@@ -1,0 +1,198 @@
+struct Pattrn.DuplicatePatternRegistrationBehavior
+struct Pattrn.DuplicateValueMatchMode
+interface Pattrn.IPattrnIndex<TSegment, TValue>
+  int MatchCountUpperBound { get; }
+  Pattrn.MatchOptions Options { get; }
+  int PatternCount { get; }
+  int RegistrationCount { get; }
+  Pattrn.PatternMatchExplanation<TSegment, TValue> Explain(System.ReadOnlySpan<TSegment> path, Pattrn.PatternExplanationOptions options = default)
+  Pattrn.PatternMatchResult<TSegment, TValue>[] MatchDetailed(System.ReadOnlySpan<TSegment> path)
+  Pattrn.PatternMatchResult<TSegment, TValue>[] MatchDetailedToArray(System.ReadOnlySpan<TSegment> path)
+  TValue[] MatchToArray(System.ReadOnlySpan<TSegment> path)
+  bool TryMatch(System.ReadOnlySpan<TSegment> path, System.Span<TValue> destination, out int written)
+  bool TryMatchDetailed(System.ReadOnlySpan<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<TSegment>> captures, out int matchesWritten, out int capturesWritten)
+  int GetCaptureCountUpperBound(System.ReadOnlySpan<TSegment> path)
+  int GetMatchCountUpperBound(System.ReadOnlySpan<TSegment> path)
+  int Match(System.ReadOnlySpan<TSegment> path, System.Span<TValue> destination)
+  int MatchDetailed(System.ReadOnlySpan<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<TSegment>> captures, out int capturesWritten)
+struct Pattrn.MatchOptions
+  .ctor(Pattrn.PrefixMatchMode prefixMatchMode = Disabled, Pattrn.DuplicateValueMatchMode duplicateValueMatchMode = Deduplicate)
+  bool DeduplicateValues { get; }
+  static Pattrn.MatchOptions Default { get; }
+  Pattrn.DuplicateValueMatchMode DuplicateValueMatchMode { get; }
+  bool IncludePrefixMatches { get; }
+  static Pattrn.MatchOptions Prefix { get; }
+  Pattrn.PrefixMatchMode PrefixMatchMode { get; }
+  static Pattrn.MatchOptions PreserveDuplicates { get; }
+  bool Equals(Pattrn.MatchOptions other)
+  bool Equals(object obj)
+  int GetHashCode()
+  static bool op_Equality(Pattrn.MatchOptions left, Pattrn.MatchOptions right)
+  static bool op_Inequality(Pattrn.MatchOptions left, Pattrn.MatchOptions right)
+  void Deconstruct(out Pattrn.PrefixMatchMode prefixMatchMode, out Pattrn.DuplicateValueMatchMode duplicateValueMatchMode)
+struct Pattrn.PatternCapture<TSegment>
+  .ctor(string name, TSegment value, int segmentIndex)
+  string Name { get; }
+  int SegmentIndex { get; }
+  TSegment Value { get; }
+  bool Equals(Pattrn.PatternCapture<TSegment> other)
+  bool Equals(object obj)
+  int GetHashCode()
+  static bool op_Equality(Pattrn.PatternCapture<TSegment> left, Pattrn.PatternCapture<TSegment> right)
+  static bool op_Inequality(Pattrn.PatternCapture<TSegment> left, Pattrn.PatternCapture<TSegment> right)
+  string ToString()
+struct Pattrn.PatternDiagnosticKind
+struct Pattrn.PatternDiagnosticSeverity
+class Pattrn.PatternDiagnostic<TSegment>
+  Pattrn.PatternDiagnosticKind Kind { get; }
+  string Message { get; }
+  System.Collections.Generic.IReadOnlyList<Pattrn.PatternSegment<TSegment>> Pattern { get; }
+  int RegistrationCount { get; }
+  Pattrn.PatternDiagnosticSeverity Severity { get; }
+struct Pattrn.PatternExplanationOptions
+  .ctor(bool includeRejectedCandidates = false)
+  static Pattrn.PatternExplanationOptions Default { get; }
+  bool IncludeRejectedCandidates { get; }
+  static Pattrn.PatternExplanationOptions IncludeRejections { get; }
+  bool Equals(Pattrn.PatternExplanationOptions other)
+  bool Equals(object obj)
+  int GetHashCode()
+  static bool op_Equality(Pattrn.PatternExplanationOptions left, Pattrn.PatternExplanationOptions right)
+  static bool op_Inequality(Pattrn.PatternExplanationOptions left, Pattrn.PatternExplanationOptions right)
+  void Deconstruct(out bool includeRejectedCandidates)
+class Pattrn.PatternMatchExplanation<TSegment, TValue>
+  int CaptureCountUpperBound { get; }
+  Pattrn.PatternExplanationOptions ExplanationOptions { get; }
+  bool HasMatches { get; }
+  int MatchCount { get; }
+  int MatchCountUpperBound { get; }
+  Pattrn.MatchOptions MatchOptions { get; }
+  System.Collections.Generic.IReadOnlyList<Pattrn.PatternMatchResult<TSegment, TValue>> Matches { get; }
+  System.Collections.Generic.IReadOnlyList<TSegment> Path { get; }
+  System.Collections.Generic.IReadOnlyList<Pattrn.PatternRejectedCandidate> RejectedCandidates { get; }
+struct Pattrn.PatternMatchKind
+class Pattrn.PatternMatchResult<TSegment, TValue>
+  System.Collections.Generic.IReadOnlyList<Pattrn.PatternCapture<TSegment>> Captures { get; }
+  Pattrn.PatternMatchKind Kind { get; }
+  string PatternId { get; }
+  int RegistrationOrder { get; }
+  int Specificity { get; }
+  TValue Value { get; }
+struct Pattrn.PatternMatch<TValue>
+  .ctor(TValue value, Pattrn.PatternMatchKind kind, int specificity, int captureStart, int captureCount, string patternId = null, int registrationOrder = -1)
+  int CaptureCount { get; }
+  int CaptureStart { get; }
+  Pattrn.PatternMatchKind Kind { get; }
+  string PatternId { get; }
+  int RegistrationOrder { get; }
+  int Specificity { get; }
+  TValue Value { get; }
+  bool Equals(Pattrn.PatternMatch<TValue> other)
+  bool Equals(object obj)
+  int GetHashCode()
+  static bool op_Equality(Pattrn.PatternMatch<TValue> left, Pattrn.PatternMatch<TValue> right)
+  static bool op_Inequality(Pattrn.PatternMatch<TValue> left, Pattrn.PatternMatch<TValue> right)
+  string ToString()
+class Pattrn.PatternRejectedCandidate
+  int PathDepth { get; }
+  string Reason { get; }
+struct Pattrn.PatternSegmentKind
+struct Pattrn.PatternSegment<TSegment>
+  bool IsCatchAll { get; }
+  bool IsLiteral { get; }
+  bool IsParameter { get; }
+  bool IsWildcard { get; }
+  Pattrn.PatternSegmentKind Kind { get; }
+  TSegment LiteralValue { get; }
+  string ParameterName { get; }
+  bool Equals(Pattrn.PatternSegment<TSegment> other)
+  bool Equals(object obj)
+  int GetHashCode()
+  static Pattrn.PatternSegment<TSegment> CatchAll()
+  static Pattrn.PatternSegment<TSegment> CatchAll(string name)
+  static Pattrn.PatternSegment<TSegment> Literal(TSegment value)
+  static Pattrn.PatternSegment<TSegment> Parameter(string name)
+  static Pattrn.PatternSegment<TSegment> Wildcard()
+  static bool op_Equality(Pattrn.PatternSegment<TSegment> left, Pattrn.PatternSegment<TSegment> right)
+  static bool op_Inequality(Pattrn.PatternSegment<TSegment> left, Pattrn.PatternSegment<TSegment> right)
+  string ToString()
+  void Deconstruct(out Pattrn.PatternSegmentKind kind, out TSegment literalValue, out string parameterName)
+class Pattrn.PattrnIndexBuilder<TSegment, TValue>
+  Pattrn.DuplicatePatternRegistrationBehavior DuplicatePatternRegistrationBehavior { get; }
+  int MatchCountUpperBound { get; }
+  int PatternCount { get; }
+  int RegistrationCount { get; }
+  System.Collections.Generic.IEqualityComparer<TSegment> SegmentComparer { get; }
+  bool UsesWildcardSegmentToken { get; }
+  System.Collections.Generic.IEqualityComparer<TValue> ValueComparer { get; }
+  TSegment WildcardSegment { get; }
+  Pattrn.PatternDiagnostic<TSegment>[] GetDiagnostics()
+  Pattrn.PattrnIndex<TSegment, TValue> Build(Pattrn.MatchOptions options = default)
+  Pattrn.PattrnIndexBuilder<TSegment, TValue> Add(System.Collections.Generic.IEnumerable<TSegment> pattern, TValue value, string patternId = null)
+  Pattrn.PattrnIndexBuilder<TSegment, TValue> Add(System.ReadOnlyMemory<TSegment> pattern, TValue value, string patternId = null)
+  Pattrn.PattrnIndexBuilder<TSegment, TValue> Add(System.ReadOnlySpan<TSegment> pattern, TValue value, string patternId = null)
+  Pattrn.PattrnIndexBuilder<TSegment, TValue> AddPattern(System.Collections.Generic.IEnumerable<Pattrn.PatternSegment<TSegment>> pattern, TValue value, string patternId = null)
+  Pattrn.PattrnIndexBuilder<TSegment, TValue> AddPattern(System.ReadOnlyMemory<Pattrn.PatternSegment<TSegment>> pattern, TValue value, string patternId = null)
+  Pattrn.PattrnIndexBuilder<TSegment, TValue> AddPattern(System.ReadOnlySpan<Pattrn.PatternSegment<TSegment>> pattern, TValue value, string patternId = null)
+  Pattrn.PattrnIndexBuilder<TSegment, TValue> AddPatternRange(System.Collections.Generic.IEnumerable<System.ValueTuple<System.Collections.Generic.IEnumerable<Pattrn.PatternSegment<TSegment>>, TValue, string>> registrations)
+  Pattrn.PattrnIndexBuilder<TSegment, TValue> AddPatternRange(System.Collections.Generic.IEnumerable<System.ValueTuple<System.Collections.Generic.IEnumerable<Pattrn.PatternSegment<TSegment>>, TValue>> registrations)
+  Pattrn.PattrnIndexBuilder<TSegment, TValue> AddRange(System.Collections.Generic.IEnumerable<System.ValueTuple<System.Collections.Generic.IEnumerable<TSegment>, TValue, string>> registrations)
+  Pattrn.PattrnIndexBuilder<TSegment, TValue> AddRange(System.Collections.Generic.IEnumerable<System.ValueTuple<System.Collections.Generic.IEnumerable<TSegment>, TValue>> registrations)
+  Pattrn.PattrnIndexBuilder<TSegment, TValue> Clear()
+  Pattrn.PattrnIndexBuilder<TSegment, TValue> DisableBuildValidation()
+  Pattrn.PattrnIndexBuilder<TSegment, TValue> UseDuplicatePatternRegistrationBehavior(Pattrn.DuplicatePatternRegistrationBehavior behavior)
+  Pattrn.PattrnIndexBuilder<TSegment, TValue> ValidateOnBuild(Pattrn.PatternDiagnosticSeverity minimumSeverity = Warning)
+  Pattrn.PattrnIndexBuilder<TSegment, TValue> ValidateOnBuild(System.Func<Pattrn.PatternDiagnostic<TSegment>, bool> rejectDiagnostic)
+  bool Contains(System.Collections.Generic.IEnumerable<TSegment> pattern)
+  bool Contains(System.ReadOnlyMemory<TSegment> pattern)
+  bool Contains(System.ReadOnlySpan<TSegment> pattern)
+  bool ContainsPattern(System.Collections.Generic.IEnumerable<Pattrn.PatternSegment<TSegment>> pattern)
+  bool ContainsPattern(System.ReadOnlyMemory<Pattrn.PatternSegment<TSegment>> pattern)
+  bool ContainsPattern(System.ReadOnlySpan<Pattrn.PatternSegment<TSegment>> pattern)
+  bool Remove(System.Collections.Generic.IEnumerable<TSegment> pattern, TValue value)
+  bool Remove(System.ReadOnlyMemory<TSegment> pattern, TValue value)
+  bool Remove(System.ReadOnlySpan<TSegment> pattern, TValue value)
+  bool RemovePattern(System.Collections.Generic.IEnumerable<Pattrn.PatternSegment<TSegment>> pattern, TValue value)
+  bool RemovePattern(System.ReadOnlyMemory<Pattrn.PatternSegment<TSegment>> pattern, TValue value)
+  bool RemovePattern(System.ReadOnlySpan<Pattrn.PatternSegment<TSegment>> pattern, TValue value)
+  int RemoveAll(System.Collections.Generic.IEnumerable<TSegment> pattern)
+  int RemoveAll(System.ReadOnlyMemory<TSegment> pattern)
+  int RemoveAll(System.ReadOnlySpan<TSegment> pattern)
+  int RemoveAllPattern(System.Collections.Generic.IEnumerable<Pattrn.PatternSegment<TSegment>> pattern)
+  int RemoveAllPattern(System.ReadOnlyMemory<Pattrn.PatternSegment<TSegment>> pattern)
+  int RemoveAllPattern(System.ReadOnlySpan<Pattrn.PatternSegment<TSegment>> pattern)
+  static Pattrn.PattrnIndexBuilder<TSegment, TValue> Create(System.Collections.Generic.IEqualityComparer<TSegment> segmentComparer = null, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+  static Pattrn.PattrnIndexBuilder<TSegment, TValue> Create(TSegment wildcardSegment, System.Collections.Generic.IEqualityComparer<TSegment> segmentComparer = null, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+class Pattrn.PattrnIndexExtensions
+  static Pattrn.PatternMatchExplanation<TSegment, TValue> Explain<TSegment, TValue>(Pattrn.IPattrnIndex<TSegment, TValue> index, System.Collections.Generic.IEnumerable<TSegment> path, Pattrn.PatternExplanationOptions options = default)
+  static Pattrn.PatternMatchExplanation<TSegment, TValue> Explain<TSegment, TValue>(Pattrn.IPattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path, Pattrn.PatternExplanationOptions options = default)
+  static Pattrn.PatternMatchResult<TSegment, TValue>[] MatchDetailed<TSegment, TValue>(Pattrn.IPattrnIndex<TSegment, TValue> index, System.Collections.Generic.IEnumerable<TSegment> path)
+  static Pattrn.PatternMatchResult<TSegment, TValue>[] MatchDetailed<TSegment, TValue>(Pattrn.IPattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path)
+  static Pattrn.PatternMatchResult<TSegment, TValue>[] MatchDetailedToArray<TSegment, TValue>(Pattrn.IPattrnIndex<TSegment, TValue> index, System.Collections.Generic.IEnumerable<TSegment> path)
+  static Pattrn.PatternMatchResult<TSegment, TValue>[] MatchDetailedToArray<TSegment, TValue>(Pattrn.IPattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path)
+  static TValue[] MatchToArray<TSegment, TValue>(Pattrn.IPattrnIndex<TSegment, TValue> index, System.Collections.Generic.IEnumerable<TSegment> path)
+  static TValue[] MatchToArray<TSegment, TValue>(Pattrn.IPattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path)
+  static bool TryMatch<TSegment, TValue>(Pattrn.IPattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path, System.Span<TValue> destination, out int written)
+  static bool TryMatchDetailed<TSegment, TValue>(Pattrn.IPattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<TSegment>> captures, out int matchesWritten, out int capturesWritten)
+  static int GetCaptureCountUpperBound<TSegment, TValue>(Pattrn.IPattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path)
+  static int GetMatchCountUpperBound<TSegment, TValue>(Pattrn.IPattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path)
+  static int Match<TSegment, TValue>(Pattrn.IPattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path, System.Span<TValue> destination)
+  static int MatchDetailed<TSegment, TValue>(Pattrn.IPattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<TSegment>> captures, out int capturesWritten)
+class Pattrn.PattrnIndex<TSegment, TValue>
+  int MatchCountUpperBound { get; }
+  Pattrn.MatchOptions Options { get; }
+  int PatternCount { get; }
+  int RegistrationCount { get; }
+  Pattrn.PatternMatchExplanation<TSegment, TValue> Explain(System.ReadOnlySpan<TSegment> path, Pattrn.PatternExplanationOptions options = default)
+  Pattrn.PatternMatchResult<TSegment, TValue>[] MatchDetailed(System.ReadOnlySpan<TSegment> path)
+  Pattrn.PatternMatchResult<TSegment, TValue>[] MatchDetailedToArray(System.ReadOnlySpan<TSegment> path)
+  TValue[] MatchToArray(System.ReadOnlySpan<TSegment> path)
+  bool TryMatch(System.ReadOnlySpan<TSegment> path, System.Span<TValue> destination, out int written)
+  bool TryMatchDetailed(System.ReadOnlySpan<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<TSegment>> captures, out int matchesWritten, out int capturesWritten)
+  int GetCaptureCountUpperBound(System.ReadOnlySpan<TSegment> path)
+  int GetMatchCountUpperBound(System.ReadOnlySpan<TSegment> path)
+  int Match(System.ReadOnlySpan<TSegment> path, System.Span<TValue> destination)
+  int MatchDetailed(System.ReadOnlySpan<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<TSegment>> captures, out int capturesWritten)
+  static Pattrn.PattrnIndexBuilder<TSegment, TValue> Builder(System.Collections.Generic.IEqualityComparer<TSegment> segmentComparer = null, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+  static Pattrn.PattrnIndexBuilder<TSegment, TValue> Builder(TSegment wildcardSegment, System.Collections.Generic.IEqualityComparer<TSegment> segmentComparer = null, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+struct Pattrn.PrefixMatchMode
