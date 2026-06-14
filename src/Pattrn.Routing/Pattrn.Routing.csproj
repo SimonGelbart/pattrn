@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Pattrn.Routing</AssemblyName>
+    <RootNamespace>Pattrn.Routing</RootNamespace>
+    <PackageId>Pattrn.Routing</PackageId>
+    <Version>3.0.0-alpha.31</Version>
+    <Authors>Simon Gelbart</Authors>
+    <Description>Route-template parsing helpers for Pattrn's generic segmented-pattern core.</Description>
+    <PackageTags>path;pattern;index;trie;wildcard;matching;routing;routes;templates</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <RepositoryType>none</RepositoryType>
+    <PublishRepositoryUrl>false</PublishRepositoryUrl>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageReleaseNotes>v3.0.0-alpha.31: adds performance guardrails and exact-only matching fast-path protections.</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pattrn\Pattrn.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\docs\getting-started\routing.md" Pack="true" PackagePath="README.md" />
+    <None Include="..\..\LICENSE.txt" Pack="true" PackagePath="\" />
+    <None Include="..\..\assets\icon.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+</Project>
