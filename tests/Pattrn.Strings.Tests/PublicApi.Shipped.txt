@@ -1,0 +1,88 @@
+class Pattrn.PattrnStringExtensions
+  static Pattrn.PattrnIndexBuilder<string, TValue> AddDotted<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, TValue value, char separator = '.', string patternId = null)
+  static Pattrn.PattrnIndexBuilder<string, TValue> AddSeparated<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, TValue value, Pattrn.StringNormalizationOptions options, string patternId = null)
+  static Pattrn.PattrnIndexBuilder<string, TValue> AddSeparated<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, TValue value, char separator, string patternId = null)
+  static TValue[] MatchDottedToArray<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, char separator = '.')
+  static TValue[] MatchSeparatedToArray<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, Pattrn.StringNormalizationOptions options)
+  static TValue[] MatchSeparatedToArray<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, char separator)
+  static bool ContainsSeparated<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, Pattrn.StringNormalizationOptions options)
+  static bool ContainsSeparated<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, char separator)
+  static bool RemoveDotted<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, TValue value, char separator = '.')
+  static bool RemoveSeparated<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, TValue value, Pattrn.StringNormalizationOptions options)
+  static bool RemoveSeparated<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, TValue value, char separator)
+  static bool TryMatchDotted<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, out int written, char separator = '.')
+  static bool TryMatchSeparated<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, out int written, Pattrn.StringNormalizationOptions options)
+  static bool TryMatchSeparated<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, out int written, char separator)
+  static int GetDottedMatchCountUpperBound<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, char separator = '.')
+  static int GetSeparatedMatchCountUpperBound<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, Pattrn.StringNormalizationOptions options)
+  static int GetSeparatedMatchCountUpperBound<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, char separator)
+  static int MatchDotted<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, char separator = '.')
+  static int MatchSeparated<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, Pattrn.StringNormalizationOptions options)
+  static int MatchSeparated<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, char separator)
+  static int RemoveAllSeparated<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, Pattrn.StringNormalizationOptions options)
+  static int RemoveAllSeparated<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, char separator)
+struct Pattrn.StringCaseSensitivity
+struct Pattrn.StringEmptySegmentBehavior
+class Pattrn.StringNormalizationOptions
+  .ctor(char separator)
+  Pattrn.StringCaseSensitivity CaseSensitivity { get; set; }
+  static Pattrn.StringNormalizationOptions Dotted { get; }
+  Pattrn.StringEmptySegmentBehavior EmptySegmentBehavior { get; set; }
+  System.Func<string, string> NormalizeSegment { get; set; }
+  char Separator { get; }
+  static Pattrn.StringNormalizationOptions Slash { get; }
+  Pattrn.StringSegmentTrimBehavior TrimBehavior { get; set; }
+  Pattrn.PattrnIndexBuilder<string, TValue> CreateBuilder<TValue>(System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+  Pattrn.PattrnIndexBuilder<string, TValue> CreateTokenizedBuilder<TValue>(string wildcardSegment, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+  Pattrn.StringPattrnIndexBuilder<TValue> CreateStringBuilder<TValue>(System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+  Pattrn.StringPattrnIndexBuilder<TValue> CreateTokenizedStringBuilder<TValue>(string wildcardSegment, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+  System.Collections.Generic.IEqualityComparer<string> CreateSegmentComparer()
+  string NormalizeSegmentValue(string segment, string parameterName = "segment")
+  string[] Split(string value, string parameterName = "value")
+class Pattrn.StringPattrnIndexBuilder
+  static Pattrn.StringPattrnIndexBuilder<TValue> Create<TValue>(Pattrn.StringNormalizationOptions options = null, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+  static Pattrn.StringPattrnIndexBuilder<TValue> Create<TValue>(char separator, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+  static Pattrn.StringPattrnIndexBuilder<TValue> CreateDotted<TValue>(System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+  static Pattrn.StringPattrnIndexBuilder<TValue> CreateSlash<TValue>(System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+  static Pattrn.StringPattrnIndexBuilder<TValue> CreateTokenized<TValue>(char separator, string wildcardSegment, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+  static Pattrn.StringPattrnIndexBuilder<TValue> CreateTokenized<TValue>(string wildcardSegment, Pattrn.StringNormalizationOptions options = null, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+class Pattrn.StringPattrnIndexBuilder<TValue>
+  Pattrn.PattrnIndexBuilder<string, TValue> CoreBuilder { get; }
+  Pattrn.StringNormalizationOptions Options { get; }
+  Pattrn.StringPattrnIndex<TValue> Build(Pattrn.MatchOptions options = default)
+  Pattrn.StringPattrnIndexBuilder<TValue> Add(string pattern, TValue value, string patternId = null)
+  Pattrn.StringPattrnIndexBuilder<TValue> AddPattern(System.Collections.Generic.IEnumerable<Pattrn.PatternSegment<string>> pattern, TValue value, string patternId = null)
+  Pattrn.StringPattrnIndexBuilder<TValue> AddPattern(System.ReadOnlySpan<Pattrn.PatternSegment<string>> pattern, TValue value, string patternId = null)
+  Pattrn.StringPattrnIndexBuilder<TValue> Clear()
+  Pattrn.StringPattrnIndexBuilder<TValue> DisableBuildValidation()
+  Pattrn.StringPattrnIndexBuilder<TValue> UseDuplicatePatternRegistrationBehavior(Pattrn.DuplicatePatternRegistrationBehavior behavior)
+  Pattrn.StringPattrnIndexBuilder<TValue> ValidateOnBuild(Pattrn.PatternDiagnosticSeverity minimumSeverity = Warning)
+  Pattrn.StringPattrnIndexBuilder<TValue> ValidateOnBuild(System.Func<Pattrn.PatternDiagnostic<string>, bool> rejectDiagnostic)
+  bool Contains(string pattern)
+  bool Remove(string pattern, TValue value)
+  int RemoveAll(string pattern)
+  static Pattrn.StringPattrnIndexBuilder<TValue> Create(Pattrn.StringNormalizationOptions options = null, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+  static Pattrn.StringPattrnIndexBuilder<TValue> Create(char separator, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+  static Pattrn.StringPattrnIndexBuilder<TValue> CreateDotted(System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+  static Pattrn.StringPattrnIndexBuilder<TValue> CreateSlash(System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+  static Pattrn.StringPattrnIndexBuilder<TValue> CreateTokenized(char separator, string wildcardSegment, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+  static Pattrn.StringPattrnIndexBuilder<TValue> CreateTokenized(string wildcardSegment, Pattrn.StringNormalizationOptions options = null, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+class Pattrn.StringPattrnIndex<TValue>
+  .ctor(Pattrn.IPattrnIndex<string, TValue> coreIndex, Pattrn.StringNormalizationOptions options)
+  Pattrn.IPattrnIndex<string, TValue> CoreIndex { get; }
+  int MatchCountUpperBound { get; }
+  Pattrn.MatchOptions MatchOptions { get; }
+  Pattrn.StringNormalizationOptions Options { get; }
+  int PatternCount { get; }
+  int RegistrationCount { get; }
+  Pattrn.PatternMatchExplanation<string, TValue> Explain(string path, Pattrn.PatternExplanationOptions options = default)
+  Pattrn.PatternMatchResult<string, TValue>[] MatchDetailed(string path)
+  Pattrn.PatternMatchResult<string, TValue>[] MatchDetailedToArray(string path)
+  TValue[] MatchToArray(string path)
+  bool TryMatch(string path, System.Span<TValue> destination, out int written)
+  bool TryMatchDetailed(string path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<string>> captures, out int matchesWritten, out int capturesWritten)
+  int GetCaptureCountUpperBound(string path)
+  int GetMatchCountUpperBound(string path)
+  int Match(string path, System.Span<TValue> destination)
+  int MatchDetailed(string path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<string>> captures, out int capturesWritten)
+struct Pattrn.StringSegmentTrimBehavior

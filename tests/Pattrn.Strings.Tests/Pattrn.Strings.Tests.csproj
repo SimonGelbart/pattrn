@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Pattrn.Strings.Tests</AssemblyName>
+    <RootNamespace>Pattrn.Strings.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Pattrn\Pattrn.csproj" />
+    <ProjectReference Include="..\..\src\Pattrn.Strings\Pattrn.Strings.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TUnit" Version="1.53.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Pattrn.Tests\TestAssertions.cs" Link="TestAssertions.cs" />
+    <None Update="PublicApi.Shipped.txt" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+</Project>
