@@ -1,0 +1,113 @@
+class Pattrn.Routing.DelegateRouteConstraintValidator
+  .ctor(System.Func<string, Pattrn.Routing.RouteConstraint, bool> validator)
+  bool IsMatch(string value, Pattrn.Routing.RouteConstraint constraint, out string failureMessage)
+interface Pattrn.Routing.IRouteConstraintValidator
+  bool IsMatch(string value, Pattrn.Routing.RouteConstraint constraint, out string failureMessage)
+class Pattrn.Routing.RouteConstraint
+  string Argument { get; }
+  string Name { get; }
+  string Text { get; }
+class Pattrn.Routing.RouteConstraintValidation
+  static Pattrn.Routing.RouteConstraintValidationResult Validate(Pattrn.Routing.RouteTemplate template, System.Collections.Generic.IReadOnlyList<Pattrn.PatternCapture<string>> captures, Pattrn.Routing.RouteConstraintValidationOptions options = null)
+  static Pattrn.Routing.RouteConstraintValidationResult Validate<TValue>(Pattrn.Routing.RouteTemplate template, Pattrn.PatternMatchResult<string, TValue> match, Pattrn.Routing.RouteConstraintValidationOptions options = null)
+class Pattrn.Routing.RouteConstraintValidationFailure
+  string Code { get; }
+  Pattrn.Routing.RouteConstraint Constraint { get; }
+  string Message { get; }
+  string ParameterName { get; }
+  int PathSegmentIndex { get; }
+  int TemplateSegmentIndex { get; }
+  string Value { get; }
+class Pattrn.Routing.RouteConstraintValidationOptions
+  .ctor()
+  bool AllowUnknownConstraints { get; set; }
+  static Pattrn.Routing.RouteConstraintValidationOptions Default { get; }
+  Pattrn.Routing.RouteConstraintValidatorRegistry ValidatorRegistry { get; set; }
+class Pattrn.Routing.RouteConstraintValidationResult
+  System.Collections.Generic.IReadOnlyList<Pattrn.Routing.RouteConstraintValidationFailure> Failures { get; }
+  bool IsValid { get; }
+class Pattrn.Routing.RouteConstraintValidatorRegistry
+  .ctor()
+  static Pattrn.Routing.RouteConstraintValidatorRegistry Default { get; }
+  Pattrn.Routing.RouteConstraintValidatorRegistry Add(string name, Pattrn.Routing.IRouteConstraintValidator validator)
+  Pattrn.Routing.RouteConstraintValidatorRegistry Add(string name, System.Func<string, Pattrn.Routing.RouteConstraint, bool> validator)
+  bool TryGetValidator(string name, out Pattrn.Routing.IRouteConstraintValidator validator)
+  static Pattrn.Routing.RouteConstraintValidatorRegistry CreateDefault()
+class Pattrn.Routing.RouteConstraintValidators
+  static Pattrn.Routing.IRouteConstraintValidator Alpha { get; }
+  static Pattrn.Routing.IRouteConstraintValidator Boolean { get; }
+  static Pattrn.Routing.IRouteConstraintValidator DateTime { get; }
+  static Pattrn.Routing.IRouteConstraintValidator Decimal { get; }
+  static Pattrn.Routing.IRouteConstraintValidator Guid { get; }
+  static Pattrn.Routing.IRouteConstraintValidator Int32 { get; }
+  static Pattrn.Routing.IRouteConstraintValidator Int64 { get; }
+  static Pattrn.Routing.IRouteConstraintValidator Length { get; }
+  static Pattrn.Routing.IRouteConstraintValidator Max { get; }
+  static Pattrn.Routing.IRouteConstraintValidator Min { get; }
+  static Pattrn.Routing.IRouteConstraintValidator Regex { get; }
+class Pattrn.Routing.RouteParameter
+  bool CanOmit { get; }
+  System.Collections.Generic.IReadOnlyList<Pattrn.Routing.RouteConstraint> Constraints { get; }
+  string DefaultValue { get; }
+  bool HasDefaultValue { get; }
+  bool IsCatchAll { get; }
+  bool IsOptional { get; }
+  string Name { get; }
+class Pattrn.Routing.RoutePattern
+  static Pattrn.PatternSegment<string>[] Parse(string pattern)
+  static Pattrn.PatternSegment<string>[][] Expand(string pattern)
+  static Pattrn.Routing.RouteTemplate ParseTemplate(string pattern)
+  static Pattrn.Routing.RouteTemplateExpansion[] ExpandDetailed(string pattern)
+  static bool TryParseTemplate(string pattern, out Pattrn.Routing.RouteTemplate template, out Pattrn.Routing.RouteTemplateDiagnostic[] diagnostics)
+  static bool TrySplitPath(string path, System.Span<string> destination, out int written)
+  static int GetPathSegmentCount(string path)
+  static int SplitPath(string path, System.Span<string> destination)
+  static string[] SplitPath(string path)
+class Pattrn.Routing.RoutePattrnIndexBuilderExtensions
+  static Pattrn.PattrnIndexBuilder<string, TValue> AddRoute<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, Pattrn.Routing.RouteTemplate template, TValue value, string patternId = null)
+  static Pattrn.PattrnIndexBuilder<string, TValue> AddRoute<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, TValue value, string patternId = null)
+  static bool ContainsRoute<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, Pattrn.Routing.RouteTemplate template)
+  static bool ContainsRoute<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern)
+  static bool RemoveRoute<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, Pattrn.Routing.RouteTemplate template, TValue value)
+  static bool RemoveRoute<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, TValue value)
+  static int RemoveAllRoute<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, Pattrn.Routing.RouteTemplate template)
+  static int RemoveAllRoute<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern)
+class Pattrn.Routing.RoutePattrnIndexExtensions
+  static Pattrn.PatternMatchResult<string, TValue>[] MatchRouteDetailed<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path)
+  static Pattrn.PatternMatchResult<string, TValue>[] MatchRouteDetailedToArray<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path)
+  static TValue[] MatchRouteToArray<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path)
+  static bool TryMatchRoute<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, out int written)
+  static bool TryMatchRouteDetailed<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<string>> captures, out int matchesWritten, out int capturesWritten)
+  static int GetRouteCaptureCountUpperBound<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path)
+  static int GetRouteMatchCountUpperBound<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path)
+  static int MatchRoute<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<TValue> destination)
+  static int MatchRouteDetailed<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<string>> captures, out int capturesWritten)
+class Pattrn.Routing.RouteSegment
+  Pattrn.Routing.RouteSegmentKind Kind { get; }
+  string Literal { get; }
+  Pattrn.Routing.RouteParameter Parameter { get; }
+  Pattrn.PatternSegment<string> ToPatternSegment()
+struct Pattrn.Routing.RouteSegmentKind
+class Pattrn.Routing.RouteTemplate
+  System.Collections.Generic.IReadOnlyList<Pattrn.Routing.RouteTemplateDiagnostic> Diagnostics { get; }
+  bool HasOptionalSegments { get; }
+  System.Collections.Generic.IReadOnlyList<Pattrn.Routing.RouteSegment> Segments { get; }
+  string Text { get; }
+  Pattrn.PatternSegment<string>[] Compile()
+  Pattrn.PatternSegment<string>[][] Expand()
+  Pattrn.Routing.RouteConstraintValidationResult ValidateConstraints(System.Collections.Generic.IReadOnlyList<Pattrn.PatternCapture<string>> captures, Pattrn.Routing.RouteConstraintValidationOptions options = null)
+  Pattrn.Routing.RouteConstraintValidationResult ValidateConstraints<TValue>(Pattrn.PatternMatchResult<string, TValue> match, Pattrn.Routing.RouteConstraintValidationOptions options = null)
+  Pattrn.Routing.RouteTemplateExpansion[] ExpandDetailed()
+  static Pattrn.Routing.RouteTemplate Parse(string template)
+  static bool TryParse(string template, out Pattrn.Routing.RouteTemplate routeTemplate, out Pattrn.Routing.RouteTemplateDiagnostic[] diagnostics)
+class Pattrn.Routing.RouteTemplateDiagnostic
+  string Code { get; }
+  string Message { get; }
+  int SegmentIndex { get; }
+class Pattrn.Routing.RouteTemplateExpansion
+  int ExpansionIndex { get; }
+  int IncludedSegmentCount { get; }
+  bool IsFullTemplate { get; }
+  System.Collections.Generic.IReadOnlyList<Pattrn.Routing.RouteParameter> OmittedParameters { get; }
+  Pattrn.PatternSegment<string>[] Pattern { get; }
+  Pattrn.Routing.RouteTemplate Template { get; }

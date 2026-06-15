@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Pattrn.Routing.Tests</AssemblyName>
+    <RootNamespace>Pattrn.Routing.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Pattrn.Routing\Pattrn.Routing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TUnit" Version="1.53.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="PublicApi.Shipped.txt" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+</Project>
