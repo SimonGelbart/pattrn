@@ -1,0 +1,29 @@
+interface Pattrn.DependencyInjection.IPattrnProvider<TSegment, TValue>
+  Pattrn.IPattrnIndex<TSegment, TValue> GetRequired(string name)
+  bool TryGet(string name, out Pattrn.IPattrnIndex<TSegment, TValue> index)
+interface Pattrn.DependencyInjection.IPattrnRegistrationSource<TSegment, TValue>
+  void AddRegistrations(Pattrn.DependencyInjection.PattrnRegistrationContext<TSegment, TValue> context)
+class Pattrn.DependencyInjection.PattrnRegistrationBuilder<TSegment, TValue>
+  bool IsDefault { get; }
+  bool IsNamed { get; }
+  string Name { get; }
+  Pattrn.DependencyInjection.PattrnRegistrationBuilder<TSegment, TValue> Configure(System.Action<Pattrn.PattrnIndexBuilder<TSegment, TValue>> configureBuilder)
+  Pattrn.DependencyInjection.PattrnRegistrationBuilder<TSegment, TValue> FromRegisteredSources()
+  Pattrn.DependencyInjection.PattrnRegistrationBuilder<TSegment, TValue> UseMatchOptions(Pattrn.MatchOptions matchOptions)
+  Pattrn.DependencyInjection.PattrnRegistrationBuilder<TSegment, TValue> UseSegmentComparer(System.Collections.Generic.IEqualityComparer<TSegment> segmentComparer)
+  Pattrn.DependencyInjection.PattrnRegistrationBuilder<TSegment, TValue> UseValueComparer(System.Collections.Generic.IEqualityComparer<TValue> valueComparer)
+  Pattrn.DependencyInjection.PattrnRegistrationBuilder<TSegment, TValue> UseWildcard(TSegment wildcardSegment)
+class Pattrn.DependencyInjection.PattrnRegistrationContext<TSegment, TValue>
+  bool IsDefault { get; }
+  bool IsNamed { get; }
+  string Name { get; }
+  Pattrn.DependencyInjection.PattrnRegistrationContext<TSegment, TValue> Add(System.Collections.Generic.IEnumerable<TSegment> pattern, TValue value)
+  Pattrn.DependencyInjection.PattrnRegistrationContext<TSegment, TValue> Add(System.ReadOnlyMemory<TSegment> pattern, TValue value)
+  Pattrn.DependencyInjection.PattrnRegistrationContext<TSegment, TValue> Add(System.ReadOnlySpan<TSegment> pattern, TValue value)
+  Pattrn.DependencyInjection.PattrnRegistrationContext<TSegment, TValue> AddPattern(System.Collections.Generic.IEnumerable<Pattrn.PatternSegment<TSegment>> pattern, TValue value)
+  Pattrn.DependencyInjection.PattrnRegistrationContext<TSegment, TValue> AddPattern(System.ReadOnlyMemory<Pattrn.PatternSegment<TSegment>> pattern, TValue value)
+  Pattrn.DependencyInjection.PattrnRegistrationContext<TSegment, TValue> AddPattern(System.ReadOnlySpan<Pattrn.PatternSegment<TSegment>> pattern, TValue value)
+class Pattrn.DependencyInjection.PattrnServiceCollectionExtensions
+  static Microsoft.Extensions.DependencyInjection.IServiceCollection AddPathPatternRegistrationSource<TSegment, TValue, TSource>(Microsoft.Extensions.DependencyInjection.IServiceCollection services)
+  static Microsoft.Extensions.DependencyInjection.IServiceCollection AddPattrnIndex<TSegment, TValue>(Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<Pattrn.DependencyInjection.PattrnRegistrationBuilder<TSegment, TValue>> configureRegistration)
+  static Microsoft.Extensions.DependencyInjection.IServiceCollection AddPattrnIndex<TSegment, TValue>(Microsoft.Extensions.DependencyInjection.IServiceCollection services, string name, System.Action<Pattrn.DependencyInjection.PattrnRegistrationBuilder<TSegment, TValue>> configureRegistration)
