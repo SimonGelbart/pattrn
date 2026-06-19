@@ -29,10 +29,6 @@ jobs:
     name: ${{ matrix.name }} mutation testing
     runs-on: ubuntu-latest
     timeout-minutes: 90
-    if: >-
-      ${{ github.event_name != 'workflow_dispatch' ||
-          github.event.inputs.project == 'all' ||
-          github.event.inputs.project == matrix.id }}
     strategy:
       fail-fast: false
       matrix:
@@ -54,30 +50,40 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT: '1'
       DOTNET_NOLOGO: 'true'
       STRYKER_TOOL_PATH: ${{ github.workspace }}/.tools
+      RUN_PROJECT: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.project == 'all' || github.event.inputs.project == matrix.id }}
 
     steps:
+      - name: Skip unselected project
+        if: ${{ env.RUN_PROJECT != 'true' }}
+        run: echo "Skipping ${{ matrix.name }} because project '${{ github.event.inputs.project }}' was selected."
+
       - name: Checkout
+        if: ${{ env.RUN_PROJECT == 'true' }}
         uses: actions/checkout@v4
 
       - name: Set up .NET SDK
+        if: ${{ env.RUN_PROJECT == 'true' }}
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
 
       - name: Install Stryker.NET
+        if: ${{ env.RUN_PROJECT == 'true' }}
         run: dotnet tool install --tool-path "$STRYKER_TOOL_PATH" dotnet-stryker
 
       - name: Restore solution
+        if: ${{ env.RUN_PROJECT == 'true' }}
         run: dotnet restore Pattrn.sln
 
       - name: Run Stryker.NET
+        if: ${{ env.RUN_PROJECT == 'true' }}
         working-directory: ${{ matrix.project_path }}
         run: >-
           "$STRYKER_TOOL_PATH/dotnet-stryker"
           --config-file stryker-config.json
 
       - name: Upload mutation reports
-        if: always()
+        if: ${{ always() && env.RUN_PROJECT == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: mutation-report-${{ matrix.id }}
