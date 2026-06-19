@@ -7,6 +7,15 @@ on:
         description: 'BenchmarkDotNet filter, for example * or *Routing*'
         required: false
         default: '*'
+      strategy:
+        description: 'BenchmarkDotNet run strategy'
+        required: false
+        default: 'Throughput'
+        type: choice
+        options:
+          - Throughput
+          - ColdStart
+          - Monitoring
   push:
     tags:
       - 'v*.*.*'
@@ -27,6 +36,7 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT: '1'
       DOTNET_NOLOGO: 'true'
       BENCHMARK_FILTER: ${{ github.event.inputs.filter || '*' }}
+      BENCHMARK_STRATEGY: ${{ github.event.inputs.strategy || 'Throughput' }}
       BENCHMARK_ARTIFACTS: ${{ github.workspace }}/BenchmarkDotNet.Artifacts
 
     steps:
@@ -49,6 +59,7 @@ jobs:
           --no-restore
           --
           --filter "$BENCHMARK_FILTER"
+          --strategy "$BENCHMARK_STRATEGY"
           --artifacts "$BENCHMARK_ARTIFACTS"
 
       - name: List benchmark artifacts
