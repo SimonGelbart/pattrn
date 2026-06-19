@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker-net/master/src/Stryker.CLI/Stryker.CLI/stryker-schema.json",
+  "stryker-config": {
+    "solution": "../../Pattrn.sln",
+    "project": "Pattrn.Strings.csproj",
+    "test-projects": [
+      "../../tests/Pattrn.Strings.Tests/Pattrn.Strings.Tests.csproj"
+    ],
+    "test-runner": "mtp",
+    "target-framework": "net10.0",
+    "configuration": "Release",
+    "reporters": [
+      "progress",
+      "html",
+      "json"
+    ],
+    "thresholds": {
+      "high": 80,
+      "low": 60,
+      "break": 0
+    }
+  }
+}
