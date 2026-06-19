@@ -1,0 +1,86 @@
+name: Mutation Testing
+
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: 'Project to mutate'
+        required: false
+        default: all
+        type: choice
+        options:
+          - all
+          - core
+          - strings
+          - routing
+          - dependency-injection
+  schedule:
+    - cron: '0 3 * * 0'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.inputs.project || 'scheduled' }}
+  cancel-in-progress: false
+
+jobs:
+  mutation:
+    name: ${{ matrix.name }} mutation testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    if: >-
+      ${{ github.event_name != 'workflow_dispatch' ||
+          github.event.inputs.project == 'all' ||
+          github.event.inputs.project == matrix.id }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: core
+            name: Core
+            project_path: src/Pattrn
+          - id: strings
+            name: Strings
+            project_path: src/Pattrn.Strings
+          - id: routing
+            name: Routing
+            project_path: src/Pattrn.Routing
+          - id: dependency-injection
+            name: Dependency Injection
+            project_path: src/Pattrn.DependencyInjection
+
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: 'true'
+      STRYKER_TOOL_PATH: ${{ github.workspace }}/.tools
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install Stryker.NET
+        run: dotnet tool install --tool-path "$STRYKER_TOOL_PATH" dotnet-stryker
+
+      - name: Restore solution
+        run: dotnet restore Pattrn.sln
+
+      - name: Run Stryker.NET
+        working-directory: ${{ matrix.project_path }}
+        run: >-
+          "$STRYKER_TOOL_PATH/dotnet-stryker"
+          --config-file stryker-config.json
+
+      - name: Upload mutation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-report-${{ matrix.id }}
+          path: |
+            ${{ matrix.project_path }}/StrykerOutput/**
+          if-no-files-found: ignore
