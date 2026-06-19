@@ -37,6 +37,7 @@ jobs:
       DOTNET_NOLOGO: 'true'
       BENCHMARK_FILTER: ${{ github.event.inputs.filter || '*' }}
       BENCHMARK_RUN_STRATEGY: ${{ github.event.inputs.run_strategy || 'Throughput' }}
+      BENCHMARK_ARTIFACTS: ${{ github.workspace }}/BenchmarkDotNet.Artifacts
 
     steps:
       - name: Checkout
@@ -59,12 +60,17 @@ jobs:
           --
           --filter "$BENCHMARK_FILTER"
           --runStrategy "$BENCHMARK_RUN_STRATEGY"
-          --artifacts ./BenchmarkDotNet.Artifacts
+          --artifacts "$BENCHMARK_ARTIFACTS"
+
+      - name: List benchmark artifacts
+        if: always()
+        run: |
+          find "$BENCHMARK_ARTIFACTS" -maxdepth 4 -type f -print || true
 
       - name: Upload benchmark artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: benchmark-results
-          path: BenchmarkDotNet.Artifacts/**
-          if-no-files-found: ignore
+          path: ${{ env.BENCHMARK_ARTIFACTS }}/**
+          if-no-files-found: error
