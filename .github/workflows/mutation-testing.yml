@@ -1,9 +1,6 @@
 name: Mutation Testing
 
 on:
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       project:
@@ -24,7 +21,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.inputs.project || 'all' }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.inputs.project || 'scheduled' }}
   cancel-in-progress: false
 
 jobs:
