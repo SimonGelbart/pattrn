@@ -94,6 +94,29 @@ jobs:
           comment-on-alert: true
           summary-always: true
 
+      - name: Checkout benchmark pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: benchmark-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish custom benchmark dashboard
+        run: |
+          set -euo pipefail
+          mkdir -p benchmark-pages/dev/bench
+          cp .github/benchmark-dashboard/index.html benchmark-pages/dev/bench/index.html
+          cd benchmark-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add dev/bench/index.html
+          if git diff --cached --quiet; then
+            echo "Custom benchmark dashboard is already up to date."
+          else
+            git commit -m "ci: update benchmark dashboard"
+            git push origin gh-pages
+          fi
+
       - name: List benchmark artifacts
         if: always()
         run: |
