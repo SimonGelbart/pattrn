@@ -21,7 +21,8 @@ on:
       - 'v*.*.*'
 
 permissions:
-  contents: read
+  contents: write
+  deployments: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.inputs.filter || 'tag' }}
@@ -38,6 +39,7 @@ jobs:
       BENCHMARK_FILTER: ${{ github.event.inputs.filter || '*' }}
       BENCHMARK_STRATEGY: ${{ github.event.inputs.strategy || 'Throughput' }}
       BENCHMARK_ARTIFACTS: ${{ github.workspace }}/BenchmarkDotNet.Artifacts
+      BENCHMARK_ACTION_REPORT: BenchmarkDotNet.Artifacts/results/benchmark-action-report-full-compressed.json
 
     steps:
       - name: Checkout
@@ -59,8 +61,38 @@ jobs:
           --no-restore
           --
           --filter "$BENCHMARK_FILTER"
+          --join
+          --exporters json
           --strategy "$BENCHMARK_STRATEGY"
           --artifacts "$BENCHMARK_ARTIFACTS"
+
+      - name: Prepare benchmark comparison input
+        run: |
+          set -euo pipefail
+          report="$(find "$BENCHMARK_ARTIFACTS/results" -maxdepth 1 -name '*-report-full-compressed.json' -print -quit)"
+          if [ -z "$report" ]; then
+            echo "No BenchmarkDotNet full compressed JSON report found under $BENCHMARK_ARTIFACTS/results" >&2
+            find "$BENCHMARK_ARTIFACTS" -maxdepth 4 -type f -print >&2 || true
+            exit 1
+          fi
+          mkdir -p "$(dirname "$BENCHMARK_ACTION_REPORT")"
+          cp "$report" "$BENCHMARK_ACTION_REPORT"
+          echo "Using benchmark report: $report"
+
+      - name: Publish and compare benchmark results
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: Pattrn Benchmarks
+          tool: benchmarkdotnet
+          output-file-path: ${{ env.BENCHMARK_ACTION_REPORT }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+          gh-pages-branch: gh-pages
+          benchmark-data-dir-path: dev/bench
+          alert-threshold: '110%'
+          fail-on-alert: true
+          comment-on-alert: true
+          summary-always: true
 
       - name: List benchmark artifacts
         if: always()
