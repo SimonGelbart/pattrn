@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1781948128924,
+  "lastUpdate": 1781952279709,
   "repoUrl": "https://github.com/SimonGelbart/pattrn",
   "entries": {
     "Pattrn Benchmarks": [
@@ -772,6 +772,778 @@ window.BENCHMARK_DATA = {
             "value": 2777557.490104167,
             "unit": "ns",
             "range": "± 29788.615912017172"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "name": "Simon G.",
+            "username": "SimonGelbart",
+            "email": "simon.gelbart@efrei.net"
+          },
+          "committer": {
+            "name": "Simon G.",
+            "username": "SimonGelbart",
+            "email": "simon.gelbart@efrei.net"
+          },
+          "id": "a84c83d15fc78a881b827cc7a2e6200802baf41d",
+          "message": "ci: publish custom benchmark dashboard",
+          "timestamp": "2026-06-20T09:40:42Z",
+          "url": "https://github.com/SimonGelbart/pattrn/commit/a84c83d15fc78a881b827cc7a2e6200802baf41d"
+        },
+        "date": 1781952279416,
+        "tool": "benchmarkdotnet",
+        "benches": [
+          {
+            "name": "Pattrn.Benchmarks.BuilderBenchmarks.Build(Scenario: BuildLargeExact)",
+            "value": 4346329.8857421875,
+            "unit": "ns",
+            "range": "± 111641.53429530072"
+          },
+          {
+            "name": "Pattrn.Benchmarks.BuilderBenchmarks.GetDiagnostics(Scenario: BuildLargeExact)",
+            "value": 3381761.6676352895,
+            "unit": "ns",
+            "range": "± 119529.76432434101"
+          },
+          {
+            "name": "Pattrn.Benchmarks.BuilderBenchmarks.BuildWithValidation(Scenario: BuildLargeExact)",
+            "value": 5048105.033854167,
+            "unit": "ns",
+            "range": "± 104801.71971252246"
+          },
+          {
+            "name": "Pattrn.Benchmarks.BuilderBenchmarks.Build(Scenario: BuildLargeParameters)",
+            "value": 3896588.645596591,
+            "unit": "ns",
+            "range": "± 94704.61827212444"
+          },
+          {
+            "name": "Pattrn.Benchmarks.BuilderBenchmarks.GetDiagnostics(Scenario: BuildLargeParameters)",
+            "value": 3314070.4230363173,
+            "unit": "ns",
+            "range": "± 111938.74193470288"
+          },
+          {
+            "name": "Pattrn.Benchmarks.BuilderBenchmarks.BuildWithValidation(Scenario: BuildLargeParameters)",
+            "value": 4436670.430147059,
+            "unit": "ns",
+            "range": "± 90655.83609189955"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.NaiveScan_MatchToArray(Scenario: ExactOnlySparseDeep)",
+            "value": 6471.065794881185,
+            "unit": "ns",
+            "range": "± 17.210539696273248"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_GetMatchCountUpperBound(Scenario: ExactOnlySparseDeep)",
+            "value": 48.28316353376095,
+            "unit": "ns",
+            "range": "± 0.03505717948937055"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToSpan(Scenario: ExactOnlySparseDeep)",
+            "value": 54.50096421516859,
+            "unit": "ns",
+            "range": "± 0.04302822954222121"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToArray(Scenario: ExactOnlySparseDeep)",
+            "value": 59.56856485775539,
+            "unit": "ns",
+            "range": "± 0.06425515731660492"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToSpans(Scenario: ExactOnlySparseDeep)",
+            "value": 57.83270997660501,
+            "unit": "ns",
+            "range": "± 0.027123041731301818"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToArray(Scenario: ExactOnlySparseDeep)",
+            "value": 74.52305497114475,
+            "unit": "ns",
+            "range": "± 0.28743749930363277"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.NaiveScan_MatchToArray(Scenario: ExactOnlyWideFanOut)",
+            "value": 28040.233744694637,
+            "unit": "ns",
+            "range": "± 7.336243076978141"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_GetMatchCountUpperBound(Scenario: ExactOnlyWideFanOut)",
+            "value": 22.10639364215044,
+            "unit": "ns",
+            "range": "± 0.020447309519637125"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToSpan(Scenario: ExactOnlyWideFanOut)",
+            "value": 25.4023309304164,
+            "unit": "ns",
+            "range": "± 0.06289052312343102"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToArray(Scenario: ExactOnlyWideFanOut)",
+            "value": 37.74395873943965,
+            "unit": "ns",
+            "range": "± 0.0967741798115116"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToSpans(Scenario: ExactOnlyWideFanOut)",
+            "value": 33.06312152972588,
+            "unit": "ns",
+            "range": "± 0.04805075293556358"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToArray(Scenario: ExactOnlyWideFanOut)",
+            "value": 49.4773083456925,
+            "unit": "ns",
+            "range": "± 0.17781141930363878"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.NaiveScan_MatchToArray(Scenario: DuplicateHeavyDeduplicate)",
+            "value": 2772.624820963542,
+            "unit": "ns",
+            "range": "± 18.96216624613248"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_GetMatchCountUpperBound(Scenario: DuplicateHeavyDeduplicate)",
+            "value": 76.25091381256397,
+            "unit": "ns",
+            "range": "± 0.06354770754705091"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToSpan(Scenario: DuplicateHeavyDeduplicate)",
+            "value": 311.28524357931957,
+            "unit": "ns",
+            "range": "± 0.23437952442944382"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToArray(Scenario: DuplicateHeavyDeduplicate)",
+            "value": 1367.5598546541655,
+            "unit": "ns",
+            "range": "± 5.043786389904682"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToSpans(Scenario: DuplicateHeavyDeduplicate)",
+            "value": 3086.9850635528564,
+            "unit": "ns",
+            "range": "± 1.9684589398762018"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToArray(Scenario: DuplicateHeavyDeduplicate)",
+            "value": 5223.957996913365,
+            "unit": "ns",
+            "range": "± 38.2597623112564"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.NaiveScan_MatchToArray(Scenario: DuplicateHeavyPreserveDuplicates)",
+            "value": 1976.237998668964,
+            "unit": "ns",
+            "range": "± 8.356790605014785"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_GetMatchCountUpperBound(Scenario: DuplicateHeavyPreserveDuplicates)",
+            "value": 78.25553474823634,
+            "unit": "ns",
+            "range": "± 0.056591813400924874"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToSpan(Scenario: DuplicateHeavyPreserveDuplicates)",
+            "value": 109.59462528427441,
+            "unit": "ns",
+            "range": "± 0.05837337285567542"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToArray(Scenario: DuplicateHeavyPreserveDuplicates)",
+            "value": 646.717965888977,
+            "unit": "ns",
+            "range": "± 5.815087719356119"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToSpans(Scenario: DuplicateHeavyPreserveDuplicates)",
+            "value": 1969.833175114223,
+            "unit": "ns",
+            "range": "± 3.694654483433019"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToArray(Scenario: DuplicateHeavyPreserveDuplicates)",
+            "value": 8415.435694013324,
+            "unit": "ns",
+            "range": "± 102.5926422750164"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.NaiveScan_MatchToArray(Scenario: CatchAllTerminal)",
+            "value": 12009.130247849684,
+            "unit": "ns",
+            "range": "± 10.4670560438915"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_GetMatchCountUpperBound(Scenario: CatchAllTerminal)",
+            "value": 63.79128712415695,
+            "unit": "ns",
+            "range": "± 0.02178067738365735"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToSpan(Scenario: CatchAllTerminal)",
+            "value": 71.7171658362661,
+            "unit": "ns",
+            "range": "± 0.038698970052101274"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToArray(Scenario: CatchAllTerminal)",
+            "value": 99.33931320508322,
+            "unit": "ns",
+            "range": "± 0.21290919861159366"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToSpans(Scenario: CatchAllTerminal)",
+            "value": 103.72447694341342,
+            "unit": "ns",
+            "range": "± 0.01700596215081811"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToArray(Scenario: CatchAllTerminal)",
+            "value": 339.93823773520336,
+            "unit": "ns",
+            "range": "± 2.6891079632623516"
+          },
+          {
+            "name": "Pattrn.Benchmarks.BuilderBenchmarks.Build(Scenario: GetDiagnosticsClean)",
+            "value": 4201319.359375,
+            "unit": "ns",
+            "range": "± 84307.76195513565"
+          },
+          {
+            "name": "Pattrn.Benchmarks.BuilderBenchmarks.GetDiagnostics(Scenario: GetDiagnosticsClean)",
+            "value": 3357659.2411099137,
+            "unit": "ns",
+            "range": "± 97973.41311799883"
+          },
+          {
+            "name": "Pattrn.Benchmarks.BuilderBenchmarks.BuildWithValidation(Scenario: GetDiagnosticsClean)",
+            "value": 5055353.468125,
+            "unit": "ns",
+            "range": "± 134404.73279901207"
+          },
+          {
+            "name": "Pattrn.Benchmarks.BuilderBenchmarks.Build(Scenario: GetDiagnosticsAmbiguous)",
+            "value": 1447506.4754284273,
+            "unit": "ns",
+            "range": "± 40084.94051130897"
+          },
+          {
+            "name": "Pattrn.Benchmarks.BuilderBenchmarks.GetDiagnostics(Scenario: GetDiagnosticsAmbiguous)",
+            "value": 2516489.08203125,
+            "unit": "ns",
+            "range": "± 47788.622354902676"
+          },
+          {
+            "name": "Pattrn.Benchmarks.BuilderBenchmarks.BuildWithValidation(Scenario: GetDiagnosticsAmbiguous)",
+            "value": 2918325.290885417,
+            "unit": "ns",
+            "range": "± 29835.52841787883"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RoutePattern_Parse(Scenario: ParseSimple)",
+            "value": 147.07378137111664,
+            "unit": "ns",
+            "range": "± 1.0313502445716678"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RoutePattern_GetPathSegmentCount(Scenario: ParseSimple)",
+            "value": 15.772173124055067,
+            "unit": "ns",
+            "range": "± 0.07537961026926752"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RoutePattern_SplitPath(Scenario: ParseSimple)",
+            "value": 76.51014672006879,
+            "unit": "ns",
+            "range": "± 1.1953910399235894"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RoutePattern_SplitPathToSpan(Scenario: ParseSimple)",
+            "value": 90.05651273197599,
+            "unit": "ns",
+            "range": "± 3.427893186475642"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchPreSplitToSpan(Scenario: ParseSimple)",
+            "value": 74.30545990665753,
+            "unit": "ns",
+            "range": "± 0.03496983423116775"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteWithCallerBufferToSpan(Scenario: ParseSimple)",
+            "value": 181.90689020156861,
+            "unit": "ns",
+            "range": "± 1.9038840801811672"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteToSpan(Scenario: ParseSimple)",
+            "value": 204.47942745685577,
+            "unit": "ns",
+            "range": "± 4.067334242529833"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchPreSplitDetailedToSpans(Scenario: ParseSimple)",
+            "value": 106.92471686999004,
+            "unit": "ns",
+            "range": "± 0.07595625791587425"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteWithCallerBufferDetailedToSpans(Scenario: ParseSimple)",
+            "value": 183.43332505226135,
+            "unit": "ns",
+            "range": "± 0.6232865968544761"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteDetailedToSpans(Scenario: ParseSimple)",
+            "value": 225.07552491823833,
+            "unit": "ns",
+            "range": "± 1.220534908719514"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteDetailedToArray(Scenario: ParseSimple)",
+            "value": 430.17983780588423,
+            "unit": "ns",
+            "range": "± 2.051031511294521"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RoutePattern_Parse(Scenario: ParseParameters)",
+            "value": 377.7586897441319,
+            "unit": "ns",
+            "range": "± 5.152368671661004"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RoutePattern_GetPathSegmentCount(Scenario: ParseParameters)",
+            "value": 15.824931623680252,
+            "unit": "ns",
+            "range": "± 0.23827240215509338"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RoutePattern_SplitPath(Scenario: ParseParameters)",
+            "value": 84.16256787776948,
+            "unit": "ns",
+            "range": "± 2.5588319021505472"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RoutePattern_SplitPathToSpan(Scenario: ParseParameters)",
+            "value": 85.36280523027692,
+            "unit": "ns",
+            "range": "± 2.4747527012544945"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchPreSplitToSpan(Scenario: ParseParameters)",
+            "value": 86.53337745941602,
+            "unit": "ns",
+            "range": "± 0.07638361176831794"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteWithCallerBufferToSpan(Scenario: ParseParameters)",
+            "value": 169.72148050580705,
+            "unit": "ns",
+            "range": "± 0.7201812663821513"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteToSpan(Scenario: ParseParameters)",
+            "value": 195.57161799498968,
+            "unit": "ns",
+            "range": "± 0.8634705839331143"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchPreSplitDetailedToSpans(Scenario: ParseParameters)",
+            "value": 106.8962470094363,
+            "unit": "ns",
+            "range": "± 0.054047480794325455"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteWithCallerBufferDetailedToSpans(Scenario: ParseParameters)",
+            "value": 193.01347897847492,
+            "unit": "ns",
+            "range": "± 1.7746319501533674"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteDetailedToSpans(Scenario: ParseParameters)",
+            "value": 234.06263060569762,
+            "unit": "ns",
+            "range": "± 2.333793816171331"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteDetailedToArray(Scenario: ParseParameters)",
+            "value": 443.15608536402385,
+            "unit": "ns",
+            "range": "± 1.9443619583285108"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RoutePattern_Parse(Scenario: ParseCatchAll)",
+            "value": 206.73341917991638,
+            "unit": "ns",
+            "range": "± 1.0145144034768931"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RoutePattern_GetPathSegmentCount(Scenario: ParseCatchAll)",
+            "value": 12.950386581676346,
+            "unit": "ns",
+            "range": "± 0.039432319906528165"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RoutePattern_SplitPath(Scenario: ParseCatchAll)",
+            "value": 73.29854525725047,
+            "unit": "ns",
+            "range": "± 2.1906397091493903"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RoutePattern_SplitPathToSpan(Scenario: ParseCatchAll)",
+            "value": 76.92427164713541,
+            "unit": "ns",
+            "range": "± 1.4231079463682028"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchPreSplitToSpan(Scenario: ParseCatchAll)",
+            "value": 50.7706353465716,
+            "unit": "ns",
+            "range": "± 0.02299483264373763"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteWithCallerBufferToSpan(Scenario: ParseCatchAll)",
+            "value": 120.86384643041171,
+            "unit": "ns",
+            "range": "± 0.5331567557235358"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteToSpan(Scenario: ParseCatchAll)",
+            "value": 149.53464891115826,
+            "unit": "ns",
+            "range": "± 0.5719860359194406"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchPreSplitDetailedToSpans(Scenario: ParseCatchAll)",
+            "value": 83.96701296170552,
+            "unit": "ns",
+            "range": "± 0.09972620375750862"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteWithCallerBufferDetailedToSpans(Scenario: ParseCatchAll)",
+            "value": 157.97566945212228,
+            "unit": "ns",
+            "range": "± 1.3088875248309635"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteDetailedToSpans(Scenario: ParseCatchAll)",
+            "value": 203.57613838513691,
+            "unit": "ns",
+            "range": "± 0.8232181116597571"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteDetailedToArray(Scenario: ParseCatchAll)",
+            "value": 351.6987318992615,
+            "unit": "ns",
+            "range": "± 2.136863986491165"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RoutePattern_Parse(Scenario: MatchDetailed)",
+            "value": 371.51832521878754,
+            "unit": "ns",
+            "range": "± 3.8321424588491304"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RoutePattern_GetPathSegmentCount(Scenario: MatchDetailed)",
+            "value": 16.235367633899052,
+            "unit": "ns",
+            "range": "± 0.1484216824098961"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RoutePattern_SplitPath(Scenario: MatchDetailed)",
+            "value": 83.48239354689916,
+            "unit": "ns",
+            "range": "± 1.24009949124107"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RoutePattern_SplitPathToSpan(Scenario: MatchDetailed)",
+            "value": 79.69906013745528,
+            "unit": "ns",
+            "range": "± 0.39304739527569527"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchPreSplitToSpan(Scenario: MatchDetailed)",
+            "value": 75.08395925362905,
+            "unit": "ns",
+            "range": "± 0.04040983458854701"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteWithCallerBufferToSpan(Scenario: MatchDetailed)",
+            "value": 157.5071562767029,
+            "unit": "ns",
+            "range": "± 0.8710126577033734"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteToSpan(Scenario: MatchDetailed)",
+            "value": 193.22086582865035,
+            "unit": "ns",
+            "range": "± 2.2447973788870317"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchPreSplitDetailedToSpans(Scenario: MatchDetailed)",
+            "value": 106.71434123175484,
+            "unit": "ns",
+            "range": "± 0.1374642448181164"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteWithCallerBufferDetailedToSpans(Scenario: MatchDetailed)",
+            "value": 196.32989510468073,
+            "unit": "ns",
+            "range": "± 0.8479531019389899"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteDetailedToSpans(Scenario: MatchDetailed)",
+            "value": 226.6029419263204,
+            "unit": "ns",
+            "range": "± 1.6606384720015945"
+          },
+          {
+            "name": "Pattrn.Benchmarks.RoutingBenchmarks.RouteIndex_MatchRouteDetailedToArray(Scenario: MatchDetailed)",
+            "value": 476.4960231781006,
+            "unit": "ns",
+            "range": "± 1.206460191185971"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.NaiveScan_MatchToArray(Scenario: WildcardSparse)",
+            "value": 2090.5632068089076,
+            "unit": "ns",
+            "range": "± 4.44536412469851"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_GetMatchCountUpperBound(Scenario: WildcardSparse)",
+            "value": 102.90272839711263,
+            "unit": "ns",
+            "range": "± 0.03517857159524012"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToSpan(Scenario: WildcardSparse)",
+            "value": 145.7107340189127,
+            "unit": "ns",
+            "range": "± 0.1582188152285929"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToArray(Scenario: WildcardSparse)",
+            "value": 206.27738908358984,
+            "unit": "ns",
+            "range": "± 0.5402859345605708"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToSpans(Scenario: WildcardSparse)",
+            "value": 173.84937917269193,
+            "unit": "ns",
+            "range": "± 0.08161490834732729"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToArray(Scenario: WildcardSparse)",
+            "value": 499.5600880895342,
+            "unit": "ns",
+            "range": "± 0.47359390900122034"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.NaiveScan_MatchToArray(Scenario: WildcardDense)",
+            "value": 51375.21241251627,
+            "unit": "ns",
+            "range": "± 108.55359267398764"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_GetMatchCountUpperBound(Scenario: WildcardDense)",
+            "value": 109.52966975248776,
+            "unit": "ns",
+            "range": "± 0.2317250634799702"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToSpan(Scenario: WildcardDense)",
+            "value": 137.89520416940962,
+            "unit": "ns",
+            "range": "± 0.07806673280387597"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToArray(Scenario: WildcardDense)",
+            "value": 219.53155270644598,
+            "unit": "ns",
+            "range": "± 0.3294025131662669"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToSpans(Scenario: WildcardDense)",
+            "value": 175.84902816159385,
+            "unit": "ns",
+            "range": "± 0.10877594984088927"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToArray(Scenario: WildcardDense)",
+            "value": 503.3462302344186,
+            "unit": "ns",
+            "range": "± 1.3702976963037152"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.NaiveScan_MatchToArray(Scenario: PrefixExactOnly)",
+            "value": 49835.052337646484,
+            "unit": "ns",
+            "range": "± 25.205124600716857"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_GetMatchCountUpperBound(Scenario: PrefixExactOnly)",
+            "value": 36.85773486324719,
+            "unit": "ns",
+            "range": "± 0.025454039516705582"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToSpan(Scenario: PrefixExactOnly)",
+            "value": 57.823911954959236,
+            "unit": "ns",
+            "range": "± 0.03262574769566488"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToArray(Scenario: PrefixExactOnly)",
+            "value": 96.01086688893182,
+            "unit": "ns",
+            "range": "± 0.502236534925635"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToSpans(Scenario: PrefixExactOnly)",
+            "value": 90.90207202945437,
+            "unit": "ns",
+            "range": "± 0.17284864895185345"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToArray(Scenario: PrefixExactOnly)",
+            "value": 177.89831248351507,
+            "unit": "ns",
+            "range": "± 0.728576521082979"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.NaiveScan_MatchToArray(Scenario: PrefixWildcard)",
+            "value": 51499.00126139323,
+            "unit": "ns",
+            "range": "± 94.06758184494088"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_GetMatchCountUpperBound(Scenario: PrefixWildcard)",
+            "value": 130.7944621489598,
+            "unit": "ns",
+            "range": "± 0.0643770546680467"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToSpan(Scenario: PrefixWildcard)",
+            "value": 166.87715580830206,
+            "unit": "ns",
+            "range": "± 0.07529121961710278"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToArray(Scenario: PrefixWildcard)",
+            "value": 258.1460826580341,
+            "unit": "ns",
+            "range": "± 0.8933912768590696"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToSpans(Scenario: PrefixWildcard)",
+            "value": 228.86383830584012,
+            "unit": "ns",
+            "range": "± 0.3544806992647981"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToArray(Scenario: PrefixWildcard)",
+            "value": 650.277857046861,
+            "unit": "ns",
+            "range": "± 2.208516680038699"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.NaiveScan_MatchToArray(Scenario: NoMatch)",
+            "value": 36402.27336707482,
+            "unit": "ns",
+            "range": "± 23.029574591706798"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_GetMatchCountUpperBound(Scenario: NoMatch)",
+            "value": 18.674812023128784,
+            "unit": "ns",
+            "range": "± 0.01798891946672046"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToSpan(Scenario: NoMatch)",
+            "value": 12.711045588765826,
+            "unit": "ns",
+            "range": "± 0.022384806387600518"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToArray(Scenario: NoMatch)",
+            "value": 21.52116166628324,
+            "unit": "ns",
+            "range": "± 0.036494417477650684"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToSpans(Scenario: NoMatch)",
+            "value": 26.252226850161186,
+            "unit": "ns",
+            "range": "± 0.012038965526051635"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToArray(Scenario: NoMatch)",
+            "value": 15.464246802605116,
+            "unit": "ns",
+            "range": "± 0.03157479011400012"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.NaiveScan_MatchToArray(Scenario: ParameterCaptures)",
+            "value": 12088.451377281775,
+            "unit": "ns",
+            "range": "± 50.14321968478022"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_GetMatchCountUpperBound(Scenario: ParameterCaptures)",
+            "value": 63.71610724925995,
+            "unit": "ns",
+            "range": "± 0.02465936839874904"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToSpan(Scenario: ParameterCaptures)",
+            "value": 71.70865855614345,
+            "unit": "ns",
+            "range": "± 0.07048608722475047"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchToArray(Scenario: ParameterCaptures)",
+            "value": 101.89051004818508,
+            "unit": "ns",
+            "range": "± 0.5025624308656755"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToSpans(Scenario: ParameterCaptures)",
+            "value": 93.7284134881837,
+            "unit": "ns",
+            "range": "± 0.16843271722228567"
+          },
+          {
+            "name": "Pattrn.Benchmarks.PattrnIndexBenchmarks.Trie_MatchDetailedToArray(Scenario: ParameterCaptures)",
+            "value": 295.25204478777374,
+            "unit": "ns",
+            "range": "± 1.1195642976603655"
+          },
+          {
+            "name": "Pattrn.Benchmarks.BuilderBenchmarks.Build(Scenario: ValidateOnBuild)",
+            "value": 1465839.9305555555,
+            "unit": "ns",
+            "range": "± 31150.491908006723"
+          },
+          {
+            "name": "Pattrn.Benchmarks.BuilderBenchmarks.GetDiagnostics(Scenario: ValidateOnBuild)",
+            "value": 2557280.988914696,
+            "unit": "ns",
+            "range": "± 85044.67522082303"
+          },
+          {
+            "name": "Pattrn.Benchmarks.BuilderBenchmarks.BuildWithValidation(Scenario: ValidateOnBuild)",
+            "value": 3030427.8889508927,
+            "unit": "ns",
+            "range": "± 52481.80825099599"
           }
         ]
       }
