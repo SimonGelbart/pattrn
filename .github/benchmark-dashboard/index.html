@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pattrn benchmark dashboard</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --line: rgba(148, 163, 184, 0.22);
+      --good: #34d399;
+      --bad: #fb7185;
+      --warn: #fbbf24;
+      --accent: #60a5fa;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.24);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #1e3a8a 0, transparent 34rem), var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .page { width: min(1500px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 48px; }
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: end;
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(31, 41, 55, 0.78));
+      box-shadow: var(--shadow);
+    }
+    h1 { margin: 0 0 8px; font-size: clamp(2rem, 4vw, 4rem); letter-spacing: -0.05em; }
+    .subtitle { margin: 0; color: var(--muted); font-size: 1.05rem; line-height: 1.6; max-width: 900px; }
+    .hero-meta { text-align: right; color: var(--muted); line-height: 1.7; white-space: nowrap; }
+    .cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin: 20px 0; }
+    .card, .panel {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(17, 24, 39, 0.82);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+    }
+    .card { padding: 18px; }
+    .label { color: var(--muted); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .value { font-size: 2rem; font-weight: 800; letter-spacing: -0.04em; margin-top: 6px; }
+    .good { color: var(--good); }
+    .bad { color: var(--bad); }
+    .warn { color: var(--warn); }
+    .controls { display: grid; grid-template-columns: 1.4fr 0.8fr 0.8fr; gap: 12px; margin: 20px 0; }
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      color: var(--text);
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: var(--accent); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+    .panel { overflow: hidden; }
+    .panel h2 { margin: 0; padding: 18px 20px; font-size: 1rem; border-bottom: 1px solid var(--line); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { padding: 12px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; background: rgba(15, 23, 42, 0.45); }
+    tr:last-child td { border-bottom: 0; }
+    .mono { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; white-space: nowrap; }
+    .bench-name { max-width: 560px; }
+    .muted { color: var(--muted); }
+    .pill { display: inline-flex; align-items: center; border-radius: 999px; padding: 4px 9px; font-size: 0.78rem; font-weight: 700; background: rgba(148, 163, 184, 0.14); }
+    .pill.good { background: rgba(52, 211, 153, 0.12); }
+    .pill.bad { background: rgba(251, 113, 133, 0.12); }
+    .pill.warn { background: rgba(251, 191, 36, 0.12); }
+    .footer { color: var(--muted); font-size: 0.85rem; margin-top: 18px; text-align: center; }
+    .empty { padding: 24px; color: var(--muted); }
+    @media (max-width: 1100px) {
+      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-2 { grid-template-columns: 1fr; }
+      .controls { grid-template-columns: 1fr; }
+      .hero { grid-template-columns: 1fr; }
+      .hero-meta { text-align: left; white-space: normal; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div>
+        <h1>Pattrn benchmarks</h1>
+        <p class="subtitle">Readable BenchmarkDotNet history with latest results, regressions, improvements, and searchable benchmark details. Lower runtime is better.</p>
+      </div>
+      <div class="hero-meta">
+        <div id="lastUpdate">Loading benchmark data...</div>
+        <div><a id="repoLink" href="#">Repository</a></div>
+      </div>
+    </section>
+
+    <section class="cards">
+      <div class="card"><div class="label">Benchmarks</div><div class="value" id="totalBenches">0</div></div>
+      <div class="card"><div class="label">Compared</div><div class="value" id="comparedBenches">0</div></div>
+      <div class="card"><div class="label">Regressions</div><div class="value bad" id="regressions">0</div></div>
+      <div class="card"><div class="label">Improvements</div><div class="value good" id="improvements">0</div></div>
+      <div class="card"><div class="label">Stable</div><div class="value" id="stable">0</div></div>
+    </section>
+
+    <section class="controls">
+      <input id="search" type="search" placeholder="Search benchmark, method, or scenario..." />
+      <select id="groupFilter"><option value="">All benchmark groups</option></select>
+      <select id="changeFilter">
+        <option value="">All changes</option>
+        <option value="regression">Regressions</option>
+        <option value="improvement">Improvements</option>
+        <option value="stable">Stable / new</option>
+      </select>
+    </section>
+
+    <section class="grid-2">
+      <div class="panel">
+        <h2>Largest regressions</h2>
+        <table><thead><tr><th>Benchmark</th><th>Latest</th><th>Change</th></tr></thead><tbody id="regressionRows"></tbody></table>
+      </div>
+      <div class="panel">
+        <h2>Largest improvements</h2>
+        <table><thead><tr><th>Benchmark</th><th>Latest</th><th>Change</th></tr></thead><tbody id="improvementRows"></tbody></table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>All benchmark results</h2>
+      <table>
+        <thead><tr><th>Group</th><th>Benchmark</th><th>Scenario</th><th>Latest</th><th>Previous</th><th>Change</th></tr></thead>
+        <tbody id="allRows"></tbody>
+      </table>
+    </section>
+
+    <div class="footer">Data source: <code>data.js</code> generated by github-action-benchmark. Custom dashboard maintained in the repository workflow.</div>
+  </div>
+
+  <script src="data.js"></script>
+  <script>
+    const data = window.BENCHMARK_DATA || {};
+    const setName = Object.keys(data.entries || {})[0];
+    const history = setName ? data.entries[setName] : [];
+    const latest = history[history.length - 1];
+    const previous = history[history.length - 2];
+    const threshold = 0.05;
+
+    function fmtDate(ms) {
+      return ms ? new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(ms)) : 'No data';
+    }
+    function splitName(name) {
+      const scenarioMatch = name.match(/\((.*)\)$/);
+      const scenario = scenarioMatch ? scenarioMatch[1].replace(/^Scenario:\s*/, '') : '';
+      const signature = name.replace(/\(.*\)$/, '');
+      const parts = signature.split('.');
+      const method = parts.pop() || signature;
+      const group = parts.pop() || 'Benchmarks';
+      return { group, method, scenario };
+    }
+    function fmtValue(value, unit) {
+      if (!Number.isFinite(value)) return 'n/a';
+      if (unit === 'ns') {
+        if (value >= 1_000_000) return (value / 1_000_000).toFixed(2) + ' ms';
+        if (value >= 1_000) return (value / 1_000).toFixed(2) + ' µs';
+        return value.toFixed(2) + ' ns';
+      }
+      return value.toFixed(2) + ' ' + (unit || '');
+    }
+    function fmtChange(change) {
+      if (!Number.isFinite(change)) return '<span class="pill">new</span>';
+      const pct = Math.abs(change * 100).toFixed(1) + '%';
+      if (change > threshold) return '<span class="pill bad">+' + pct + '</span>';
+      if (change < -threshold) return '<span class="pill good">-' + pct + '</span>';
+      return '<span class="pill">' + (change >= 0 ? '+' : '-') + pct + '</span>';
+    }
+    function rowLabel(item) {
+      const p = splitName(item.name);
+      return { ...p, short: p.method, full: item.name };
+    }
+    const prevByName = new Map((previous?.benches || []).map(b => [b.name, b]));
+    const rows = (latest?.benches || []).map(item => {
+      const prev = prevByName.get(item.name);
+      const change = prev ? (item.value - prev.value) / prev.value : NaN;
+      return { item, prev, change, ...rowLabel(item) };
+    });
+
+    document.getElementById('lastUpdate').textContent = 'Last update: ' + fmtDate(data.lastUpdate || latest?.date);
+    document.getElementById('repoLink').href = data.repoUrl || '#';
+    document.getElementById('repoLink').textContent = data.repoUrl ? data.repoUrl.replace('https://github.com/', '') : 'Repository';
+    document.getElementById('totalBenches').textContent = rows.length;
+    document.getElementById('comparedBenches').textContent = rows.filter(r => r.prev).length;
+    document.getElementById('regressions').textContent = rows.filter(r => r.change > threshold).length;
+    document.getElementById('improvements').textContent = rows.filter(r => r.change < -threshold).length;
+    document.getElementById('stable').textContent = rows.filter(r => !Number.isFinite(r.change) || Math.abs(r.change) <= threshold).length;
+
+    const groupFilter = document.getElementById('groupFilter');
+    [...new Set(rows.map(r => r.group))].sort().forEach(g => {
+      const option = document.createElement('option');
+      option.value = g;
+      option.textContent = g;
+      groupFilter.appendChild(option);
+    });
+
+    function renderMiniTable(id, subset, fallback) {
+      const target = document.getElementById(id);
+      target.innerHTML = subset.length ? subset.map(r => `
+        <tr>
+          <td class="bench-name"><strong>${r.group}.${r.short}</strong><div class="muted">${r.scenario || r.full}</div></td>
+          <td class="mono">${fmtValue(r.item.value, r.item.unit)}</td>
+          <td class="mono">${fmtChange(r.change)}</td>
+        </tr>`).join('') : `<tr><td colspan="3" class="empty">${fallback}</td></tr>`;
+    }
+    renderMiniTable('regressionRows', rows.filter(r => r.change > threshold).sort((a,b) => b.change - a.change).slice(0, 8), 'No regression above 5%.');
+    renderMiniTable('improvementRows', rows.filter(r => r.change < -threshold).sort((a,b) => a.change - b.change).slice(0, 8), 'No improvement above 5%.');
+
+    function renderAll() {
+      const q = document.getElementById('search').value.toLowerCase();
+      const g = groupFilter.value;
+      const c = document.getElementById('changeFilter').value;
+      let filtered = rows.filter(r => !q || r.full.toLowerCase().includes(q) || r.group.toLowerCase().includes(q) || r.short.toLowerCase().includes(q) || r.scenario.toLowerCase().includes(q));
+      if (g) filtered = filtered.filter(r => r.group === g);
+      if (c === 'regression') filtered = filtered.filter(r => r.change > threshold);
+      if (c === 'improvement') filtered = filtered.filter(r => r.change < -threshold);
+      if (c === 'stable') filtered = filtered.filter(r => !Number.isFinite(r.change) || Math.abs(r.change) <= threshold);
+      filtered.sort((a,b) => a.group.localeCompare(b.group) || a.short.localeCompare(b.short) || a.scenario.localeCompare(b.scenario));
+      document.getElementById('allRows').innerHTML = filtered.length ? filtered.map(r => `
+        <tr>
+          <td><span class="pill">${r.group}</span></td>
+          <td class="bench-name"><strong>${r.short}</strong><div class="muted">${r.full}</div></td>
+          <td>${r.scenario || '<span class="muted">—</span>'}</td>
+          <td class="mono">${fmtValue(r.item.value, r.item.unit)}<div class="muted">${r.item.range || ''}</div></td>
+          <td class="mono">${r.prev ? fmtValue(r.prev.value, r.prev.unit) : '<span class="muted">—</span>'}</td>
+          <td class="mono">${fmtChange(r.change)}</td>
+        </tr>`).join('') : '<tr><td colspan="6" class="empty">No benchmark rows match the current filters.</td></tr>';
+    }
+    document.getElementById('search').addEventListener('input', renderAll);
+    groupFilter.addEventListener('change', renderAll);
+    document.getElementById('changeFilter').addEventListener('change', renderAll);
+    renderAll();
+  </script>
+</body>
+</html>
