@@ -193,9 +193,13 @@ When multiple structural branches match the same input at the same depth, result
 literal > named parameter > anonymous wildcard > terminal catch-all
 ```
 
-`PatternMatch<TValue>.Specificity` and `PatternMatchResult<TSegment, TValue>.Specificity` expose the specificity value for detailed results. The broad ordering above is compatibility-covered; exact numeric weights remain an implementation detail.
+`PatternMatch<TValue>.Specificity` and `PatternMatchResult<TSegment, TValue>.Specificity` expose the specificity value for detailed results. Higher values are more specific. The broad ordering above is compatibility-covered; exact numeric weights remain an implementation detail.
 
-Registrations with the same structural specificity preserve registration order when duplicate preservation is enabled.
+Registrations with the same structural specificity preserve registration order when duplicate preservation is enabled. When default value deduplication suppresses equal values, the first accepted value in deterministic rank order wins.
+
+Prefix mode is deterministic but traversal ordered. A registration at a prefix node is emitted before deeper descendant registrations. Use detailed match metadata for consumer-side sorting if a scenario needs one global ranking order across prefix and descendant matches.
+
+See [ranking and specificity](ranking-specificity.md) for the full contract and consumer-side sorting guidance.
 
 ## Threading
 

@@ -23,7 +23,7 @@ literal
 
 This ordering follows the compiled traversal: exact literal children are visited before wildcard/parameter children, and catch-all branches are emitted last for the same node.
 
-`PatternMatch<TValue>.Specificity` and `PatternMatchResult<TSegment, TValue>.Specificity` expose the generic specificity value used to compare these broad categories. The current category weights are implementation details, but the ordering above is compatibility-covered.
+`PatternMatch<TValue>.Specificity` and `PatternMatchResult<TSegment, TValue>.Specificity` expose the generic specificity value used to compare these broad categories. Higher values are more specific. The current numeric weights are implementation details, but the ordering above is compatibility-covered. See [ranking and specificity](ranking-specificity.md) for the full contract.
 
 ## Captures
 
@@ -46,7 +46,7 @@ A terminal catch-all can match an empty remainder. In that case the detailed mat
 | `Replace` | Replace existing registrations for the structural pattern. |
 | `Ignore` | Keep existing registrations and ignore the new duplicate value. |
 
-This is separate from `DuplicateValueMatchMode`, which controls duplicate values emitted by a built index during matching.
+This is separate from `DuplicateValueMatchMode`, which controls duplicate values emitted by a built index during matching. Default deduplication keeps the first accepted value in deterministic rank order.
 
 ## Routing package preview semantics
 
