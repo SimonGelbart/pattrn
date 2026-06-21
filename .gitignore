@@ -15,3 +15,6 @@ BenchmarkDotNet.Artifacts/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local generated restore config
+eng/NuGet.local.config
