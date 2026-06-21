@@ -78,7 +78,7 @@ var preserving = builder.Build(
 
 The default is `DuplicateValueMatchMode.Deduplicate`.
 
-This mode compares emitted values with the builder's configured value comparer. It does not change pattern registration and it does not remove registrations from the index.
+This mode compares emitted values with the builder's configured value comparer. It does not change pattern registration, it does not remove registrations from the index, and it does not add a separate priority policy. When equal values are reached by multiple matches, the first accepted value in deterministic ranking order wins.
 
 ## Interaction examples
 
@@ -112,6 +112,12 @@ builder.Add(["orders", "*"], "handler");
 ```
 
 For input `orders/new`, both patterns match. Default match options emit `handler` once. `PreserveDuplicates` emits it twice.
+
+## Ordering and ranking
+
+Duplicate behavior and ranking are separate. Builder duplicate policies decide which structural registrations are accepted. Match duplicate-value mode decides whether equal values are emitted once or repeatedly. Ranking decides the deterministic order of the accepted matches.
+
+See [ranking and specificity](ranking-specificity.md) for the ordering contract.
 
 ## Diagnostics and validation
 
