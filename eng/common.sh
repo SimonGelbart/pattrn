@@ -15,8 +15,6 @@ resolve_dotnet_cmd() {
   local candidates=(
     "$ROOT/../dotnet10/dotnet"
     "$ROOT/../dotnet/dotnet"
-    "/mnt/data/dotnet10/dotnet"
-    "/mnt/data/dotnet/dotnet"
     "dotnet"
   )
 
@@ -54,10 +52,8 @@ resolve_nuget_packages() {
 
   local candidates=(
     "$ROOT/packages"
+    "$ROOT/../nuget-bundle/packages"
     "$ROOT/../tracepack-nuget-bundle/packages"
-    "/mnt/data/tracepack-nuget-bundle/packages"
-    "/mnt/data/ppi_check/nuget/tracepack-nuget-bundle/packages"
-    "/mnt/data/review-v2/tracepack-nuget-bundle/packages"
   )
 
   for candidate in "${candidates[@]}"; do
@@ -69,7 +65,7 @@ resolve_nuget_packages() {
 
   echo "" >&2
   echo "Could not find the offline NuGet bundle packages directory." >&2
-  echo "Set NUGET_BUNDLE_PACKAGES=/absolute/path/to/tracepack-nuget-bundle/packages and retry." >&2
+  echo "Set NUGET_BUNDLE_PACKAGES=/absolute/path/to/offline-nuget-bundle/packages and retry." >&2
   return 1
 }
 
@@ -77,7 +73,7 @@ ensure_root_nuget_bundle_link() {
   local packages bundle_root expected_link parent_dir
   packages="$(resolve_nuget_packages)"
   bundle_root="$(cd "$packages/.." && pwd)"
-  expected_link="$ROOT/../tracepack-nuget-bundle"
+  expected_link="$ROOT/../nuget-bundle"
   parent_dir="$(dirname "$expected_link")"
 
   if [[ -e "$expected_link" ]]; then
@@ -98,7 +94,7 @@ write_local_nuget_config() {
 <configuration>
   <packageSources>
     <clear />
-    <add key="tracepack-offline-bundle" value="$packages" />
+    <add key="offline-bundle" value="$packages" />
   </packageSources>
 </configuration>
 XML

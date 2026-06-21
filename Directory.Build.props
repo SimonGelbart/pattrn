@@ -7,4 +7,14 @@
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <PattrnVersion>0.1.0-alpha.1</PattrnVersion>
+    <Version>$(PattrnVersion)</Version>
+    <PackageVersion>$(PattrnVersion)</PackageVersion>
+    <PackageReleaseNotes>Pre-beta package from the project-foundation line. Package versions are centralized while the public API is still pre-beta.</PackageReleaseNotes>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/SimonGelbart/pattrn</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+  </PropertyGroup>
 </Project>

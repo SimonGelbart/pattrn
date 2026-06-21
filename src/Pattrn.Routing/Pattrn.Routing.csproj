@@ -4,7 +4,6 @@
     <AssemblyName>Pattrn.Routing</AssemblyName>
     <RootNamespace>Pattrn.Routing</RootNamespace>
     <PackageId>Pattrn.Routing</PackageId>
-    <Version>3.0.0-alpha.31</Version>
     <Authors>Simon Gelbart</Authors>
     <Description>Route-template parsing helpers for Pattrn's generic segmented-pattern core.</Description>
     <PackageTags>path;pattern;index;trie;wildcard;matching;routing;routes;templates</PackageTags>
@@ -15,10 +14,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EnablePackageValidation>true</EnablePackageValidation>
-    <RepositoryType>none</RepositoryType>
-    <PublishRepositoryUrl>false</PublishRepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <PackageReleaseNotes>v3.0.0-alpha.31: adds performance guardrails and exact-only matching fast-path protections.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

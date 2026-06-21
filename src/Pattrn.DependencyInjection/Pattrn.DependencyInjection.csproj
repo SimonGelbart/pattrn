@@ -4,7 +4,6 @@
     <AssemblyName>Pattrn.DependencyInjection</AssemblyName>
     <RootNamespace>Pattrn.DependencyInjection</RootNamespace>
     <PackageId>Pattrn.DependencyInjection</PackageId>
-    <Version>3.0.0-alpha.31</Version>
     <Authors>Simon Gelbart</Authors>
     <Description>Dependency-injection registration extensions for Pattrn.</Description>
     <PackageTags>path;pattern;index;trie;wildcard;routing;matching;dependency-injection;di</PackageTags>
@@ -15,10 +14,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EnablePackageValidation>true</EnablePackageValidation>
-    <RepositoryType>none</RepositoryType>
-    <PublishRepositoryUrl>false</PublishRepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <PackageReleaseNotes>v3.0.0-alpha.31: adds performance guardrails and exact-only matching fast-path protections.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
   </ItemGroup>
 
   <ItemGroup>
