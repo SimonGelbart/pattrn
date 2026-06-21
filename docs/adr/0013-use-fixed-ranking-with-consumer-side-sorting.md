@@ -25,6 +25,8 @@ The stable pre-beta contract is:
 - anonymous wildcards outrank terminal catch-alls;
 - equal structural specificity preserves registration order;
 - default value deduplication keeps the first accepted value in deterministic rank order;
+- prefix mode emits accepted prefix-node registrations before deeper descendant registrations;
+- route constraints, defaults, and optional metadata do not add core specificity;
 - detailed matches expose metadata for consumer-side sorting.
 
 Do not add a public ranking comparer, ranking plugin, `SpecificityOptions`, or route-aware precedence hook before beta.
