@@ -1,5 +1,8 @@
 # Release decisions before beta
 
+> Historical note: this file preserves earlier alpha-line release notes. Current roadmap and versioning policy live in `docs/roadmap.md` and `docs/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones.md`.
+
+
 This document records the product/API decisions made through the alpha.31 performance guardrails and speed triage update.
 
 ## Core remains generic

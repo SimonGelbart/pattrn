@@ -1,5 +1,8 @@
 # API freeze policy
 
+> Historical note: this file preserves earlier alpha-line release notes. Current roadmap and versioning policy live in `docs/roadmap.md` and `docs/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones.md`.
+
+
 The `3.0.0` alpha track intentionally reopens the public API because the package is still pre-stable and the product boundary is being clarified.
 
 The current alpha direction is:

@@ -1,5 +1,8 @@
 # Beta readiness review
 
+> Historical note: this file preserves earlier alpha-line release notes. Current roadmap and versioning policy live in `docs/roadmap.md` and `docs/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones.md`.
+
+
 This review records the `3.0.0-alpha.20` readiness decision before cutting a first beta package line.
 
 No matcher behavior changed in this increment. No public API shape changed in this increment. The purpose is to make the release posture explicit and to confirm that the repository is clean enough to move from alpha implementation work to beta feedback.

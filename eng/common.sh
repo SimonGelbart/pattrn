@@ -53,7 +53,6 @@ resolve_nuget_packages() {
   local candidates=(
     "$ROOT/packages"
     "$ROOT/../nuget-bundle/packages"
-    "$ROOT/../tracepack-nuget-bundle/packages"
   )
 
   for candidate in "${candidates[@]}"; do
@@ -67,22 +66,6 @@ resolve_nuget_packages() {
   echo "Could not find the offline NuGet bundle packages directory." >&2
   echo "Set NUGET_BUNDLE_PACKAGES=/absolute/path/to/offline-nuget-bundle/packages and retry." >&2
   return 1
-}
-
-ensure_root_nuget_bundle_link() {
-  local packages bundle_root expected_link parent_dir
-  packages="$(resolve_nuget_packages)"
-  bundle_root="$(cd "$packages/.." && pwd)"
-  expected_link="$ROOT/../nuget-bundle"
-  parent_dir="$(dirname "$expected_link")"
-
-  if [[ -e "$expected_link" ]]; then
-    return
-  fi
-
-  if [[ -w "$parent_dir" ]]; then
-    ln -s "$bundle_root" "$expected_link"
-  fi
 }
 
 write_local_nuget_config() {

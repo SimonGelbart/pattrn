@@ -1,5 +1,8 @@
 # Benchmarks
 
+> Historical note: alpha-version benchmark references are retained as benchmark-history labels, not as current roadmap milestones.
+
+
 The benchmark project is part of the product contract. It exists to keep performance claims measurable and to protect the read path from regressions as the matcher becomes more expressive.
 
 Run the reproducible benchmark script with the provided SDK and offline NuGet bundle:

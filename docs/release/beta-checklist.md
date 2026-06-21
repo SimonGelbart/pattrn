@@ -1,5 +1,8 @@
 # Beta checklist
 
+> Historical note: this file preserves earlier alpha-line release notes. Current roadmap and versioning policy live in `docs/roadmap.md` and `docs/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones.md`.
+
+
 This checklist defines the remaining work before a `3.0.0-beta.1` package line.
 
 `3.0.0-alpha.20` was the beta-readiness review. `3.0.0-alpha.21` added the architecture decision to make explicit `PatternSegment<TSegment>` registration primary. `3.0.0-alpha.22` consolidated the standalone roadmap into `docs/roadmap.md` and explicitly allowed breaking alpha changes because the library is not yet used by consumers. `3.0.0-alpha.23` implemented tokenless builder creation and explicit-segment-first API reorientation. `3.0.0-alpha.24` added pattern identity and registration-order metadata to the stable matching contract. `3.0.0-alpha.25` separated hot matching from diagnostics-oriented explanation matching. `3.0.0-alpha.26` established the generic/string normalization boundary. `3.0.0-alpha.27` added ergonomic string-path builder and index facades. `3.0.0-alpha.28` expanded framework-neutral route-template metadata and optional/defaulted suffix expansion, `3.0.0-alpha.29` added optional route constraint validation above structural matching, `3.0.0-alpha.30` refreshed the roadmap while hardening optional/defaulted route expansion metadata, and `3.0.0-alpha.31` added speed guardrails plus exact-only matching fast-path protection.
