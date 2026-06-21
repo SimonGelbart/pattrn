@@ -179,6 +179,7 @@ Key pages:
 - [API overview](docs/reference/api.md)
 - [Pattern segments](docs/reference/pattern-segments.md)
 - [Matching semantics](docs/reference/matching-semantics.md)
+- [Ranking and specificity](docs/reference/ranking-specificity.md)
 - [Duplicate behavior](docs/reference/duplicate-behavior.md)
 - [Diagnostics](docs/reference/diagnostics.md)
 - [Benchmarks](docs/development/benchmarks.md)
