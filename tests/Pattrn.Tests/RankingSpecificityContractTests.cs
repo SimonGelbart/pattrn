@@ -116,4 +116,45 @@ public sealed class RankingSpecificityContractTests
         ShouldBeTrue(matches[0].Specificity > matches[1].Specificity, "Literal should outrank parameter at the same depth.");
         ShouldBeTrue(matches[1].Specificity > matches[2].Specificity, "Parameter should outrank wildcard at the same depth.");
     }
+
+    [Test]
+    public void CatchAllWithEmptyRemainderIsEmittedAfterExactRegistrationAtTheSameNode()
+    {
+        var index = PattrnIndex<string, string>
+            .Builder("*")
+            .AddPattern([PatternSegment<string>.Literal("files"), PatternSegment<string>.CatchAll("path")], "files-catch-all")
+            .Add(["files"], "files-root")
+            .Build(MatchOptions.PreserveDuplicates);
+
+        var matches = index.MatchDetailedToArray(["files"]);
+
+        ShouldSequenceEqual(matches.Select(match => match.Value), ["files-root", "files-catch-all"]);
+        ShouldEqual(matches[0].Kind, PatternMatchKind.Exact);
+        ShouldEqual(matches[1].Kind, PatternMatchKind.CatchAll);
+        ShouldEqual(matches[1].Captures.Count, 0);
+    }
+
+    [Test]
+    public void EqualCatchAllSpecificityPreservesRegistrationOrder()
+    {
+        var index = PattrnIndex<string, string>
+            .Builder("*")
+            .UseDuplicatePatternRegistrationBehavior(DuplicatePatternRegistrationBehavior.Append)
+            .AddPattern([PatternSegment<string>.Literal("files"), PatternSegment<string>.CatchAll("firstPath")], "first")
+            .AddPattern([PatternSegment<string>.Literal("files"), PatternSegment<string>.CatchAll("secondPath")], "second")
+            .Build(MatchOptions.PreserveDuplicates);
+
+        var matches = index.MatchDetailedToArray(["files", "a", "b.txt"]);
+
+        ShouldSequenceEqual(matches.Select(match => match.Value), ["first", "second"]);
+        ShouldEqual(matches[0].Specificity, matches[1].Specificity);
+        ShouldEqual(matches[0].RegistrationOrder, 0);
+        ShouldEqual(matches[1].RegistrationOrder, 1);
+        ShouldSequenceEqual(
+            matches[0].Captures,
+            [new PatternCapture<string>("firstPath", "a", 1), new PatternCapture<string>("firstPath", "b.txt", 2)]);
+        ShouldSequenceEqual(
+            matches[1].Captures,
+            [new PatternCapture<string>("secondPath", "a", 1), new PatternCapture<string>("secondPath", "b.txt", 2)]);
+    }
 }
