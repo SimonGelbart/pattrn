@@ -77,3 +77,5 @@ Invalid route shapes such as a non-terminal catch-all remain invalid:
 ```
 
 The routing package does not URL-decode, case-fold, collapse duplicate separators, join catch-all captures, implement HTTP method semantics, or claim ASP.NET Core endpoint-routing compatibility.
+
+Route constraints, defaults, and optional metadata are not core ranking inputs. Structural route matches follow the same literal, parameter, wildcard, catch-all, and registration-order rules as the generic core. Route-layer validation can reject or diagnose a structural match, but it does not create framework-specific route precedence in `Pattrn`.

@@ -197,7 +197,7 @@ literal > named parameter > anonymous wildcard > terminal catch-all
 
 Registrations with the same structural specificity preserve registration order when duplicate preservation is enabled. When default value deduplication suppresses equal values, the first accepted value in deterministic rank order wins.
 
-Prefix mode is deterministic but traversal ordered. A registration at a prefix node is emitted before deeper descendant registrations. Use detailed match metadata for consumer-side sorting if a scenario needs one global ranking order across prefix and descendant matches.
+Prefix mode is deterministic but traversal ordered. A registration at a prefix node is emitted before deeper descendant registrations. Within competing branches at the same depth, the generic specificity order still applies. Use detailed match metadata plus application-owned value metadata for consumer-side sorting if a scenario needs one global ranking order across prefix and descendant matches.
 
 See [ranking and specificity](ranking-specificity.md) for the full contract and consumer-side sorting guidance.
 

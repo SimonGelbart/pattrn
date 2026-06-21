@@ -70,6 +70,19 @@ When equal values are deduplicated, the first accepted match in deterministic or
 
 Use `DuplicateValueMatchMode.PreserveDuplicates` when auditing or debugging raw accepted registrations.
 
+## Catch-all empty remainder
+
+A terminal catch-all can match an empty remainder. For example, `files/{*path}` can match `files`.
+
+When a catch-all accepts an empty remainder, an exact registration at the same node is still emitted before the catch-all match:
+
+```text
+files          // exact registration
+files/{*path}  // catch-all accepting an empty remainder
+```
+
+The detailed catch-all match has zero captures for the catch-all name when there are no remaining input segments. The deterministic order is compatibility-covered; exact numeric specificity values remain implementation details.
+
 ## Prefix mode
 
 Prefix mode allows shorter patterns to match longer inputs. Prefix mode is still deterministic, but it is traversal ordered rather than a global priority queue.
@@ -77,6 +90,21 @@ Prefix mode allows shorter patterns to match longer inputs. Prefix mode is still
 The traversal emits registrations at a prefix node before walking deeper matching branches. Within a node or competing branch at the same depth, the same generic specificity rules apply.
 
 Use detailed match metadata for consumer-side sorting if a prefix scenario needs one global ranking order across all matched prefix and descendant registrations.
+
+This means prefix mode intentionally distinguishes two questions:
+
+| Question | Answer |
+|---|---|
+| Which registrations were accepted during traversal? | Prefix registrations are emitted as soon as their node is reached. |
+| Which accepted registration should a domain prefer globally? | The consumer decides using detailed match metadata and its own value metadata. |
+
+## Route-template boundaries
+
+`Pattrn.Routing` compiles route-template syntax into the generic core model. Literal route segments, parameters, and catch-alls therefore follow the same generic ranking contract as manually registered `PatternSegment<TSegment>` patterns.
+
+Route constraints, default values, and optional metadata do not add core specificity. They are route-layer metadata and validation concerns.
+
+Do not read this contract as ASP.NET Core endpoint-routing precedence. If an application needs framework-specific or domain-specific route priority, it should sort detailed matches outside the core or use a future companion package that explicitly owns that behavior.
 
 ## Domain-specific ranking
 
