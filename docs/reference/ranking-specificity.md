@@ -41,6 +41,8 @@ var selected = index
     .FirstOrDefault();
 ```
 
+See [select a best match](../how-to/select-best-match.md) for a task-oriented guide to choosing one result from the detailed match set.
+
 ## Registration-order tie-breaker
 
 When two accepted registrations have the same structural specificity, Pattrn preserves registration order.

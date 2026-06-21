@@ -2,7 +2,7 @@
 
 Pattrn documentation is organized by audience and lifecycle. Keep this directory small, predictable, and product-facing; archive historical alpha notes instead of leaving one-off files at the top level.
 
-Start with the [consolidated roadmap](roadmap.md) for product direction, current status, and the next increment.
+Start with the [roadmap](roadmap.md) for product direction, current status, and the next increment.
 
 ## Repository guidance
 
@@ -25,11 +25,16 @@ New durable documentation should follow the Diataxis folders: `tutorials/`, `how
 - [Routing companion package](getting-started/routing.md)
 - [Dependency injection](getting-started/dependency-injection.md)
 
+## How-to guides
+
+- [Select a best match](how-to/select-best-match.md)
+
 ## Reference
 
 - [Core API](reference/api.md)
 - [Generic pattern segments](reference/pattern-segments.md)
 - [Matching semantics](reference/matching-semantics.md)
+- [Ranking and specificity](reference/ranking-specificity.md)
 - [Compatibility semantics](reference/compatibility-semantics.md)
 - [Duplicate behavior](reference/duplicate-behavior.md)
 - [Diagnostics](reference/diagnostics.md)
