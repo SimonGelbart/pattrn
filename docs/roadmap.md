@@ -1,14 +1,35 @@
-# Pattrn living beta-readiness roadmap
+# Pattrn Product Roadmap
 
-This roadmap is the product-direction document for `Pattrn` after the alpha.31 performance guardrails and speed triage pass. It promotes the standalone roadmap to the first-class planning source while reflecting the actual API shape that emerged from alpha.23 through alpha.31.
+> **Pattrn is a fast, immutable, segmented-pattern index for .NET 10 backend apps and libraries.**
+>
+> It gives applications deterministic matching, captures, specificity metadata, and optional diagnostics without tying the core to routing, globbing, authorization, filesystems, or framework-specific semantics.
 
-The library is still pre-adoption and pre-beta. Backward compatibility is not a priority in the alpha line. Prefer clear architecture, predictable semantics, and a small long-term API over preserving any current alpha surface.
+## Status
 
-## North star
+Pattrn is pre-beta and pre-1.0.
 
-`Pattrn` should become a reusable, high-performance segmented-pattern indexing toolkit.
+The project is not constrained by old alpha-era APIs or release numbering. Breaking alpha-era APIs, docs, and package metadata is acceptable when doing so makes the long-term product smaller, clearer, faster, or more predictable.
 
-The package should help applications answer this question:
+Use this rule during pre-beta work:
+
+```text
+If preserving an old alpha API or process makes the long-term product worse,
+break the alpha-era choice and document the migration.
+```
+
+## Versioning posture
+
+Roadmap milestones describe product readiness, not package-version numbers.
+
+Package versions are centralized in `Directory.Build.props`. Dependency versions are centralized in `Directory.Packages.props`. Until beta, the package version line is intentionally simple and may reset because no real users depend on the previous alpha train.
+
+SemVer, breaking-change, and stable release policies should be finalized before beta/1.0.
+
+## North Star
+
+Pattrn should become a reusable, high-performance segmented-pattern matching toolkit for .NET backend applications and library authors.
+
+It answers this question:
 
 ```text
 Given a collection of hierarchical patterns and an incoming segmented key,
@@ -25,91 +46,158 @@ Input:
 Output:
   matching values
   captures
-  specificity/ranking
-  diagnostics, optionally
+  specificity/ranking metadata
+  optional diagnostics
 ```
 
-The library should remain useful across domains such as HTTP route matching, filesystem policy matching, message-topic matching, feature-flag targeting, plugin command dispatch, configuration-key matching, namespace/type/member lookup, tenant/resource matching, authorization-path policy lookup, event-stream topic matching, command-line command trees, and resource access rules.
+## Target Users
 
-## Product positioning
+Primary users:
 
-`Pattrn` is not a framework router, a glob-only library, or a web framework abstraction. It is a generic matching engine with focused companion packages.
+- backend application developers;
+- infrastructure/library authors;
+- framework-adjacent library authors;
+- developers building dispatch, policy, routing-like, or lookup systems.
 
-The package family should keep this separation:
+Representative use cases:
+
+- backend path and key matching;
+- plugin command dispatch;
+- message-topic matching;
+- event-stream topic matching;
+- feature-flag targeting;
+- authorization-path policy lookup;
+- tenant/resource matching;
+- configuration-key matching;
+- namespace/type/member lookup;
+- command-line command trees;
+- route-like matching outside a full web framework;
+- filesystem-policy matching later through a companion package.
+
+## Product Positioning
+
+Pattrn should compete as infrastructure.
+
+It should not initially compete by claiming to be a full replacement for ASP.NET Core routing, filesystem globbing, authorization frameworks, or business-rule engines.
+
+The strongest positioning is:
 
 ```text
-Pattrn
-  generic segmented-pattern matching core
-
-Companion packages
-  ergonomic syntax and domain adapters
-
-Consumer applications
-  domain semantics, metadata, policy, authorization, and interpretation
+A compiled segmented-pattern index for backend apps and libraries.
 ```
 
-The core should know about segments, patterns, literals, parameters, wildcards, terminal catch-alls, captures, duplicates, specificity, matching, and optional diagnostics.
+Pattrn can support routing, globbing, authorization, and policy use cases as a lower-level engine, but it should not own those domains in the core.
 
-The core should not know about HTTP, ASP.NET Core, filesystems, symbols, authorization, tenants, source code, endpoint metadata, business rules, or framework-specific routing semantics. Those belong in companion packages or consuming applications.
+## Product Boundaries
 
-## Current status after alpha.31
+The core should know about:
 
-Alpha.30 confirms that the project is still aligned with the original goal. The work since alpha.22 has moved the library from a useful core matcher into a coherent pre-beta package family:
+- segments;
+- pattern segments;
+- literals;
+- parameters;
+- wildcards;
+- terminal catch-alls;
+- captures;
+- duplicate registrations;
+- specificity metadata;
+- deterministic matching;
+- optional diagnostics.
 
-- alpha.22: consolidated the standalone roadmap into the repository;
-- alpha.23: made tokenless builders and explicit `PatternSegment<TSegment>` registration the primary core model;
-- alpha.24: added optional pattern identity and deterministic registration-order metadata;
-- alpha.25: separated hot matching from diagnostics-oriented explainability;
-- alpha.26: established the generic/string normalization boundary;
-- alpha.27: added ergonomic string-path builder and index facades;
-- alpha.28: added framework-neutral route-template metadata and optional/defaulted suffix expansion;
-- alpha.29: added optional route-layer constraint validation above structural matching;
-- alpha.30: refreshed the roadmap into this living beta-readiness document and hardened optional/defaulted route expansion metadata through `RouteTemplateExpansion`;
-- alpha.31: made speed a first-class roadmap gate, committed the alpha.30 benchmark baseline, added performance guardrails, and protected exact-only matching with direct fast paths.
+The core should not know about:
 
-The current codebase already contains substantial pieces of the long-term product:
+- HTTP;
+- ASP.NET Core;
+- filesystems;
+- endpoint metadata;
+- authorization policy semantics;
+- tenants;
+- business rules;
+- OpenAPI;
+- source-code analysis;
+- framework-specific route behavior.
 
-- immutable compiled segmented index;
-- tokenless default core builder creation;
-- explicit `PatternSegment<TSegment>` registrations as the primary core model;
-- tokenized segmented registration convenience APIs as opt-in behavior;
-- literal, wildcard, named parameter, and terminal catch-all support;
-- value-only and detailed match APIs;
-- diagnostics-oriented `Explain(...)` APIs;
-- optional caller-provided pattern identity in registrations;
-- deterministic registration-order metadata in detailed matches;
-- capture metadata for named parameters and named catch-alls;
-- specificity values in detailed match metadata;
-- duplicate value match mode and duplicate pattern registration behavior;
-- advisory builder diagnostics and opt-in build validation;
-- opt-in rejected-candidate explanation diagnostics;
-- string helper package with explicit `StringNormalizationOptions`;
-- ergonomic `StringPattrnIndexBuilder<TValue>` and `StringPattrnIndex<TValue>` facades;
-- dependency-injection package;
-- framework-neutral routing companion package with literal, parameter, terminal catch-all, preserved constraint/default/optional metadata, optional/defaulted suffix expansion metadata, structured diagnostics, and optional route-layer constraint validation;
-- benchmark project, committed benchmark snapshots, and explicit performance guardrails;
-- offline build/test/pack scripts.
+Those concerns belong in companion packages or consuming applications.
 
-## Compatibility posture
+## Package Strategy
 
-Because the library is not yet used by consumers, alpha compatibility should not constrain design. Breaking changes are acceptable when they make the product simpler, more generic, or more predictable.
+### Stable-scope packages for beta and 1.0
 
-Use this rule for alpha work:
+#### `Pattrn`
 
-```text
-If preserving an old alpha API makes the long-term API worse,
-break the alpha API and document the migration in the changelog.
-```
+The core package.
 
-Compatibility should become meaningful only once a beta/stable contract is intentionally declared. Until then, migration notes are useful, but design correctness wins.
+Responsibilities:
 
-## Core design principles
+- generic segmented-pattern matching;
+- explicit `PatternSegment<TSegment>` registration;
+- immutable compiled index;
+- fast value matching;
+- detailed matching;
+- captures;
+- deterministic ranking metadata;
+- duplicate behavior;
+- optional diagnostics.
 
-### 1. Explicit pattern segments first
+#### `Pattrn.Strings`
 
-The primary API should use explicit segment kinds rather than magic string tokens.
+String-path ergonomics.
 
-Preferred core registration:
+Responsibilities:
+
+- string splitting;
+- separators;
+- case sensitivity;
+- trimming;
+- empty segment behavior;
+- custom string normalization;
+- ergonomic string-path builders and indexes.
+
+#### `Pattrn.DependencyInjection`
+
+Backend application integration.
+
+Responsibilities:
+
+- registering compiled indexes as singletons;
+- named/keyed index registration;
+- keeping DI usage thin and framework-neutral.
+
+### Preview package
+
+#### `Pattrn.Routing`
+
+Routing remains important, but it should not block the first stable product.
+
+Responsibilities:
+
+- framework-neutral route-template parsing;
+- structural route-template compilation;
+- route metadata preservation;
+- optional/defaulted segment expansion;
+- route-layer validation.
+
+Non-responsibilities:
+
+- replacing ASP.NET Core endpoint routing;
+- implementing endpoint dispatch;
+- owning HTTP method semantics;
+- enforcing framework-specific route precedence;
+- becoming a web framework abstraction.
+
+### Post-1.0 candidates
+
+- `Pattrn.Globbing`
+- `Pattrn.AspNetCore`
+- optional advanced diagnostics package if diagnostics outgrow the core;
+- composite or partitioned matching helpers;
+- ranking extensibility only after real demand appears.
+
+## Product Principles
+
+### 1. Explicit segments first
+
+The primary model should use explicit pattern segment kinds.
 
 ```csharp
 builder.AddPattern(
@@ -123,249 +211,253 @@ builder.AddPattern(
     ]);
 ```
 
-String-based or tokenized APIs can exist for convenience, but they should compile into explicit pattern segments and should not define the core mental model.
+String and tokenized APIs can exist for convenience, but they should compile into explicit pattern segments and should not define the core mental model.
 
-### 2. Separate matching from interpretation
+### 2. Matching is separate from interpretation
 
-The core can answer:
+The core can answer which pattern matched, what was captured, and which specificity metadata applies. The consumer decides what the value means, whether a domain constraint rejects the match, and whether metadata changes priority.
 
-```text
-this pattern matched this path
-this value was captured
-this match has this specificity
-this registration has this identity/order
-```
+### 3. Fast paths stay fast
 
-The consumer should decide:
+The main matching path should optimize for repeated reads against an immutable compiled index.
 
-```text
-what the value means
-whether the match is authorized
-whether a route constraint rejects the match
-whether domain-specific metadata changes priority
-```
+Diagnostics, rejected-candidate explanations, route validation, and normalization notes should be optional because they are more expensive.
 
-### 3. Keep fast paths fast
+### 4. Behavior must be deterministic
 
-The main matching path should be optimized for repeated reads against an immutable compiled index. Diagnostics, explanations, rejected-candidate reporting, and normalization notes should be optional because they are more expensive.
+The following behavior must be deterministic, documented, and tested:
 
-Speed is a product constraint. Core span matching and pre-split route matching are protected hot paths. A feature increment is not done if it causes an unexplained hot-path regression or hidden allocation in those protected paths.
+- match ordering;
+- specificity ranking;
+- duplicate pattern handling;
+- duplicate value handling;
+- capture behavior;
+- terminal catch-all behavior;
+- optional/defaulted route expansion;
+- tie-breaking;
+- diagnostics stability posture.
 
-### 4. Make behavior predictable
+### 5. Companion packages stay thin
 
-Pattern ordering, duplicate handling, specificity scoring, capture behavior, terminal catch-all behavior, optional route expansion, and tie-breaking should be deterministic, documented, and covered by compatibility tests.
+Companion packages should translate domain-friendly syntax into the generic core model.
 
-### 5. Keep companion packages thin
+They should not force domain concepts back into the core.
 
-Companion packages should translate domain-friendly syntax into the generic core model. They should not force domain concepts back into the core.
+### 6. .NET 10 only for now
 
-## Package-family direction
+Pattrn should target .NET 10 only for the current product cycle.
 
-Current package family:
+### 7. Stabilize before expanding
 
-```text
-Pattrn
-  Generic segmented index.
+Do not add globbing, ASP.NET Core integration, source generators, analyzers, or custom ranking plugins before the core/string/DI product is beta-ready.
 
-Pattrn.Strings
-  String path helpers, separators, case sensitivity, normalization, and ergonomic string-path facades.
+## Ranking Strategy
 
-Pattrn.Routing
-  Framework-neutral route-template parser, structural compiler, optional/default expansion metadata, and optional constraint validation.
-
-Pattrn.DependencyInjection
-  Registration helpers for Microsoft.Extensions.DependencyInjection.
-```
-
-Future package candidates:
+Ranking should use:
 
 ```text
-Pattrn.Globbing
-  Filesystem-style glob pattern support.
-
-Pattrn.Diagnostics
-  Optional explainability and validation helpers, if diagnostics grow too large for the core.
-
-Pattrn.AspNetCore
-  Optional ASP.NET Core compatibility helpers, only if there is a clear need and a clean boundary.
+fixed built-in deterministic ranking
++
+exposed metadata for consumer-side custom sorting
 ```
 
-The roadmap originally named `Pattrn.RouteTemplates`. The current implementation is `Pattrn.Routing`. Before beta, decide whether the package name should remain `Routing` or move closer to the roadmap wording. Because alpha compatibility is loose, this can still change if the beta API is clearer.
+Avoid a public ranking plugin or comparer before beta. Advanced users can sort detailed matches themselves using exposed metadata.
 
-## Completed increments
+A configurable ranking comparer or `SpecificityOptions` type can be added later if real users need it.
 
-| Increment | Status | Notes |
-|---|---:|---|
-| 1. Core `PatternSegment`-first API | Complete | Tokenless builders are default. Explicit `AddPattern(...)` is the primary core model. |
-| 2. Stable matching contract | Complete | Pattern identity, registration order, captures, specificity, and match kind are available in detailed results. |
-| 3. Fast matching vs explainability separation | Complete | `Match`, `TryMatch`, and `MatchToArray` remain hot paths. `Explain(...)` is diagnostics-oriented. |
-| 4. Generic normalization hooks | Complete | The core remains segmented; string normalization lives in `Pattrn.Strings`. |
-| 5. String API ergonomics | Complete | `StringPattrnIndexBuilder<TValue>` and `StringPattrnIndex<TValue>` provide stored-options string workflows. |
-| 6. Framework-neutral route-template metadata | Mostly complete | Route templates preserve literals, parameters, constraints, defaults, optionality, catch-alls, and diagnostics. |
-| 7. Optional route constraint validation | Complete | Constraint validation is route-layer validation over structural captures, not core matching. |
-| 8. Optional/defaulted route expansion hardening | Complete for beta candidate | `RouteTemplateExpansion` links generated structural patterns back to the original template and records omitted parameters. |
-| 9. Performance guardrails and speed triage | Complete | Alpha.30 benchmark results are committed, speed gates are documented, and exact-only span/detailed matching has direct fast paths. |
+## Roadmap
 
-## Beta-readiness roadmap from here
+### Project foundation and ADRs
 
-The next work should prioritize stabilization before new feature breadth. Globbing and multi-dimensional composition are still important, but they should wait until the core/string/routing surfaces are harder. Speed remains a release gate for every step below.
+Goal: make product direction, workflow, and historical choices explicit before stabilizing more APIs.
 
-### alpha.32 — Specificity and ranking customization
+Scope:
 
-Goal: make match ordering explicit, deterministic, and adaptable.
+- create `docs/adr/` and record historical product-boundary decisions;
+- add durable repository workflow/reference docs;
+- align README and roadmap with product positioning;
+- simplify pre-beta versioning and centralize package/dependency versions;
+- remove stale documentation that treats local execution mechanics as product policy;
+- link or archive historical architecture review docs.
 
-Recommended scope:
+Exit criteria:
 
-- review the current default specificity model;
-- document literal, constrained-parameter, parameter, wildcard, catch-all, and registration-order precedence;
-- decide whether the core needs `IPatternSpecificityComparer<TSegment, TValue>`, `SpecificityOptions`, or a smaller hook;
-- ensure default ranking remains allocation-conscious;
-- add tests for ambiguous and near-ambiguous patterns;
-- avoid route-specific precedence in the generic core.
+- ADR index exists;
+- major architectural choices have status, context, decision, consequences, and historical context;
+- README and roadmap agree on product positioning;
+- validation commands and package metadata reflect the real repository.
 
-### alpha.33 — Diagnostics and validation hardening
+### Ranking and specificity contract
 
-Goal: consolidate diagnostics before adding more companion packages.
+Goal: make match ordering explicit, deterministic, and stable enough for beta feedback.
 
-Recommended scope:
+Scope:
 
-- review diagnostic models across core, strings, and routing;
-- decide which diagnostic codes must be stable for beta;
-- document rejected-candidate explanation as opt-in and preview if it remains expensive;
-- add validation coverage for duplicate parameter names, ambiguous patterns, unreachable registrations where practical, invalid string options, invalid route syntax, and route constraint failures;
-- decide whether `Pattrn.Diagnostics` is warranted or premature.
+- document literal, parameter, wildcard, and catch-all precedence;
+- document registration-order tie-breaking;
+- document duplicate structural pattern behavior and duplicate value behavior;
+- document capture behavior and detailed match metadata;
+- show consumer-side custom sorting using metadata;
+- keep built-in ranking fixed for beta;
+- do not add a public ranking comparer yet.
 
-### alpha.34 — Serialization-friendly registrations
+Exit criteria:
 
-Goal: support persistence without freezing internal compiled index structure.
+- ranking rules are documented;
+- ambiguous and near-ambiguous pattern tests exist;
+- default ranking remains allocation-conscious;
+- no route-specific precedence leaks into the generic core.
 
-Recommended scope:
+### Internal architecture cleanup
+
+Goal: keep the engine fast while making the implementation easier to reason about.
+
+Candidate internal separations:
+
+- exact-only matcher;
+- wildcard/catch-all matcher;
+- prefix matcher;
+- detailed match collector;
+- capture collector;
+- capture counter;
+- rejected-candidate explainer;
+- specificity/ranking helper;
+- child lookup helper.
+
+Exit criteria:
+
+- public API remains stable unless a deliberate pre-beta breaking change is chosen;
+- hot paths remain fast;
+- matching internals are easier to test and audit.
+
+### Diagnostics and validation hardening
+
+Goal: make Pattrn trustworthy and explainable without polluting hot paths.
+
+Scope:
+
+- duplicate structural patterns;
+- duplicate parameter names;
+- ambiguous pattern families;
+- unreachable registrations where practical;
+- invalid catch-all placement;
+- invalid string options;
+- invalid route syntax;
+- route constraint failures;
+- rejected-candidate explanations.
+
+Exit criteria:
+
+- diagnostic model is documented;
+- diagnostic stability posture is explicit;
+- important validation cases have tests;
+- expensive explanations remain opt-in.
+
+### Serialization-friendly registrations
+
+Goal: support backend apps that load patterns from configuration, databases, generated files, or external metadata.
+
+Scope:
 
 - add stable registration DTOs rather than serializing compiled internals;
-- include pattern id, segment kinds, segment values, registration order, and optional metadata key;
-- support JSON-friendly roundtrip tests;
-- keep compiled trie/index internals private and changeable.
+- include pattern id, segment kind, segment value, parameter name, catch-all marker, registration order, optional value key, and optional metadata key;
+- document how to rebuild an index from registrations.
 
-### alpha.35 — Benchmark and performance regression pass
+Exit criteria:
 
-Goal: verify the speed guardrails before beta.
+- registration DTOs roundtrip through JSON;
+- docs show how to rebuild an index from registrations;
+- compiled index internals are not serialized.
 
-Recommended scope:
+### Benchmark and CI hardening
 
-- run focused benchmarks after alpha.31's exact-only fast-path protection and later specificity/ranking changes;
-- refresh benchmark snapshots after the recent API changes;
-- cover small/large indexes, many literals, many parameters, catch-alls, duplicate-heavy cases, string helpers, route helpers, and diagnostic matching;
-- document allocation expectations for core, strings, and routing;
-- decide whether CI should include light performance smoke checks.
+Goal: make product quality measurable.
 
-### alpha.36 — Developer experience and sample cleanup
+Scope:
 
-Goal: make the package easy to adopt and hard to misuse.
+- refresh benchmark baselines;
+- document allocation expectations;
+- strengthen CI with analyzers, public API checks, package validation, test coverage reporting, docs link checks, and light allocation/performance smoke checks where practical.
 
-Recommended scope:
+Exit criteria:
 
-- update all samples to the intended beta-first API style;
-- make README examples consistent with explicit-segment-first usage;
-- add compact examples for routing with constraint validation and optional/defaulted expansion metadata;
-- update migration notes for alpha-era breaking changes;
-- verify XML docs are clear enough for package consumers.
+- protected hot paths remain within guardrails;
+- CI verifies build, tests, package metadata, and public API stability;
+- release criteria are measurable.
 
-### beta.1 — API review / breaking-change cleanup
+### Documentation and samples
 
-Goal: intentionally declare the beta feedback surface.
+Goal: make adoption obvious for backend developers and library authors.
 
-Recommended scope:
+Scope:
 
-- review all public names and overloads;
-- remove or rename alpha-era compatibility APIs that make the beta surface worse;
-- decide package naming, especially `Pattrn.Routing` versus `Pattrn.RouteTemplates`;
-- mark preview surfaces clearly;
-- publish beta readiness criteria in the release docs.
+- organize docs using Diataxis;
+- keep README short, accurate, and adoption-oriented;
+- ensure samples compile and use intended beta-first API style;
+- archive or clearly mark alpha-era docs as historical;
+- keep migration notes current.
 
-## Later roadmap items
+Exit criteria:
 
-These remain aligned with the north star but should not block beta unless a real consumer need appears.
+- tutorials, how-to guides, reference docs, and explanation docs cover the stable candidate APIs;
+- samples compile;
+- stale docs are reconciled or archived.
 
-### Globbing companion
+### Beta feedback surface
 
-Package candidate: `Pattrn.Globbing`.
+Goal: declare the intended beta API surface and invite real-world feedback.
 
-Support common filesystem/policy glob syntax such as:
+Stable candidate scope:
 
-```text
-*
-**
-?
-*.cs
-**/*.cs
-**/bin/**
-src/**/Controllers/*.cs
-```
+- `Pattrn`;
+- `Pattrn.Strings`;
+- `Pattrn.DependencyInjection`.
 
-Keep glob-specific semantics out of the core. Compile into core pattern registrations where possible and isolate any extra glob matcher logic in the companion package.
+Preview or non-blocking scope:
 
-### Multi-dimensional composition helpers
+- `Pattrn.Routing`.
 
-Support matching by a partition key plus a segmented key without making the core understand the partition meaning.
+Excluded from beta:
 
-Examples:
+- globbing;
+- ASP.NET Core package;
+- source generators;
+- custom ranking plugin;
+- analyzer package;
+- async APIs;
+- multidimensional matching helpers.
 
-```text
-method + path
-tenant + resource path
-environment + configuration key
-permission + resource path
-```
+### Focused stable release
 
-Candidate APIs include `PartitionedPatternIndex<TKey, TSegment, TValue>` or `CompositePatternIndex`.
+Goal: ship a stable, focused, trustworthy matching toolkit.
 
-### Optional ASP.NET Core compatibility helpers
+Stable 1.0 scope:
 
-Only add an ASP.NET Core package when there is a clear need and a clean boundary. It should adapt framework metadata to the generic route/template layer rather than moving framework behavior into the core.
+- core segmented-pattern matching;
+- explicit pattern segment API;
+- immutable compiled indexes;
+- value matching;
+- detailed matching;
+- captures;
+- deterministic ranking metadata;
+- duplicate behavior;
+- string path ergonomics;
+- DI registration;
+- stable documentation;
+- clear limitations.
 
-## Beta readiness criteria
+## Explicit Non-Goals
 
-The project is ready for beta when:
+Pattrn should not become:
 
-- the core API names and overloads are intentionally chosen;
-- the string and routing helper APIs are coherent and documented;
-- breaking alpha-era overloads are removed, renamed, or explicitly kept;
-- specificity and ranking behavior are deterministic and documented;
-- diagnostics have a documented stability posture;
-- package boundaries are clear;
-- samples compile and demonstrate intended usage;
-- benchmark baselines are refreshed;
-- changelog and migration notes are current;
-- release artifacts follow the golden rules: versioned source zip, updated changelog, and roadmap status.
+- a web framework;
+- a full ASP.NET Core router;
+- an authorization framework;
+- a business-rule engine;
+- a filesystem abstraction;
+- an OpenAPI engine;
+- a configuration framework;
+- a source-code analysis library;
+- an AI-agent-specific package.
 
-## Explicit non-goals
-
-The package should not become:
-
-```text
-a web framework
-a full ASP.NET router
-a source-code analysis library
-a business-rule engine
-an authorization framework
-a filesystem abstraction
-a configuration framework
-an AI-agent-specific package
-```
-
-It can support these use cases as a lower-level indexing primitive, but it should not own their domain semantics.
-
-## Success criteria
-
-`Pattrn` is successful when:
-
-```text
-the core remains small and understandable
-matching is fast and allocation-conscious
-pattern behavior is deterministic
-captures and specificity are easy to inspect
-diagnostics are useful but optional
-companion packages add ergonomics without polluting the core
-consumers can carry their own domain metadata through TValue
-framework-specific behavior stays outside the generic core
-```
+It can support these domains as a lower-level indexing primitive, but it should not own their semantics.

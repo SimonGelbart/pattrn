@@ -17,7 +17,7 @@ The test project uses TUnit on top of Microsoft.Testing.Platform.
 Unzip the provided NuGet bundle next to the repository as:
 
 ```text
-../tracepack-nuget-bundle/packages
+../offline-nuget-bundle/packages
 ```
 
 Then run:

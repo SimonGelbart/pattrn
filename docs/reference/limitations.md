@@ -1,6 +1,6 @@
 # Known limitations
 
-This document records intentional boundaries for the `3.0.0-alpha.*` line. These are product choices, not missing framework features.
+This document records intentional pre-beta product boundaries. These are product choices, not missing framework features.
 
 ## .NET target
 

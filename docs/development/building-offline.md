@@ -1,22 +1,27 @@
 # Building offline
 
-The repository is designed to restore from the provided offline NuGet bundle.
+The repository can restore from a local offline NuGet package bundle.
 
-Set `NUGET_BUNDLE_PACKAGES` when the bundle is not located in one of the default paths:
+Set `NUGET_BUNDLE_PACKAGES` when the bundle is not located in one of the default relative paths:
 
 ```bash
-export NUGET_BUNDLE_PACKAGES=/absolute/path/to/tracepack-nuget-bundle/packages
-./eng/restore.sh
-./eng/build.sh
-./eng/test.sh
-./eng/pack.sh
-./eng/inspect-packages.sh
+export NUGET_BUNDLE_PACKAGES=/absolute/path/to/offline-nuget-bundle/packages
+bash eng/restore.sh
+bash eng/build.sh
+bash eng/test.sh
+bash eng/pack.sh
+bash eng/inspect-packages.sh
+```
+
+Set `DOTNET` when the required .NET 10 SDK is not discoverable on `PATH`:
+
+```bash
+export DOTNET=/absolute/path/to/dotnet
 ```
 
 The solution targets .NET 10 only.
 
-There is no Git repository today, so package projects intentionally omit `RepositoryUrl`, use neutral `RepositoryType=none`, and omit SourceLink metadata. Add real repository metadata once a repository exists.
-
+Package projects publish Git repository metadata through centralized build properties. Package and dependency versions are centralized in `Directory.Build.props` and `Directory.Packages.props`.
 
 ## MSBuild node count
 
