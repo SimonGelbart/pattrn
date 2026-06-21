@@ -1,6 +1,6 @@
 # Compatibility semantics
 
-This document records behavior that should not change accidentally while the `3.0.0` alpha track moves toward beta.
+This document records behavior that should not change accidentally while Pattrn moves toward beta.
 
 The project is still pre-stable, so intentional breaking changes are allowed. However, any change to the semantics below should be reviewed as a product decision, not an incidental implementation side effect.
 
@@ -21,7 +21,7 @@ literal
   > terminal catch-all
 ```
 
-This ordering follows the packed traversal: exact literal children are visited before wildcard/parameter children, and catch-all branches are emitted last for the same node.
+This ordering follows the compiled traversal: exact literal children are visited before wildcard/parameter children, and catch-all branches are emitted last for the same node.
 
 `PatternMatch<TValue>.Specificity` and `PatternMatchResult<TSegment, TValue>.Specificity` expose the generic specificity value used to compare these broad categories. The current category weights are implementation details, but the ordering above is compatibility-covered.
 
@@ -50,18 +50,30 @@ This is separate from `DuplicateValueMatchMode`, which controls duplicate values
 
 ## Routing package preview semantics
 
-`Pattrn.Routing` currently supports only:
+`Pattrn.Routing` is preview. Its API may change before beta, but current behavior should not change accidentally.
+
+The routing package supports:
 
 ```text
 /literal/{parameter}/{*catchAll}
-```
-
-The route package intentionally rejects deferred syntax such as:
-
-```text
 {id:int}
 {id?}
+{id=default}
+```
+
+Current preview behavior includes:
+
+- literal route segments;
+- named parameters;
+- terminal named catch-alls;
+- preserved route constraints, defaults, and optional metadata;
+- optional/defaulted suffix expansion through `RouteTemplateExpansion`;
+- route-layer constraint validation over structural captures.
+
+Invalid route shapes such as a non-terminal catch-all remain invalid:
+
+```text
 /files/{*path}/tail
 ```
 
-It also preserves path segment text exactly. It does not URL-decode, case-fold, collapse duplicate separators, or join catch-all captures.
+The routing package does not URL-decode, case-fold, collapse duplicate separators, join catch-all captures, implement HTTP method semantics, or claim ASP.NET Core endpoint-routing compatibility.

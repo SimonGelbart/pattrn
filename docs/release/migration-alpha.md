@@ -1,5 +1,8 @@
 # Alpha migration notes
 
+> Historical note: this file preserves earlier alpha-line release notes. Current roadmap and versioning policy live in `docs/roadmap.md` and `docs/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones.md`.
+
+
 These notes summarize breaking changes made during the `3.0.0-alpha.*` stabilization line. The alpha line is preview, so breaking changes are expected, but the goal before beta is to make the remaining surface intentional.
 
 ## alpha.13 naming cleanup

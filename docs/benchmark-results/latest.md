@@ -1,5 +1,8 @@
 # Latest benchmark results
 
+> Historical note: alpha-version benchmark references are retained as benchmark-history labels, not as current roadmap milestones.
+
+
 The latest committed full BenchmarkDotNet baseline is:
 
 ```text

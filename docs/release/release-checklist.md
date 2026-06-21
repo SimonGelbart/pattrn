@@ -1,5 +1,8 @@
 # Release checklist
 
+> Historical note: this file preserves earlier alpha-line release notes. Current roadmap and versioning policy live in `docs/roadmap.md` and `docs/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones.md`.
+
+
 Before producing a release artifact:
 
 - restore with the offline bundle;

@@ -1,5 +1,8 @@
 # API Stabilization Checkpoint
 
+> Historical note: this file preserves earlier alpha-line release notes. Current roadmap and versioning policy live in `docs/roadmap.md` and `docs/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones.md`.
+
+
 This document records the public API status through `3.0.0-alpha.31` before moving toward beta.
 
 The goal is not to freeze everything immediately. The alpha.22 consolidated roadmap explicitly allows breaking alpha changes while the library is unused/pre-beta. Alpha.23 used that freedom to make tokenless builders the default, alpha.24 completed the stable matching-contract metadata, alpha.25 separated hot matching from diagnostics-oriented explanation matching, alpha.26 established the generic/string normalization boundary, alpha.27 added ergonomic string-path facades on top of that boundary, alpha.28 expanded framework-neutral route-template metadata and optional/defaulted suffix expansion, alpha.29 added optional route constraint validation above structural matching, alpha.30 refreshed the roadmap while hardening optional/defaulted route expansion metadata, and alpha.31 made speed a release gate while protecting exact-only matching fast paths. The goal is to make the maturity level of each surface explicit so future changes are intentional.

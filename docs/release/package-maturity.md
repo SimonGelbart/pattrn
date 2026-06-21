@@ -1,5 +1,8 @@
 # Package maturity
 
+> Historical note: this file preserves earlier alpha-line release notes. Current roadmap and versioning policy live in `docs/roadmap.md` and `docs/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones.md`.
+
+
 Pattrn packages are pre-beta preview packages. Earlier `3.0.0-alpha.*` entries are historical alpha-line notes, not the current versioning policy. `3.0.0-alpha.20` records the beta-readiness posture, `3.0.0-alpha.21` records the explicit-segment-first architecture decision, `3.0.0-alpha.22` consolidates the roadmap and confirms that breaking alpha changes are acceptable before beta, `3.0.0-alpha.23` implements tokenless builder creation, `3.0.0-alpha.24` adds pattern identity and registration-order metadata to detailed match results, `3.0.0-alpha.25` separates hot matching from diagnostics-oriented explanation matching, `3.0.0-alpha.26` establishes the generic/string normalization boundary, `3.0.0-alpha.27` adds string-path ergonomics on top of that boundary, `3.0.0-alpha.28` expands framework-neutral route-template metadata and optional/defaulted suffix expansion, `3.0.0-alpha.29` adds optional route constraint validation above structural matching, `3.0.0-alpha.30` refreshes the roadmap while hardening optional/defaulted route expansion metadata, and `3.0.0-alpha.31` adds performance guardrails plus exact-only matching fast-path protection.
 
 The project currently separates maturity by package so the core can stabilize without forcing companion packages to freeze too early.
