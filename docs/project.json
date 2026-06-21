@@ -1,0 +1,13 @@
+{
+  "name": "Pattrn",
+  "slug": "pattrn",
+  "kind": "Flagship library",
+  "status": "Active development",
+  "stack": "C# / .NET",
+  "focus": "API design, matching semantics, package boundaries, performance",
+  "summary": "Fast immutable segmented-pattern matching for .NET with explicit semantics, package boundaries, diagnostics, and low-allocation hot paths.",
+  "repo": "https://github.com/SimonGelbart/pattrn",
+  "docs": "https://simongelbart.github.io/pattrn/",
+  "adr": "https://simongelbart.github.io/pattrn/adr/",
+  "roadmap": "https://simongelbart.github.io/pattrn/roadmap/"
+}
