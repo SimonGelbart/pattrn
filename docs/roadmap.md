@@ -291,6 +291,8 @@ Exit criteria:
 
 Goal: make match ordering explicit, deterministic, and stable enough for beta feedback.
 
+Decision record: [ADR 0013: Use fixed ranking with consumer-side sorting](adr/0013-use-fixed-ranking-with-consumer-side-sorting.md).
+
 Scope:
 
 - document literal, parameter, wildcard, and catch-all precedence;
@@ -306,7 +308,8 @@ Exit criteria:
 - ranking rules are documented;
 - ambiguous and near-ambiguous pattern tests exist;
 - default ranking remains allocation-conscious;
-- no route-specific precedence leaks into the generic core.
+- no route-specific precedence leaks into the generic core;
+- public ranking extensibility remains deferred until real beta feedback requires it.
 
 ### Internal architecture cleanup
 

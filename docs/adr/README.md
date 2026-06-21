@@ -12,6 +12,7 @@ Start with these ADRs when changing public behavior, package boundaries, docs, o
 2. [ADR 0003: Explicit pattern segments are the primary core model](0003-explicit-pattern-segments-are-primary.md)
 3. [ADR 0004: Strings, DI, and Routing are companion packages](0004-companion-packages.md)
 4. [ADR 0012: Simplify pre-beta versioning and roadmap milestones](0012-simplify-pre-beta-versioning-and-roadmap-milestones.md)
+5. [ADR 0013: Use fixed ranking with consumer-side sorting](0013-use-fixed-ranking-with-consumer-side-sorting.md)
 
 ## Status values
 
