@@ -9,8 +9,8 @@ The core package works with already-segmented paths, for example `ReadOnlySpan<s
 Install both packages when you want string helpers:
 
 ```xml
-<PackageReference Include="Pattrn" Version="3.0.0-alpha.31" />
-<PackageReference Include="Pattrn.Strings" Version="3.0.0-alpha.31" />
+<PackageReference Include="Pattrn" Version="0.1.0-alpha.1" />
+<PackageReference Include="Pattrn.Strings" Version="0.1.0-alpha.1" />
 ```
 
 ## Basic usage

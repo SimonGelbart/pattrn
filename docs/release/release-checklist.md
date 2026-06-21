@@ -11,7 +11,7 @@ Before producing a release artifact:
 - inspect package metadata;
 - verify MIT license metadata;
 - verify packages include README, icon, XML docs, symbols, and license;
-- verify neutral `RepositoryType=none` metadata and no `RepositoryUrl` until a real Git repository exists.
+- verify centralized Git repository metadata, package version, package README, icon, license, XML docs, and symbol packages.
 
 ## Golden update rules
 

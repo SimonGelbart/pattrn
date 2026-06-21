@@ -2,7 +2,7 @@
 
 `Pattrn.DependencyInjection` integrates the core index with `Microsoft.Extensions.DependencyInjection`.
 
-The package is preview in the `3.0.0-alpha.*` line. The fluent registration model is the stable-candidate surface. Named-index provider and registration-source APIs remain preview until beta.
+The package is pre-beta. The fluent registration model is the stable-candidate surface. Named-index provider and registration-source APIs remain preview until beta.
 
 ## Design goals
 
