@@ -4,6 +4,20 @@ Pattrn documentation is organized by audience and lifecycle. Keep this directory
 
 Start with the [consolidated roadmap](roadmap.md) for product direction, current status, and the next increment.
 
+## Repository guidance
+
+For assisted or maintainer work, start with:
+
+- [`../AGENTS.md`](../AGENTS.md)
+- [Project profile](reference/project-profile.md)
+- [Repository layout](reference/repository-layout.md)
+- [Git workflow](reference/git-workflow.md)
+- [Validation](reference/validation.md)
+- [Documentation standards](reference/documentation-standards.md)
+- [Architecture decisions](adr/README.md)
+
+New durable documentation should follow the Diataxis folders: `tutorials/`, `how-to/`, `reference/`, `explanation/`, and `adr/`. Existing alpha-era folders are retained while their content is reconciled.
+
 ## Getting started
 
 - [Examples](getting-started/examples.md)
