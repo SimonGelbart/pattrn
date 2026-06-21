@@ -79,4 +79,41 @@ public sealed class RankingSpecificityContractTests
         ShouldEqual(matches[0].PatternId, "literal-handler");
         ShouldEqual(matches[0].Kind, PatternMatchKind.Exact);
     }
+
+    [Test]
+    public void PrefixModeEmitsPrefixRegistrationsBeforeDeeperRegistrations()
+    {
+        var index = PattrnIndex<string, string>
+            .Builder("*")
+            .Add(["api"], "api-prefix")
+            .Add(["api", "orders"], "orders-prefix")
+            .Add(["api", "orders", "new"], "orders-new")
+            .Build(new MatchOptions(PrefixMatchMode.IncludePrefixPatterns, DuplicateValueMatchMode.PreserveDuplicates));
+
+        var values = index.MatchToArray(["api", "orders", "new"]);
+        var detailed = index.MatchDetailedToArray(["api", "orders", "new"]);
+
+        ShouldSequenceEqual(values, ["api-prefix", "orders-prefix", "orders-new"]);
+        ShouldSequenceEqual(detailed.Select(match => match.Value), values);
+        ShouldSequenceEqual(detailed.Select(match => match.RegistrationOrder), [0, 1, 2]);
+    }
+
+    [Test]
+    public void PrefixModeStillUsesSpecificityWithinTheSameDepth()
+    {
+        var index = PattrnIndex<string, string>
+            .Builder("*")
+            .Add(["api", "orders", "*"], "wildcard")
+            .AddPattern(
+                [PatternSegment<string>.Literal("api"), PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("id")],
+                "parameter")
+            .Add(["api", "orders", "new"], "literal")
+            .Build(new MatchOptions(PrefixMatchMode.IncludePrefixPatterns, DuplicateValueMatchMode.PreserveDuplicates));
+
+        var matches = index.MatchDetailedToArray(["api", "orders", "new"]);
+
+        ShouldSequenceEqual(matches.Select(match => match.Value), ["literal", "parameter", "wildcard"]);
+        ShouldBeTrue(matches[0].Specificity > matches[1].Specificity, "Literal should outrank parameter at the same depth.");
+        ShouldBeTrue(matches[1].Specificity > matches[2].Specificity, "Parameter should outrank wildcard at the same depth.");
+    }
 }
