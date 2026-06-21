@@ -6,10 +6,21 @@ namespace Pattrn.Tests;
 public sealed class PackageMetadataTests
 {
     [Test]
-    public void PackageProjectsUseMitLicenseAndNeutralRepositoryMetadataUntilRepositoryExists()
+    public void PackageMetadataIsCentralizedAndUsesRepositoryMetadata()
     {
         var root = FindRepositoryRoot();
-        var projectPaths = new[]
+        var directoryBuildProps = XDocument.Load(Path.Combine(root.FullName, "Directory.Build.props"));
+        var packageVersion = directoryBuildProps.Descendants("PattrnVersion").SingleOrDefault()?.Value;
+        var repositoryType = directoryBuildProps.Descendants("RepositoryType").SingleOrDefault()?.Value;
+        var repositoryUrl = directoryBuildProps.Descendants("RepositoryUrl").SingleOrDefault()?.Value;
+        var publishRepositoryUrl = directoryBuildProps.Descendants("PublishRepositoryUrl").SingleOrDefault()?.Value;
+
+        ShouldEqual(packageVersion, "0.1.0-alpha.1", "The pre-beta package version should be centralized.");
+        ShouldEqual(repositoryType, "git", "Package metadata should point at the real Git repository.");
+        ShouldEqual(repositoryUrl, "https://github.com/SimonGelbart/pattrn", "Package metadata should use the public repository URL.");
+        ShouldEqual(publishRepositoryUrl, "true", "NuGet packages should publish repository metadata.");
+
+        var packageProjects = new[]
         {
             Path.Combine(root.FullName, "src", "Pattrn", "Pattrn.csproj"),
             Path.Combine(root.FullName, "src", "Pattrn.Strings", "Pattrn.Strings.csproj"),
@@ -17,16 +28,15 @@ public sealed class PackageMetadataTests
             Path.Combine(root.FullName, "src", "Pattrn.Routing", "Pattrn.Routing.csproj")
         };
 
-        foreach (var projectPath in projectPaths)
+        foreach (var projectPath in packageProjects)
         {
             var document = XDocument.Load(projectPath);
             var license = document.Descendants("PackageLicenseExpression").SingleOrDefault()?.Value;
-            var repositoryType = document.Descendants("RepositoryType").SingleOrDefault()?.Value;
-            var repositoryUrl = document.Descendants("RepositoryUrl").SingleOrDefault()?.Value;
 
             ShouldEqual(license, "MIT", $"{projectPath} should use the MIT SPDX license expression.");
-            ShouldEqual(repositoryType, "none", $"{projectPath} should use neutral repository metadata until a real repository exists.");
-            ShouldEqual(repositoryUrl, null, $"{projectPath} should not include RepositoryUrl until a real repository exists.");
+            ShouldEqual(document.Descendants("Version").SingleOrDefault()?.Value, null, $"{projectPath} should inherit the centralized version.");
+            ShouldEqual(document.Descendants("RepositoryType").SingleOrDefault()?.Value, null, $"{projectPath} should inherit centralized repository metadata.");
+            ShouldEqual(document.Descendants("RepositoryUrl").SingleOrDefault()?.Value, null, $"{projectPath} should inherit centralized repository metadata.");
         }
     }
 

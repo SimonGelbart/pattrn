@@ -4,7 +4,6 @@
     <AssemblyName>Pattrn.Strings</AssemblyName>
     <RootNamespace>Pattrn.Strings</RootNamespace>
     <PackageId>Pattrn.Strings</PackageId>
-    <Version>3.0.0-alpha.31</Version>
     <Authors>Simon Gelbart</Authors>
     <Description>Separated and dotted string helpers for Pattrn.</Description>
     <PackageTags>path;pattern;index;trie;wildcard;matching;strings;dotted;separated</PackageTags>
@@ -15,10 +14,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EnablePackageValidation>true</EnablePackageValidation>
-    <RepositoryType>none</RepositoryType>
-    <PublishRepositoryUrl>false</PublishRepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <PackageReleaseNotes>v3.0.0-alpha.31: adds performance guardrails and exact-only matching fast-path protections.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
