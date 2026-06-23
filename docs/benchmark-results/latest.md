@@ -1,5 +1,8 @@
 # Latest benchmark results
 
+
+> Historical benchmark note: this page points to the latest locally committed alpha-line benchmark baseline. It is retained for history; CI-owned benchmark artifacts and workflow summaries are expected to become the benchmark source of truth.
+
 > Historical note: alpha-version benchmark references are retained as benchmark-history labels, not as current roadmap milestones.
 
 

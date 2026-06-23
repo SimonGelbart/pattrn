@@ -1,5 +1,8 @@
 # Latest routing benchmark results
 
+
+> Historical benchmark note: this page points to locally committed alpha-line routing benchmark evidence. It is retained for history; CI-owned benchmark artifacts and workflow summaries are expected to become the benchmark source of truth.
+
 The latest committed routing benchmark rows are included in the alpha.30 full BenchmarkDotNet baseline:
 
 ```text
