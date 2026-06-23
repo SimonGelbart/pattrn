@@ -28,9 +28,8 @@
 | `tests/` | Unit, compatibility, package metadata, and public API snapshot tests. |
 | `benchmarks/` | BenchmarkDotNet benchmark project. |
 | `.github/workflows/` | GitHub Actions workflows. |
-| `eng/` | Maintainer scripts for restore, build, test, pack, inspection, and benchmarks. |
 
-`eng/` scripts are durable maintainer automation. They are allowed to handle local tool discovery and offline restore, but public documentation should not treat one local execution environment as product policy.
+Legacy local `eng/` scripts have been retired. CI workflows are the durable automation entry points for restore, build, test, package, documentation, and benchmark verification.
 
 ## Documentation
 

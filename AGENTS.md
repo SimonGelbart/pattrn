@@ -63,7 +63,6 @@ pattrn/
       coding/
     explanation/
     adr/
-  eng/
   src/
   tests/
   benchmarks/

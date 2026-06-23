@@ -47,10 +47,6 @@ Before cutting `3.0.0-beta.1` after the roadmap consolidation, core API reorient
 - [x] Complete optional/defaulted route-segment expansion hardening.
 - [ ] Complete the next implementation increment: specificity and ranking customization.
 - [ ] Bump package versions from the final alpha line to `3.0.0-beta.1`.
-- [ ] Run `./eng/restore.sh`.
-- [ ] Run `./eng/build.sh`.
-- [ ] Run `./eng/test.sh`.
-- [ ] Run `./eng/pack.sh`.
-- [ ] Run `./eng/inspect-packages.sh`.
+- [ ] Confirm CI restore/build/test/package verification passed.
 - [ ] Confirm package contents include the intended README, license, icon, XML docs, symbols, and no generated benchmark artifacts.
 - [ ] Publish release notes that clearly state routing and diagnostics remain preview.
