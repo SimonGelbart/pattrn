@@ -1,24 +1,19 @@
 # Documentation
 
-Pattrn documentation is organized by audience and lifecycle. Keep this directory small, predictable, and product-facing; archive historical alpha notes instead of leaving one-off files at the top level.
+Pattrn documentation is organized around the current pre-beta product state. Start here when you want current user-facing docs; historical alpha-line notes are kept separately so they do not obscure the active documentation path.
 
 Start with the [roadmap](roadmap.md) for product direction, current status, and the next increment.
 
-## Repository guidance
+## Current product docs
 
-For assisted or maintainer work, start with:
+- [Root README](../README.md) for the short product overview and first examples.
+- [Roadmap](roadmap.md) for current product direction.
+- [Project profile](reference/project-profile.md) for durable project facts, package family, and stability posture.
+- [Known limitations](reference/limitations.md) for current boundaries and deferred behavior.
 
-- [`../AGENTS.md`](../AGENTS.md)
-- [Project profile](reference/project-profile.md)
-- [Repository layout](reference/repository-layout.md)
-- [Git workflow](reference/git-workflow.md)
-- [Validation](reference/validation.md)
-- [Documentation standards](reference/documentation-standards.md)
-- [Architecture decisions](adr/README.md)
+## Package and usage docs
 
-New durable documentation should follow the Diataxis folders: `tutorials/`, `how-to/`, `reference/`, `explanation/`, and `adr/`. Existing alpha-era folders are retained while their content is reconciled.
-
-## Getting started
+These pages are still being reconciled from the older getting-started folder into the durable documentation structure. Treat them as current package-oriented guidance unless a page says it is historical.
 
 - [Examples](getting-started/examples.md)
 - [String helpers](getting-started/strings.md)
@@ -40,12 +35,36 @@ New durable documentation should follow the Diataxis folders: `tutorials/`, `how
 - [Diagnostics](reference/diagnostics.md)
 - [Known limitations](reference/limitations.md)
 
-## Design
+## Maintainer guidance
+
+For assisted or maintainer work, start with:
+
+- [`../AGENTS.md`](../AGENTS.md)
+- [Project profile](reference/project-profile.md)
+- [Repository layout](reference/repository-layout.md)
+- [Git workflow](reference/git-workflow.md)
+- [Validation](reference/validation.md)
+- [Documentation standards](reference/documentation-standards.md)
+- [Architecture decisions](adr/README.md)
+
+New durable documentation should follow the Diataxis folders: `tutorials/`, `how-to/`, `reference/`, `explanation/`, and `adr/`. Existing alpha-era folders are retained while their content is reconciled, archived, or migrated.
+
+## Architecture decisions
+
+- [ADR index](adr/README.md)
+
+ADRs are architecture decision records. They preserve decision history and should not be used as a general documentation bucket.
+
+## Historical and transitional material
+
+The following areas contain alpha-line history, maintainer notes, local benchmark evidence, or transitional documentation. They remain available for context, but they are not the primary current user path.
+
+### Design history
 
 - [Architecture](design/architecture.md)
 - [State-of-the-art architecture review](design/state-of-the-art-architecture-review.md)
 
-## Development
+### Maintainer and legacy local workflow notes
 
 - [Benchmarks](development/benchmarks.md)
 - [Building offline](development/building-offline.md)
@@ -53,7 +72,7 @@ New durable documentation should follow the Diataxis folders: `tutorials/`, `how
 - [Testing](development/testing.md)
 - [Package README mapping](development/package-readmes.md)
 
-## Release management
+### Release history and planning notes
 
 - [Package maturity](release/package-maturity.md)
 - [API stabilization](release/api-stabilization.md)
@@ -64,10 +83,12 @@ New durable documentation should follow the Diataxis folders: `tutorials/`, `how
 - [Release decisions](release/release-decisions.md)
 - [Alpha migration notes](release/migration-alpha.md)
 
-## Benchmark reports
+### Historical benchmark results
 
-- [Latest full benchmark report](benchmark-results/latest.md)
-- [Latest routing benchmark report](benchmark-results/routing-latest.md)
+Local committed benchmark reports are historical evidence, not the long-term benchmark source of truth. Benchmark reporting is expected to move to CI-owned artifacts and workflow summaries.
+
+- [Historical full benchmark baseline](benchmark-results/latest.md)
+- [Historical routing benchmark baseline](benchmark-results/routing-latest.md)
 - [Performance guardrails](benchmark-results/performance-guardrails.md)
 - [Committed benchmark result runs](benchmark-results/)
 

@@ -1,5 +1,8 @@
 # State-of-the-Art Architecture Review — alpha.21
 
+
+> Historical note: this review records an alpha-line architecture-hardening pass. Keep it as decision context, but use the current roadmap, project profile, reference docs, and accepted ADRs for current product guidance.
+
 This review records the alpha.21 architecture-hardening decision before beta. It intentionally adds no matcher behavior, parser behavior, route semantics, glob semantics, source generators, analyzers, or framework integration.
 
 ## Reviewed goal

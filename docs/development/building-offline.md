@@ -1,5 +1,7 @@
 # Building offline
 
+> Transitional note: CI is the authoritative verification path. This page documents legacy local/offline restore helpers for maintainers who need to reproduce older local validation flows.
+
 The repository can restore from a local offline NuGet package bundle.
 
 Set `NUGET_BUNDLE_PACKAGES` when the bundle is not located in one of the default relative paths:

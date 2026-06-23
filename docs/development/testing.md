@@ -1,6 +1,6 @@
 # Testing
 
-The test project uses TUnit on top of Microsoft.Testing.Platform.
+The test project uses TUnit on top of Microsoft.Testing.Platform. CI is the authoritative verification path; local commands in this page are optional maintainer preflight helpers. See [validation](../reference/validation.md).
 
 .NET 10 requires the test runner to be selected in `global.json`; this repository opts into:
 
@@ -12,9 +12,9 @@ The test project uses TUnit on top of Microsoft.Testing.Platform.
 }
 ```
 
-## Offline restore
+## Legacy local offline restore
 
-Unzip the provided NuGet bundle next to the repository as:
+This section documents the older local/offline workflow. Use it only when you need to reproduce local validation outside CI. Unzip the provided NuGet bundle next to the repository as:
 
 ```text
 ../offline-nuget-bundle/packages
@@ -62,7 +62,7 @@ The test suite covers:
 
 ## Benchmarks
 
-The benchmark project is intentionally separate from the test suite. Use it to inspect performance and allocation behavior after functional tests pass:
+The benchmark project is intentionally separate from the test suite. Local benchmark commands are transitional preflight helpers; benchmark proof should move to CI-owned workflow artifacts. If you still need a local inspection run, use:
 
 ```bash
 dotnet run -c Release --project benchmarks/Pattrn.Benchmarks /p:Platform="Any CPU" -- --filter '*' --job short
