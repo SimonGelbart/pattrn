@@ -94,7 +94,7 @@ The following areas contain pre-beta history, maintainer notes, local benchmark 
 
 ### Historical benchmark results
 
-Local committed benchmark reports are historical evidence, not the long-term benchmark source of truth. Benchmark reporting is expected to move to CI-owned artifacts and workflow summaries.
+Local committed benchmark reports are historical evidence, not the benchmark source of truth. Current benchmark evidence should come from CI-owned workflow artifacts and summaries.
 
 - [Historical full benchmark baseline](benchmark-results/latest.md)
 - [Historical routing benchmark baseline](benchmark-results/routing-latest.md)

@@ -1,79 +1,31 @@
 # Benchmarks
 
-
-> Transitional note: this page still documents legacy local benchmark workflows and historical alpha-line benchmark reports. Benchmark reporting is expected to move to CI-owned artifacts and workflow summaries in a dedicated benchmark PR.
-
-> Historical note: alpha-version benchmark references are retained as benchmark-history labels, not as current roadmap milestones.
-
+Benchmark evidence should come from the benchmark workflow, not from locally committed machine output.
 
 The benchmark project is part of the product contract. It exists to keep performance claims measurable and to protect the read path from regressions as the matcher becomes more expressive.
 
-Run the reproducible benchmark script with the provided SDK and offline NuGet bundle:
+## Source of truth
 
-```bash
-./eng/benchmark.sh
-```
+The `Benchmarks` GitHub Actions workflow is the benchmark source of truth for current commits. Each run should produce:
 
-By default, the script runs a real out-of-process BenchmarkDotNet smoke run that completes in constrained sandboxes and verifies the SDK/NuGet/BenchmarkDotNet pipeline.
+- raw BenchmarkDotNet artifacts;
+- workflow metadata;
+- grouped benchmark summaries;
+- a GitHub job summary;
+- a downloadable `benchmark-results-<run-id>-<attempt>` artifact.
 
-For a broader dry run across all benchmark classes:
+Do not treat local benchmark output or old committed benchmark reports as current product proof. Keep old reports only as historical evidence.
 
-```bash
-BENCHMARK_MODE=dry ./eng/benchmark.sh
-```
+## Benchmark groups
 
-For a short comparative run across all benchmark classes:
+The current workflow groups existing benchmark classes as follows:
 
-```bash
-BENCHMARK_MODE=short ./eng/benchmark.sh
-```
-
-For a full default BenchmarkDotNet run suitable for a publishable report:
-
-```bash
-BENCHMARK_MODE=full ./eng/benchmark.sh
-```
-
-You can also pass BenchmarkDotNet arguments directly:
-
-```bash
-./eng/benchmark.sh --filter '*ExactOnlyWideFanOut*' --job short
-./eng/benchmark.sh --filter '*RoutingBenchmarks*' --job short
-./eng/benchmark.sh --filter '*BuilderBenchmarks*' --job dry
-```
-
-The script writes the latest generated markdown report to `BenchmarkDotNet.Artifacts/results`. Only copy a result into `docs/benchmark-results/` when it should become committed product evidence.
-
-Raw BenchmarkDotNet output remains under:
-
-```text
-BenchmarkDotNet.Artifacts/results
-```
-
-## Committed reports
-
-The current full baseline is committed at:
-
-```text
-docs/benchmark-results/2026-06-17-alpha30/README.md
-```
-
-The latest benchmark pointers are:
-
-```text
-docs/benchmark-results/latest.md
-docs/benchmark-results/routing-latest.md
-docs/benchmark-results/performance-guardrails.md
-```
-
-Alpha.30 is now the first official post-roadmap-refresh performance baseline. It preserves the core span hot-path allocation profile, but it also records red flags in exact wide fan-out matching, duplicate-heavy detailed materialization, route parsing, and parameter-heavy build time. Alpha.31 responds by making speed a roadmap gate and by protecting exact-only span/detailed matching with direct fast paths.
-
-The previous baselines remain available for historical comparison:
-
-```text
-docs/benchmark-results/2026-06-15-alpha17/README.md
-docs/benchmark-results/2026-06-15-alpha19-routing/README.md
-```
+| Group | Existing benchmark classes | Purpose |
+|---|---|---|
+| Core matching | `PattrnIndexBenchmarks` | Generic segmented matching, detailed matches, captures, duplicates, and naive baseline comparison. |
+| Routing preview | `RoutingBenchmarks` | Route-template parsing, path splitting, route helper matching, and route detailed matching. |
+| Builder and diagnostics | `BuilderBenchmarks` | Build-time behavior, large pattern sets, diagnostics, and validation overhead. |
+| String helpers | Existing string-helper tests for now. Add focused benchmarks only if a future performance question needs them. | Separated string ergonomics and normalization scenarios. |
 
 ## Benchmark classes
 
@@ -123,33 +75,46 @@ Covers build-time behavior:
 - diagnostic scanning on ambiguous builders;
 - opt-in build validation overhead.
 
+## Local preflight
+
+Local benchmark commands are optional maintainer preflight helpers. They are useful for smoke checks or local investigation, but they are not the current source of benchmark truth.
+
+If a local run is still useful, run the benchmark project directly:
+
+```bash
+dotnet run \
+  --project benchmarks/Pattrn.Benchmarks/Pattrn.Benchmarks.csproj \
+  --configuration Release \
+  -- \
+  --filter "*" \
+  --join \
+  --exporters json \
+  --exporters markdown \
+  --strategy Throughput \
+  --artifacts BenchmarkDotNet.Artifacts
+```
+
 ## Reporting rules
 
-Do not add a performance claim to the README unless a committed benchmark report supports it.
+Do not add or strengthen a performance claim in the README unless CI-owned benchmark artifacts support it.
 
-When publishing a benchmark report, include:
+When reviewing benchmark artifacts, record:
 
+- workflow run ID;
+- commit SHA;
 - SDK and runtime versions;
 - BenchmarkDotNet version;
-- host CPU/OS;
-- benchmark command;
-- exact package/source version;
-- whether the result is smoke, dry, short, or full/default;
-- allocation data.
+- benchmark filter;
+- benchmark strategy;
+- whether the run was full or focused;
+- allocation data when relevant.
 
 Smoke and dry runs prove the benchmark pipeline works. They are not publishable product-performance evidence.
 
-## Alpha.17 optimization follow-up
+## Historical reports
 
-`3.0.0-alpha.17` implements the first optimization target from the alpha.16 benchmark analysis: detailed-match duplicate-heavy deduplication. It adds an ordered-block fast path to the detailed writer, and the committed alpha.17 full run confirms the targeted outlier improved substantially.
+Committed benchmark reports under `docs/benchmark-results/` are historical local evidence. They can explain past decisions, but they should not be treated as current proof for new README performance claims.
 
-## Alpha.18 routing allocation follow-up
-
-`3.0.0-alpha.18` addresses the next benchmark finding in the preview routing package. String-based route helpers now rent the temporary `string[]` used to call the generic core matcher, and `RoutePattern.SplitPath(string, Span<string>)` lets hot callers provide their own segment buffer.
-
-This does not make raw route-string matching allocation-free: each route segment is still materialized as a `string` because the core index is generic over `string` segments. Truly allocation-free matching for raw route strings would require a separate span-of-char-aware routing index, which is intentionally deferred unless benchmarks and users prove it is worth the added package complexity.
-
-
-## Alpha.31 speed policy
-
-`3.0.0-alpha.31` makes speed a first-class release gate. Future feature increments should not be considered complete until the benchmark comparison says the core span hot paths remain allocation-free and any latency regressions are explained. Use focused benchmark filters after performance-sensitive code changes, and reserve full BenchmarkDotNet runs for important refactors and beta/release decisions.
+- [Historical full benchmark baseline](../benchmark-results/latest.md)
+- [Historical routing benchmark baseline](../benchmark-results/routing-latest.md)
+- [Performance guardrails](../benchmark-results/performance-guardrails.md)
