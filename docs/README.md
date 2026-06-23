@@ -13,12 +13,13 @@ Start with the [roadmap](roadmap.md) for product direction, current status, and 
 
 ## Package and usage docs
 
-These pages are still being reconciled from the older getting-started folder into the durable documentation structure. Treat them as current package-oriented guidance unless a page says it is historical.
+Package README sources live under `docs/packages/` so package-scoped NuGet guidance is separate from older getting-started material.
 
+- [Core package](packages/pattrn.md)
+- [String helpers](packages/pattrn-strings.md)
+- [Routing companion package](packages/pattrn-routing.md)
+- [Dependency injection](packages/pattrn-dependency-injection.md)
 - [Examples](getting-started/examples.md)
-- [String helpers](getting-started/strings.md)
-- [Routing companion package](getting-started/routing.md)
-- [Dependency injection](getting-started/dependency-injection.md)
 
 ## How-to guides
 
