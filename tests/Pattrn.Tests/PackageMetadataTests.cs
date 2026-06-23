@@ -103,23 +103,18 @@ public sealed class PackageMetadataTests
     }
 
     [Test]
-    public void SourceDistributionContainsOfflineBuildEntryPoints()
+    public void SourceDistributionContainsOfflineBuildGuidance()
     {
         var root = FindRepositoryRoot();
 
         var expectedFiles = new[]
         {
-            Path.Combine(root.FullName, "docs", "development", "building-offline.md"),
-            Path.Combine(root.FullName, "eng", "restore.sh"),
-            Path.Combine(root.FullName, "eng", "build.sh"),
-            Path.Combine(root.FullName, "eng", "test.sh"),
-            Path.Combine(root.FullName, "eng", "pack.sh"),
-            Path.Combine(root.FullName, "eng", "inspect-packages.sh")
+            Path.Combine(root.FullName, "docs", "development", "building-offline.md")
         };
 
         foreach (var expectedFile in expectedFiles)
         {
-            ShouldBeTrue(File.Exists(expectedFile), $"Missing expected offline build file: {expectedFile}");
+            ShouldBeTrue(File.Exists(expectedFile), $"Missing expected offline build guidance: {expectedFile}");
         }
     }
 

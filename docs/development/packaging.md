@@ -13,4 +13,4 @@ All packages use the MIT license and include a package-scoped README, icon, XML 
 
 Package versions are centralized in `Directory.Build.props`. External package dependency versions are centralized in `Directory.Packages.props`.
 
-Before publishing or handing off packages, use CI as the verification source of truth. Local `eng/` scripts are legacy preflight helpers only; see [validation](../reference/validation.md).
+Before publishing or handing off packages, use CI as the verification source of truth. Local preflight should use direct `dotnet` commands only when a maintainer needs it; see [validation](../reference/validation.md).

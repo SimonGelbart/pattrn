@@ -1,30 +1,20 @@
 # Building offline
 
-> Transitional note: CI is the authoritative verification path. This page documents legacy local/offline restore helpers for maintainers who need to reproduce older local validation flows.
+> Transitional note: CI is the authoritative verification path. This page documents local/offline restore guidance for maintainers who need to reproduce validation outside CI.
 
-The repository can restore from a local offline NuGet package bundle.
+The legacy `eng/` scripts have been retired. Use direct `dotnet` commands with a maintainer-provided NuGet configuration or local package source when offline restore is required.
 
-Set `NUGET_BUNDLE_PACKAGES` when the bundle is not located in one of the default relative paths:
+Set the package source through your local NuGet configuration or command-line restore options. Keep machine-specific paths out of committed documentation.
 
-```bash
-export NUGET_BUNDLE_PACKAGES=/absolute/path/to/offline-nuget-bundle/packages
-bash eng/restore.sh
-bash eng/build.sh
-bash eng/test.sh
-bash eng/pack.sh
-bash eng/inspect-packages.sh
-```
-
-Set `DOTNET` when the required .NET 10 SDK is not discoverable on `PATH`:
+Example local flow:
 
 ```bash
-export DOTNET=/absolute/path/to/dotnet
+dotnet restore Pattrn.sln
+dotnet build Pattrn.sln --configuration Release --no-restore
+dotnet test Pattrn.sln --configuration Release --no-build
+dotnet pack Pattrn.sln --configuration Release --no-build
 ```
 
 The solution targets .NET 10 only.
 
 Package projects publish Git repository metadata through centralized build properties. Package and dependency versions are centralized in `Directory.Build.props` and `Directory.Packages.props`.
-
-## MSBuild node count
-
-The offline scripts use `-m:1` for solution restore and build entry points. This avoids container-specific MSBuild/NuGet hangs observed when the environment also sets platform-like variables such as `PLATFORM=linux/amd64`. The common script already unsets `PLATFORM`.

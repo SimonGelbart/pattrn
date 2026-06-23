@@ -10,7 +10,7 @@ The sandbox implementation increment introduced the packed representation and ke
 Generate the report with:
 
 ```bash
-BENCHMARK_MODE=full ./eng/benchmark.sh
+dotnet run --project benchmarks/Pattrn.Benchmarks/Pattrn.Benchmarks.csproj --configuration Release -- --filter "*" --join --exporters json --exporters markdown --strategy Throughput --artifacts BenchmarkDotNet.Artifacts
 ```
 
 Then replace this placeholder with the generated BenchmarkDotNet report and summary.

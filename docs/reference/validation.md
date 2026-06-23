@@ -22,35 +22,15 @@ Use the smallest validation set that matches the change:
 
 When a maintainer explicitly says local build/test can be skipped for a documentation-only PR, report those commands as `Not run` and state why.
 
-## Local legacy helpers
+## Local preflight
 
-The `eng/` scripts are legacy/local convenience helpers. They may be useful for maintainer preflight work, offline restore experiments, or reproducing older validation notes, but they are not the canonical verification source.
+Legacy local `eng/` scripts have been retired. Use direct tool commands only when a maintainer wants local preflight, and do not report local preflight as CI-equivalent proof.
 
-If you choose to use them locally, run them from the repository root:
-
-```bash
-bash eng/restore.sh
-bash eng/build.sh
-bash eng/test.sh
-bash eng/pack.sh
-bash eng/inspect-packages.sh
-```
-
-Benchmark work should prefer the dedicated benchmark workflow once it is available. Until then, local benchmark commands documented in `docs/development/benchmarks.md` are historical/transitional preflight helpers, not current product proof.
+Benchmark work should prefer the dedicated benchmark workflow. Local benchmark commands documented in `docs/development/benchmarks.md` are optional investigation helpers, not current product proof.
 
 ## Offline local restore
 
-The legacy scripts can restore from a local package bundle. Set `NUGET_BUNDLE_PACKAGES` when the bundle is not in one of the standard local locations:
-
-```bash
-export NUGET_BUNDLE_PACKAGES=/absolute/path/to/offline-nuget-bundle/packages
-```
-
-Set `DOTNET` if the required .NET SDK is not discoverable on `PATH`:
-
-```bash
-export DOTNET=/absolute/path/to/dotnet
-```
+CI is preferred. If a maintainer needs local offline restore, use a local NuGet configuration or package source and run direct `dotnet restore`, `dotnet build`, `dotnet test`, and `dotnet pack` commands as appropriate for the change.
 
 Keep environment-specific paths out of durable documentation unless they are framed as generic maintainer guidance.
 
