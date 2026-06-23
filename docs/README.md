@@ -23,7 +23,7 @@ Package README sources live under `docs/packages/` so package-scoped NuGet guida
 - [String helpers](packages/pattrn-strings.md)
 - [Routing companion package](packages/pattrn-routing.md)
 - [Dependency injection](packages/pattrn-dependency-injection.md)
-- [Examples](getting-started/examples.md)
+- [Examples](tutorials/examples.md)
 
 ## How-to guides
 
@@ -56,7 +56,7 @@ For assisted or maintainer work, start with:
 - [Documentation standards](reference/documentation-standards.md)
 - [Architecture decisions](adr/README.md)
 
-New durable documentation should follow the Diataxis folders: `tutorials/`, `how-to/`, `reference/`, `explanation/`, and `adr/`. Existing alpha-era folders are retained while their content is reconciled, archived, or migrated.
+New durable documentation should follow the Diataxis folders: `tutorials/`, `how-to/`, `reference/`, `explanation/`, and `adr/`. Older pre-beta folders have been moved under `docs/archive/pre-beta/` while their content is reconciled or migrated.
 
 ## Architecture decisions
 
@@ -70,27 +70,27 @@ The following areas contain pre-beta history, maintainer notes, local benchmark 
 
 ### Design history
 
-- [Architecture](design/architecture.md)
-- [State-of-the-art architecture review](design/state-of-the-art-architecture-review.md)
+- [Architecture](archive/pre-beta/design/architecture.md)
+- [State-of-the-art architecture review](archive/pre-beta/design/state-of-the-art-architecture-review.md)
 
 ### Maintainer and legacy local workflow notes
 
-- [Benchmarks](development/benchmarks.md)
-- [Building offline](development/building-offline.md)
-- [Packaging](development/packaging.md)
-- [Testing](development/testing.md)
-- [Package README mapping](development/package-readmes.md)
+- [Benchmarks](reference/benchmarks.md)
+- [Building offline](reference/building-offline.md)
+- [Packaging](reference/packaging.md)
+- [Testing](reference/testing.md)
+- [Package README mapping](reference/package-readmes.md)
 
 ### Release history and planning notes
 
-- [Package maturity](release/package-maturity.md)
-- [API stabilization](release/api-stabilization.md)
-- [API freeze policy](release/api-freeze.md)
-- [Beta checklist](release/beta-checklist.md)
-- [Beta readiness review](release/beta-readiness-review.md)
-- [Release checklist](release/release-checklist.md)
-- [Release decisions](release/release-decisions.md)
-- [Historical migration notes](release/migration-alpha.md)
+- [Package maturity](archive/pre-beta/release/package-maturity.md)
+- [API stabilization](archive/pre-beta/release/api-stabilization.md)
+- [API freeze policy](archive/pre-beta/release/api-freeze.md)
+- [Beta checklist](archive/pre-beta/release/beta-checklist.md)
+- [Beta readiness review](archive/pre-beta/release/beta-readiness-review.md)
+- [Release checklist](archive/pre-beta/release/release-checklist.md)
+- [Release decisions](archive/pre-beta/release/release-decisions.md)
+- [Historical migration notes](archive/pre-beta/release/migration-alpha.md)
 
 ### Historical benchmark results
 

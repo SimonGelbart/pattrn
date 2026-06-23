@@ -110,7 +110,7 @@ path:    NASDAQ.MSFT
 result:  match
 ```
 
-The legacy wildcard token is a single-segment wildcard, not a recursive glob. Generic terminal catch-all semantics are available through `PatternSegment<TSegment>.CatchAll()` and remain independent of string route syntax. See [matching semantics](../reference/matching-semantics.md) for the complete behavior contract. Result ordering is intentionally not part of the public contract so the internal traversal and child-map strategy can evolve.
+The legacy wildcard token is a single-segment wildcard, not a recursive glob. Generic terminal catch-all semantics are available through `PatternSegment<TSegment>.CatchAll()` and remain independent of string route syntax. See [matching semantics](../../../reference/matching-semantics.md) for the complete behavior contract. Result ordering is intentionally not part of the public contract so the internal traversal and child-map strategy can evolve.
 
 ## Deduplication
 
@@ -144,7 +144,7 @@ The DI package builds the mutable builder once when the singleton index is creat
 
 ## Benchmark project
 
-`benchmarks/Pattrn.Benchmarks` keeps a performance baseline for the starter-kit-inspired cases. It compares the compiled trie matcher with a deliberately naive scan across exact, wildcard, prefix, and duplicate-heavy scenarios. See [benchmarks](../development/benchmarks.md).
+`benchmarks/Pattrn.Benchmarks` keeps a performance baseline for the starter-kit-inspired cases. It compares the compiled trie matcher with a deliberately naive scan across exact, wildcard, prefix, and duplicate-heavy scenarios. See [benchmarks](../../../reference/benchmarks.md).
 
 ## Builder policies
 

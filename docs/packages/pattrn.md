@@ -182,7 +182,7 @@ Key pages:
 - [Ranking and specificity](../reference/ranking-specificity.md)
 - [Duplicate behavior](../reference/duplicate-behavior.md)
 - [Diagnostics](../reference/diagnostics.md)
-- [Benchmarks](../development/benchmarks.md)
+- [Benchmarks](../reference/benchmarks.md)
 
 ## Product direction
 

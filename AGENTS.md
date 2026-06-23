@@ -69,7 +69,7 @@ pattrn/
   samples/
 ```
 
-Some older alpha documentation still lives under `docs/getting-started/`, `docs/design/`, `docs/development/`, and `docs/release/`. Do not expand those folders without checking whether the material belongs in the Diataxis structure instead.
+Older pre-beta documentation lives under `docs/archive/pre-beta/`. Do not expand archived folders without checking whether the material belongs in the Diataxis structure instead.
 
 ## Honesty standard
 

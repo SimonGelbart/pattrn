@@ -100,7 +100,7 @@ Full BenchmarkDotNet runs are not required after every small cleanup. Run the fu
 
 ## Alpha.20 beta-readiness outcome
 
-- [x] Added `docs/release/beta-readiness-review.md`.
+- [x] Added `docs/archive/pre-beta/release/beta-readiness-review.md`.
 - [x] Confirmed the core, strings, and fluent DI surfaces are stable candidates for beta feedback.
 - [x] Confirmed routing, diagnostics, DI provider, and registration-source extras remain preview.
 - [x] Confirmed no matcher behavior or public API shape changed in alpha.20.

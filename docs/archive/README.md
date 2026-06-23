@@ -15,13 +15,10 @@ Current product documentation starts at the [documentation index](../README.md),
 
 - [alpha.1 vs packed engine](benchmark-results-alpha1-vs-packed-engine.md)
 
-## Transitional historical areas
+## Archived pre-beta folders
 
-Some historical and transitional material still lives outside this archive while it is reconciled or migrated:
+- [Getting started history](pre-beta/getting-started/)
+- [Design history](pre-beta/design/)
+- [Release history and planning notes](pre-beta/release/)
 
-- design history under [`../design/`](../design/);
-- maintainer and legacy local workflow notes under [`../development/`](../development/);
-- release history and planning notes under [`../release/`](../release/);
-- locally committed benchmark reports under [`../benchmark-results/`](../benchmark-results/).
-
-Those folders are linked from the documentation index as historical or transitional material. Prefer current tutorials, how-to guides, reference docs, explanation docs, package docs, and ADRs for current guidance.
+Locally committed benchmark reports still live under [`../benchmark-results/`](../benchmark-results/) as historical evidence. Prefer current tutorials, how-to guides, reference docs, explanation docs, package docs, and ADRs for current guidance.

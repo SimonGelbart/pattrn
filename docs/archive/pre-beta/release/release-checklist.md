@@ -32,7 +32,7 @@ Current packages:
 - `Pattrn.DependencyInjection`
 - `Pattrn.Routing`
 
-For beta-specific requirements, see `docs/release/beta-checklist.md`.
+For beta-specific requirements, see `docs/archive/pre-beta/release/beta-checklist.md`.
 
 
 ## Beta.1 candidate checklist
