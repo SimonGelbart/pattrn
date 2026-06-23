@@ -13,12 +13,4 @@ All packages use the MIT license and include a package-scoped README, icon, XML 
 
 Package versions are centralized in `Directory.Build.props`. External package dependency versions are centralized in `Directory.Packages.props`.
 
-Before publishing or handing off packages, run:
-
-```bash
-bash eng/restore.sh
-bash eng/build.sh
-bash eng/test.sh
-bash eng/pack.sh
-bash eng/inspect-packages.sh
-```
+Before publishing or handing off packages, use CI as the verification source of truth. Local `eng/` scripts are legacy preflight helpers only; see [validation](../reference/validation.md).

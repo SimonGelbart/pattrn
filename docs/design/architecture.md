@@ -1,5 +1,8 @@
 # Architecture
 
+
+> Historical note: this design document contains alpha-line architecture and implementation history. For current public product facts, package status, and boundaries, start with `docs/reference/project-profile.md`, `docs/reference/architecture/boundaries.md`, and the ADR index. Compiled index internals described here are not a public serialization or compatibility contract.
+
 `Pattrn` is built around a clear separation between mutation and matching.
 
 The library targets .NET 10 only.

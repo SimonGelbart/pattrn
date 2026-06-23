@@ -1,5 +1,8 @@
 # Benchmarks
 
+
+> Transitional note: this page still documents legacy local benchmark workflows and historical alpha-line benchmark reports. Benchmark reporting is expected to move to CI-owned artifacts and workflow summaries in a dedicated benchmark PR.
+
 > Historical note: alpha-version benchmark references are retained as benchmark-history labels, not as current roadmap milestones.
 
 

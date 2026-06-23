@@ -1,6 +1,7 @@
 # Release checklist
 
 > Historical note: this file preserves earlier alpha-line release notes. Current roadmap and versioning policy live in `docs/roadmap.md` and `docs/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones.md`.
+> Transitional note: use the current roadmap and project profile for active product direction. This page should not be read as the current release train or versioning source of truth.
 
 
 Before producing a release artifact:
