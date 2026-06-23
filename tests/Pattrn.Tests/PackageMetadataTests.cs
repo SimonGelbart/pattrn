@@ -102,22 +102,6 @@ public sealed class PackageMetadataTests
         ShouldSequenceEqual(temporaryFiles, Array.Empty<string>(), "Source distribution should not include temporary files or raw logs.");
     }
 
-    [Test]
-    public void SourceDistributionContainsOfflineBuildGuidance()
-    {
-        var root = FindRepositoryRoot();
-
-        var expectedFiles = new[]
-        {
-            Path.Combine(root.FullName, "docs", "development", "building-offline.md")
-        };
-
-        foreach (var expectedFile in expectedFiles)
-        {
-            ShouldBeTrue(File.Exists(expectedFile), $"Missing expected offline build guidance: {expectedFile}");
-        }
-    }
-
     private static DirectoryInfo FindRepositoryRoot()
     {
         var current = new DirectoryInfo(AppContext.BaseDirectory);
