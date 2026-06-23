@@ -103,4 +103,4 @@ Local committed benchmark reports are historical evidence, not the long-term ben
 
 ## Archive
 
-Historical notes and pre-release migration documents live under [archive](archive/).
+Historical notes and pre-release migration documents live under the [archive index](archive/README.md).
