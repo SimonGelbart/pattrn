@@ -40,7 +40,7 @@ Before `3.0.0-beta.1`:
 
 ## Alpha.16 package-readme decision
 
-Each package ships documentation scoped to its boundary. See `docs/development/package-readmes.md` for the mapping. This is part of keeping the core generic and avoiding route, string, or DI-specific semantics leaking into `Pattrn`.
+Each package ships documentation scoped to its boundary. See `docs/reference/package-readmes.md` for the mapping. This is part of keeping the core generic and avoiding route, string, or DI-specific semantics leaking into `Pattrn`.
 
 
 ## Alpha.20 readiness outcome

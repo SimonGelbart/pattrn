@@ -26,7 +26,7 @@ When a maintainer explicitly says local build/test can be skipped for a document
 
 Legacy local `eng/` scripts have been retired. Use direct tool commands only when a maintainer wants local preflight, and do not report local preflight as CI-equivalent proof.
 
-Benchmark work should prefer the dedicated benchmark workflow. Local benchmark commands documented in `docs/development/benchmarks.md` are optional investigation helpers, not current product proof.
+Benchmark work should prefer the dedicated benchmark workflow. Local benchmark commands documented in `docs/reference/benchmarks.md` are optional investigation helpers, not current product proof.
 
 ## Offline local restore
 

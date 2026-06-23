@@ -33,8 +33,8 @@ Do not rewrite a historical ADR to hide a change in direction. If the project in
 
 These ADRs summarize and stabilize decisions that were previously spread across README sections, release docs, benchmark notes, the living roadmap, and historical design reviews such as:
 
-- `docs/design/architecture.md`
-- `docs/design/state-of-the-art-architecture-review.md`
+- `docs/archive/pre-beta/design/architecture.md`
+- `docs/archive/pre-beta/design/state-of-the-art-architecture-review.md`
 - `docs/archive/`
-- `docs/release/`
+- `docs/archive/pre-beta/release/`
 - `docs/benchmark-results/`

@@ -100,9 +100,9 @@ Do not add these before the stabilization work is done:
 
 ## Alpha.16 final documentation sweep outcome
 
-- Added `docs/release/beta-checklist.md` to make remaining beta gates explicit.
-- Added `docs/release/migration-alpha.md` to capture alpha.13 through alpha.15 breaking changes.
-- Added `docs/development/package-readmes.md` to document which README is packed by each package.
+- Added `docs/archive/pre-beta/release/beta-checklist.md` to make remaining beta gates explicit.
+- Added `docs/archive/pre-beta/release/migration-alpha.md` to capture alpha.13 through alpha.15 breaking changes.
+- Added `docs/reference/package-readmes.md` to document which README is packed by each package.
 - Rechecked preview/stable-candidate labels without adding matcher behavior.
 - Full benchmark results remain the main external beta blocker.
 

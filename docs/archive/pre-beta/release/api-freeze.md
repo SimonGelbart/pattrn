@@ -18,7 +18,7 @@ The current alpha direction is:
 The current API status is tracked in:
 
 ```text
-docs/release/api-stabilization.md
+docs/archive/pre-beta/release/api-stabilization.md
 ```
 
 Before `3.0.0-beta.1`, the project should complete:
@@ -30,7 +30,7 @@ Before `3.0.0-beta.1`, the project should complete:
 5. confirmation that package README mapping is accurate;
 6. confirmation that no deferred route-specific features are being pulled into the core package.
 
-The detailed beta checklist is tracked in `docs/release/beta-checklist.md`.
+The detailed beta checklist is tracked in `docs/archive/pre-beta/release/beta-checklist.md`.
 
 After `3.0.0-rc.1`, public API changes should be limited to bug fixes or changes required by benchmark evidence.
 

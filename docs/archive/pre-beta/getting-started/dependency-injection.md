@@ -114,4 +114,4 @@ Preview:
 - `IPattrnRegistrationSource<TSegment, TValue>`.
 - `PattrnRegistrationContext<TSegment, TValue>`.
 
-See `docs/release/package-maturity.md` for the current package-level stability decisions.
+See `docs/archive/pre-beta/release/package-maturity.md` for the current package-level stability decisions.

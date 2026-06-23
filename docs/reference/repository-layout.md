@@ -43,4 +43,4 @@ Pattrn is moving toward the Diataxis documentation structure:
 | `docs/explanation/` | Rationale and conceptual background. |
 | `docs/adr/` | Architecture Decision Records. |
 
-Historical alpha-era folders such as `docs/getting-started/`, `docs/design/`, `docs/development/`, and `docs/release/` are retained while their contents are reconciled or migrated.
+Historical pre-beta folders such as `docs/getting-started/`, `docs/design/`, and `docs/release/` have been moved under `docs/archive/pre-beta/`. Current maintainer guidance lives under `docs/reference/`.
