@@ -144,7 +144,7 @@ Use these defaults unless a scenario clearly needs something else:
 
 ## Preview status
 
-Duplicate behavior APIs remain preview during the alpha series. The current names are intentionally more explicit than the earlier alpha names:
+Duplicate behavior APIs remain pre-beta. The current names are intentionally explicit about the difference between registration-time duplicate policy and match-time duplicate value emission:
 
 ```text
 DuplicatePatternRegistrationBehavior  // builder-time structural duplicate policy

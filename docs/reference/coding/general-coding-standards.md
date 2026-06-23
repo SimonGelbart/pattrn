@@ -1,7 +1,7 @@
 # General Coding Standards
 
 - Prefer clear, focused code over clever code.
-- Preserve public behavior unless the change intentionally modifies the alpha surface.
+- Preserve public behavior unless the change intentionally modifies the pre-beta surface.
 - Keep public API changes documented.
 - Add tests for new behavior and regression tests for fixes.
 - Avoid broad rewrites mixed with semantic changes.
