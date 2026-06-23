@@ -11,6 +11,10 @@ Start with the [roadmap](roadmap.md) for product direction, current status, and 
 - [Project profile](reference/project-profile.md) for durable project facts, package family, and stability posture.
 - [Known limitations](reference/limitations.md) for current boundaries and deferred behavior.
 
+## Tutorials
+
+- [Build your first Pattrn index](tutorials/first-index.md)
+
 ## Package and usage docs
 
 Package README sources live under `docs/packages/` so package-scoped NuGet guidance is separate from older getting-started material.
@@ -24,6 +28,10 @@ Package README sources live under `docs/packages/` so package-scoped NuGet guida
 ## How-to guides
 
 - [Select a best match](how-to/select-best-match.md)
+
+## Explanation
+
+- [Package boundaries](explanation/package-boundaries.md)
 
 ## Reference
 

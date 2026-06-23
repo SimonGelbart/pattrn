@@ -1,9 +1,7 @@
 # How-to Guides
 
-Task-oriented documentation will move here as older transitional docs are reconciled.
+How-to docs are task-oriented procedures for the current Pattrn product surface.
 
-Current practical guides still live under:
+- [Select a best match](select-best-match.md)
 
-- `docs/getting-started/`
-- `docs/development/`
-- `docs/release/`
+Older transitional docs remain available while they are reconciled into tutorials, how-to guides, reference docs, or explanation docs.
