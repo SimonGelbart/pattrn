@@ -21,8 +21,7 @@ on:
       - 'v*.*.*'
 
 permissions:
-  contents: write
-  deployments: write
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.inputs.filter || 'tag' }}
@@ -39,7 +38,7 @@ jobs:
       BENCHMARK_FILTER: ${{ github.event.inputs.filter || '*' }}
       BENCHMARK_STRATEGY: ${{ github.event.inputs.strategy || 'Throughput' }}
       BENCHMARK_ARTIFACTS: ${{ github.workspace }}/BenchmarkDotNet.Artifacts
-      BENCHMARK_ACTION_REPORT: BenchmarkDotNet.Artifacts/results/benchmark-action-report-full-compressed.json
+      BENCHMARK_CI_RESULTS: ${{ github.workspace }}/benchmark-ci-results
 
     steps:
       - name: Checkout
@@ -63,10 +62,11 @@ jobs:
           --filter "$BENCHMARK_FILTER"
           --join
           --exporters json
+          --exporters markdown
           --strategy "$BENCHMARK_STRATEGY"
           --artifacts "$BENCHMARK_ARTIFACTS"
 
-      - name: Prepare benchmark comparison input
+      - name: Verify BenchmarkDotNet JSON report
         run: |
           set -euo pipefail
           report="$(find "$BENCHMARK_ARTIFACTS/results" -maxdepth 1 -name '*-report-full-compressed.json' -print -quit)"
@@ -75,57 +75,79 @@ jobs:
             find "$BENCHMARK_ARTIFACTS" -maxdepth 4 -type f -print >&2 || true
             exit 1
           fi
-          mkdir -p "$(dirname "$BENCHMARK_ACTION_REPORT")"
-          cp "$report" "$BENCHMARK_ACTION_REPORT"
           echo "Using benchmark report: $report"
 
-      - name: Publish and compare benchmark results
-        uses: benchmark-action/github-action-benchmark@v1
-        with:
-          name: Pattrn Benchmarks
-          tool: benchmarkdotnet
-          output-file-path: ${{ env.BENCHMARK_ACTION_REPORT }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-push: true
-          gh-pages-branch: gh-pages
-          benchmark-data-dir-path: dev/bench
-          alert-threshold: '110%'
-          fail-on-alert: true
-          comment-on-alert: true
-          summary-always: true
-
-      - name: Checkout benchmark pages
-        uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-          path: benchmark-pages
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish custom benchmark dashboard
+      - name: Prepare CI benchmark artifacts and summary
+        if: always()
         run: |
           set -euo pipefail
-          mkdir -p benchmark-pages/dev/bench
-          cp .github/benchmark-dashboard/index.html benchmark-pages/dev/bench/index.html
-          cd benchmark-pages
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add dev/bench/index.html
-          if git diff --cached --quiet; then
-            echo "Custom benchmark dashboard is already up to date."
-          else
-            git commit -m "ci: update benchmark dashboard"
-            git push origin gh-pages
+          mkdir -p "$BENCHMARK_CI_RESULTS/raw" "$BENCHMARK_CI_RESULTS/summaries"
+
+          if [ -d "$BENCHMARK_ARTIFACTS" ]; then
+            cp -R "$BENCHMARK_ARTIFACTS"/. "$BENCHMARK_CI_RESULTS/raw/"
           fi
+
+          cat > "$BENCHMARK_CI_RESULTS/metadata.json" <<JSON
+          {
+            "repository": "${GITHUB_REPOSITORY}",
+            "ref": "${GITHUB_REF}",
+            "sha": "${GITHUB_SHA}",
+            "run_id": "${GITHUB_RUN_ID}",
+            "run_attempt": "${GITHUB_RUN_ATTEMPT}",
+            "benchmark_filter": "${BENCHMARK_FILTER}",
+            "benchmark_strategy": "${BENCHMARK_STRATEGY}"
+          }
+          JSON
+
+          cat > "$BENCHMARK_CI_RESULTS/summaries/grouped-summary.md" <<'MD'
+          # Benchmark Summary
+
+          Benchmark artifacts from this workflow run are the benchmark source of truth for this commit.
+
+          ## Groups
+
+          | Group | Existing benchmark classes | Purpose |
+          |---|---|---|
+          | Core matching | `PattrnIndexBenchmarks` | Generic segmented matching, detailed matches, captures, duplicates, and naive baseline comparison. |
+          | Routing preview | `RoutingBenchmarks` | Route-template parsing, path splitting, route helper matching, and route detailed matching. |
+          | Builder and diagnostics | `BuilderBenchmarks` | Build-time behavior, large pattern sets, diagnostics, and validation overhead. |
+          | String helpers | Existing string-helper coverage in core/package tests; add focused benchmarks later only if needed. | Separated string ergonomics and normalization scenarios. |
+
+          ## Downloadable artifacts
+
+          Download the `benchmark-results` artifact from this workflow run for raw BenchmarkDotNet output, metadata, and summaries.
+          MD
+
+          {
+            echo "# Benchmark Summary"
+            echo
+            echo "Benchmark artifacts from this workflow run are the benchmark source of truth for this commit."
+            echo
+            echo "## Run metadata"
+            echo
+            echo "- Repository: ${GITHUB_REPOSITORY}"
+            echo "- Ref: ${GITHUB_REF}"
+            echo "- SHA: ${GITHUB_SHA}"
+            echo "- Run ID: ${GITHUB_RUN_ID}"
+            echo "- Filter: ${BENCHMARK_FILTER}"
+            echo "- Strategy: ${BENCHMARK_STRATEGY}"
+            echo
+            cat "$BENCHMARK_CI_RESULTS/summaries/grouped-summary.md"
+            echo
+            echo "## Artifact contents"
+            echo
+            find "$BENCHMARK_CI_RESULTS" -maxdepth 4 -type f -print | sort | sed 's#^#- #'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: List benchmark artifacts
         if: always()
         run: |
-          find "$BENCHMARK_ARTIFACTS" -maxdepth 4 -type f -print || true
+          find "$BENCHMARK_CI_RESULTS" -maxdepth 5 -type f -print || true
 
       - name: Upload benchmark artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: benchmark-results
-          path: ${{ env.BENCHMARK_ARTIFACTS }}/**
+          name: benchmark-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.BENCHMARK_CI_RESULTS }}/**
           if-no-files-found: error
