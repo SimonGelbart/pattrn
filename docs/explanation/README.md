@@ -1,9 +1,7 @@
 # Explanation
 
-Conceptual documentation and rationale will move here as product docs are reconciled.
+Explanation docs describe concepts, tradeoffs, and product boundaries.
 
-Current architecture and background notes still live under:
+- [Package boundaries](package-boundaries.md)
 
-- `docs/design/`
-- `docs/roadmap.md`
-- `docs/adr/`
+Historical design notes remain available under `docs/design/`, but current conceptual docs should move here as they are reconciled.
