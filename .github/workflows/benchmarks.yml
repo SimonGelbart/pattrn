@@ -77,15 +77,11 @@ jobs:
           fi
           echo "Using benchmark report: $report"
 
-      - name: Prepare CI benchmark artifacts and summary
-        if: always()
+      - name: Prepare CI benchmark artifact layout
         run: |
           set -euo pipefail
           mkdir -p "$BENCHMARK_CI_RESULTS/raw" "$BENCHMARK_CI_RESULTS/summaries"
-
-          if [ -d "$BENCHMARK_ARTIFACTS" ]; then
-            cp -R "$BENCHMARK_ARTIFACTS"/. "$BENCHMARK_CI_RESULTS/raw/"
-          fi
+          cp -R "$BENCHMARK_ARTIFACTS" "$BENCHMARK_CI_RESULTS/raw/BenchmarkDotNet.Artifacts"
 
           cat > "$BENCHMARK_CI_RESULTS/metadata.json" <<JSON
           {
@@ -99,44 +95,20 @@ jobs:
           }
           JSON
 
-          cat > "$BENCHMARK_CI_RESULTS/summaries/grouped-summary.md" <<'MD'
-          # Benchmark Summary
+      - name: Generate grouped benchmark summaries
+        run: >-
+          python tools/benchmarks/summarize_benchmarks.py
+          --artifacts "$BENCHMARK_ARTIFACTS"
+          --output "$BENCHMARK_CI_RESULTS"
 
-          Benchmark artifacts from this workflow run are the benchmark source of truth for this commit.
-
-          ## Groups
-
-          | Group | Existing benchmark classes | Purpose |
-          |---|---|---|
-          | Core matching | `PattrnIndexBenchmarks` | Generic segmented matching, detailed matches, captures, duplicates, and naive baseline comparison. |
-          | Routing preview | `RoutingBenchmarks` | Route-template parsing, path splitting, route helper matching, and route detailed matching. |
-          | Builder and diagnostics | `BuilderBenchmarks` | Build-time behavior, large pattern sets, diagnostics, and validation overhead. |
-          | String helpers | Existing string-helper coverage in core/package tests; add focused benchmarks later only if needed. | Separated string ergonomics and normalization scenarios. |
-
-          ## Downloadable artifacts
-
-          Download the `benchmark-results` artifact from this workflow run for raw BenchmarkDotNet output, metadata, and summaries.
-          MD
-
+      - name: Write benchmark job summary
+        run: |
+          set -euo pipefail
+          cat "$BENCHMARK_CI_RESULTS/summaries/grouped-summary.md" >> "$GITHUB_STEP_SUMMARY"
           {
-            echo "# Benchmark Summary"
-            echo
-            echo "Benchmark artifacts from this workflow run are the benchmark source of truth for this commit."
-            echo
-            echo "## Run metadata"
-            echo
-            echo "- Repository: ${GITHUB_REPOSITORY}"
-            echo "- Ref: ${GITHUB_REF}"
-            echo "- SHA: ${GITHUB_SHA}"
-            echo "- Run ID: ${GITHUB_RUN_ID}"
-            echo "- Filter: ${BENCHMARK_FILTER}"
-            echo "- Strategy: ${BENCHMARK_STRATEGY}"
-            echo
-            cat "$BENCHMARK_CI_RESULTS/summaries/grouped-summary.md"
             echo
             echo "## Artifact contents"
-            echo
-            find "$BENCHMARK_CI_RESULTS" -maxdepth 4 -type f -print | sort | sed 's#^#- #'
+            find "$BENCHMARK_CI_RESULTS" -maxdepth 5 -type f -print | sort | sed 's#^#- #'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: List benchmark artifacts
