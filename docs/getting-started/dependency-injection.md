@@ -50,7 +50,7 @@ var index = provider
     .GetRequired("market-data");
 ```
 
-`IPattrnProvider<TSegment, TValue>` is retained through alpha.16 because it is convenient in application code that should not depend directly on keyed-service calls. It remains preview until beta.
+`IPattrnProvider<TSegment, TValue>` is retained as a preview convenience API for application code that should not depend directly on keyed-service calls.
 
 ## Registration sources
 

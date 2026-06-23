@@ -6,11 +6,11 @@ The core package works with already-segmented paths, for example `ReadOnlySpan<s
 
 ## Install
 
-Install both packages when you want string helpers:
+Install both packages when you want string helpers. Use the current pre-beta package version from the package feed or repository package metadata:
 
 ```xml
-<PackageReference Include="Pattrn" Version="0.1.0-alpha.1" />
-<PackageReference Include="Pattrn.Strings" Version="0.1.0-alpha.1" />
+<PackageReference Include="Pattrn" Version="..." />
+<PackageReference Include="Pattrn.Strings" Version="..." />
 ```
 
 ## Basic usage

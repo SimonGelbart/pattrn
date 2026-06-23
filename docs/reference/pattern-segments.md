@@ -1,6 +1,6 @@
 # Generic pattern segments
 
-`PatternSegment<TSegment>` is the domain-neutral pattern model introduced in the v3 alpha track.
+`PatternSegment<TSegment>` is the domain-neutral pattern model for the current pre-beta core API.
 
 It lets callers describe pattern intent without relying on a reserved wildcard value in the segment domain:
 

@@ -1,6 +1,6 @@
 # Documentation
 
-Pattrn documentation is organized around the current pre-beta product state. Start here when you want current user-facing docs; historical alpha-line notes are kept separately so they do not obscure the active documentation path.
+Pattrn documentation is organized around the current pre-beta product state. Start here when you want current user-facing docs; historical pre-beta notes are kept separately so they do not obscure the active documentation path.
 
 Start with the [roadmap](roadmap.md) for product direction, current status, and the next increment.
 
@@ -58,7 +58,7 @@ ADRs are architecture decision records. They preserve decision history and shoul
 
 ## Historical and transitional material
 
-The following areas contain alpha-line history, maintainer notes, local benchmark evidence, or transitional documentation. They remain available for context, but they are not the primary current user path.
+The following areas contain pre-beta history, maintainer notes, local benchmark evidence, or transitional documentation. They remain available for context, but they are not the primary current user path.
 
 ### Design history
 
@@ -82,7 +82,7 @@ The following areas contain alpha-line history, maintainer notes, local benchmar
 - [Beta readiness review](release/beta-readiness-review.md)
 - [Release checklist](release/release-checklist.md)
 - [Release decisions](release/release-decisions.md)
-- [Alpha migration notes](release/migration-alpha.md)
+- [Historical migration notes](release/migration-alpha.md)
 
 ### Historical benchmark results
 

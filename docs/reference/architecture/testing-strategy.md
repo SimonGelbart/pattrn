@@ -18,7 +18,7 @@ Pattrn uses tests to protect deterministic behavior, public API shape, and packa
 
 ## Compatibility posture
 
-Pattrn is pre-beta. Tests may be updated for deliberate alpha breaking changes, but the change should be documented in the roadmap, changelog, or an ADR.
+Pattrn is pre-beta. Tests may be updated for deliberate breaking changes before beta, but the change should be documented in the roadmap, changelog, or an ADR when it affects public behavior.
 
 ## Benchmarks
 

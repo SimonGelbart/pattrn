@@ -11,7 +11,7 @@ Do not put private identities, credentials, local paths, validation transcripts,
 | Project name | Pattrn |
 | Repository slug | `SimonGelbart/pattrn` |
 | License | MIT |
-| Status | Pre-beta / alpha-line product shaping |
+| Status | Pre-beta product shaping |
 | Primary platform | .NET 10 |
 | Primary language | C# |
 
@@ -44,7 +44,7 @@ Compiled index internals are not a public format and must not become a serializa
 
 ## Current direction
 
-Pattrn is still pre-beta. Breaking alpha-era APIs are acceptable when doing so makes the long-term product smaller, clearer, faster, or more predictable.
+Pattrn is still pre-beta. Breaking changes are acceptable before beta when doing so makes the long-term product smaller, clearer, faster, or more predictable.
 
 Roadmap milestones are product-readiness stages, not package-version numbers. Package versions are centralized and intentionally simple until beta/1.0 version policy is finalized.
 
