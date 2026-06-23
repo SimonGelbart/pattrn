@@ -16,16 +16,50 @@ The `Benchmarks` GitHub Actions workflow is the benchmark source of truth for cu
 
 Do not treat local benchmark output or old committed benchmark reports as current product proof. Keep old reports only as historical evidence.
 
+## Grouped reports
+
+The benchmark workflow generates grouped reports from the BenchmarkDotNet full compressed JSON produced by that workflow run. The grouped reports are derived evidence, not hand-maintained performance tables.
+
+Each benchmark artifact should contain:
+
+```text
+benchmark-ci-results/
+  metadata.json
+  raw/
+    BenchmarkDotNet.Artifacts/
+      results/
+        ...
+  summaries/
+    grouped-summary.md
+    grouped-results.json
+```
+
+The workflow remains the source of truth for current benchmark evidence. Old committed benchmark reports are historical only and must not be cited as proof for current performance claims.
+
+Rows are classified deterministically into these groups:
+
+| Group | Purpose |
+|---|---|
+| Core hot path | Value matching and protected read-path operations. |
+| Detailed matching | Match metadata, captures, deduplication, and materialization. |
+| Routing preview | Route parsing, route splitting, route helper matching, and pre-split route matching. |
+| Builder / validation | Build-time behavior, diagnostics, validation, and large-pattern construction. |
+| String helpers | String splitting, normalization, and convenience facade costs. |
+| Unclassified | Rows that do not match classification rules. These rows are reported and require follow-up instead of being dropped. |
+
+The grouped summary includes guardrail statuses for protected hot paths:
+
+| Status | Meaning |
+|---|---|
+| `Pass` | The relevant rows were found and match the expectation. |
+| `Review` | Relevant rows were found, but the result needs human review. |
+| `Unknown` | The report generator could not confidently find enough evidence. |
+
+`Unknown` is intentionally preferred when evidence is missing or ambiguous. Treat unclassified rows and `Unknown` guardrails as follow-up items before using a run to support a performance-sensitive decision.
+
 ## Benchmark groups
 
-The current workflow groups existing benchmark classes as follows:
-
-| Group | Existing benchmark classes | Purpose |
-|---|---|---|
-| Core matching | `PattrnIndexBenchmarks` | Generic segmented matching, detailed matches, captures, duplicates, and naive baseline comparison. |
-| Routing preview | `RoutingBenchmarks` | Route-template parsing, path splitting, route helper matching, and route detailed matching. |
-| Builder and diagnostics | `BuilderBenchmarks` | Build-time behavior, large pattern sets, diagnostics, and validation overhead. |
-| String helpers | Existing string-helper tests for now. Add focused benchmarks only if a future performance question needs them. | Separated string ergonomics and normalization scenarios. |
+Current grouped reports classify existing benchmark rows by benchmark class and method names. Avoid renaming benchmark methods solely for report presentation because stable names make historical comparison easier.
 
 ## Benchmark classes
 
