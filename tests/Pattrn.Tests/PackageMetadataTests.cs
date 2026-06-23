@@ -47,10 +47,10 @@ public sealed class PackageMetadataTests
         var root = FindRepositoryRoot();
         var expected = new Dictionary<string, string>
         {
-            [Path.Combine(root.FullName, "src", "Pattrn", "Pattrn.csproj")] = Path.Combine(root.FullName, "README.md"),
-            [Path.Combine(root.FullName, "src", "Pattrn.Strings", "Pattrn.Strings.csproj")] = Path.Combine(root.FullName, "docs", "getting-started", "strings.md"),
-            [Path.Combine(root.FullName, "src", "Pattrn.DependencyInjection", "Pattrn.DependencyInjection.csproj")] = Path.Combine(root.FullName, "docs", "getting-started", "dependency-injection.md"),
-            [Path.Combine(root.FullName, "src", "Pattrn.Routing", "Pattrn.Routing.csproj")] = Path.Combine(root.FullName, "docs", "getting-started", "routing.md")
+            [Path.Combine(root.FullName, "src", "Pattrn", "Pattrn.csproj")] = Path.Combine(root.FullName, "docs", "packages", "pattrn.md"),
+            [Path.Combine(root.FullName, "src", "Pattrn.Strings", "Pattrn.Strings.csproj")] = Path.Combine(root.FullName, "docs", "packages", "pattrn-strings.md"),
+            [Path.Combine(root.FullName, "src", "Pattrn.DependencyInjection", "Pattrn.DependencyInjection.csproj")] = Path.Combine(root.FullName, "docs", "packages", "pattrn-dependency-injection.md"),
+            [Path.Combine(root.FullName, "src", "Pattrn.Routing", "Pattrn.Routing.csproj")] = Path.Combine(root.FullName, "docs", "packages", "pattrn-routing.md")
         };
 
         foreach (var pair in expected)
