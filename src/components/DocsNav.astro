@@ -1,0 +1,19 @@
+---
+import { getDocsBySection, withBase } from '../lib/docs';
+
+const { currentRoute = '' } = Astro.props;
+const sections = getDocsBySection();
+---
+<nav class="docs-nav" aria-label="Rendered documentation">
+  <p class="eyebrow">Rendered docs</p>
+  {sections.map(({ section, docs }) => (
+    <details open={docs.some((doc) => doc.route === currentRoute)}>
+      <summary>{section}</summary>
+      <div>
+        {docs.map((doc) => (
+          <a href={withBase(doc.route)} aria-current={doc.route === currentRoute ? 'page' : undefined}>{doc.title}</a>
+        ))}
+      </div>
+    </details>
+  ))}
+</nav>
