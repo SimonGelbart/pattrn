@@ -1,5 +1,9 @@
 # Changelog
 
+This file is the public release-history record.
+
+The `3.0.0-alpha.*` entries below are preserved as **historical pre-beta chronology**. Current pre-beta versioning and roadmap policy are defined by [ADR 0012](docs/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones.md) and the current [roadmap](docs/roadmap.md).
+
 ## 3.0.0-alpha.31
 
 Performance guardrails and speed triage update.

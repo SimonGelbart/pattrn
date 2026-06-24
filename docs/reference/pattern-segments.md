@@ -24,6 +24,7 @@ The core package does **not** parse route strings such as `/orders/{id}`. Route-
 | `Literal` | Matches one exact segment value. |
 | `Wildcard` | Matches any single input segment without assigning a name. |
 | `Parameter` | Matches any single input segment and carries a logical name for detailed match APIs. |
+| `CatchAll` | Matches zero or more remaining segments and must be terminal. |
 
 The default value of `PatternSegment<TSegment>` is an anonymous wildcard. This keeps default struct values safe.
 
@@ -44,6 +45,16 @@ builder.AddPattern([PatternSegment<string>.Wildcard()], "wildcard");
 ```
 
 For input `"*"`, both registrations can match. For any other single segment, only the wildcard registration matches.
+
+## Catch-all semantics
+
+`PatternSegment<TSegment>.CatchAll()` and `CatchAll(name)` represent a terminal catch-all segment. Catch-all complements the other segment kinds:
+
+- `Literal` still matches one exact segment.
+- `Wildcard` and `Parameter` still match one segment.
+- `CatchAll` matches the remaining suffix (including an empty suffix).
+
+Named catch-all captures are exposed through detailed match APIs, with one capture per matched remaining segment.
 
 ## Detailed captures
 

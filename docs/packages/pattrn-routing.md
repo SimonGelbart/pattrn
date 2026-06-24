@@ -123,6 +123,34 @@ Expansions are ordered from shortest omitted-suffix variant to the full template
 var values = index.MatchRouteToArray("/orders/123");
 ```
 
+## Low-allocation route helper APIs
+
+Use these helpers when you want caller-controlled buffers and explicit capacity checks:
+
+```csharp
+var maxValues = index.GetRouteMatchCountUpperBound("/orders/123");
+var maxCaptures = index.GetRouteCaptureCountUpperBound("/orders/123");
+
+var values = new string[maxValues];
+var matches = index.TryMatchRoute("/orders/123", values, out var written);
+```
+
+For detailed matching with caller-provided buffers:
+
+```csharp
+var matchBuffer = new PatternMatch<string>[index.GetRouteMatchCountUpperBound("/orders/123")];
+var captureBuffer = new PatternCapture<string>[index.GetRouteCaptureCountUpperBound("/orders/123")];
+
+var ok = index.TryMatchRouteDetailed(
+    "/orders/123",
+    matchBuffer,
+    captureBuffer,
+    out var matchesWritten,
+    out var capturesWritten);
+```
+
+`TryMatchRoute(...)` and `TryMatchRouteDetailed(...)` follow the same no-partial-write contract as core `Try*` APIs when buffers are too small.
+
 ## Detailed matches and captures
 
 ```csharp
