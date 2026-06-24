@@ -1,12 +1,18 @@
 ---
 import PattrnLayout from '../../layouts/PattrnLayout.astro';
-const adrRoot = 'https://github.com/SimonGelbart/pattrn/blob/main/docs/adr';
+import { getRouteForSource, getSourceUrl, withBase } from '../../lib/docs';
+
+function linkForSource(source: string) {
+  const route = getRouteForSource(source);
+  return route ? withBase(route) : getSourceUrl(source);
+}
+
 const adrs = [
-  ['ADR 0001', 'Core remains segmented and domain-neutral', `${adrRoot}/0001-core-remains-segmented-and-domain-neutral.md`],
-  ['ADR 0003', 'Explicit pattern segments are the primary core model', `${adrRoot}/0003-explicit-pattern-segments-are-primary.md`],
-  ['ADR 0004', 'Strings, DI, and Routing are companion packages', `${adrRoot}/0004-companion-packages.md`],
-  ['ADR 0012', 'Simplify pre-beta versioning and roadmap milestones', `${adrRoot}/0012-simplify-pre-beta-versioning-and-roadmap-milestones.md`],
-  ['ADR 0013', 'Use fixed ranking with consumer-side sorting', `${adrRoot}/0013-use-fixed-ranking-with-consumer-side-sorting.md`],
+  ['ADR 0001', 'Core remains segmented and domain-neutral', linkForSource('docs/adr/0001-core-remains-segmented-and-domain-neutral.md')],
+  ['ADR 0003', 'Explicit pattern segments are the primary core model', linkForSource('docs/adr/0003-explicit-pattern-segments-are-primary.md')],
+  ['ADR 0004', 'Strings, DI, and Routing are companion packages', linkForSource('docs/adr/0004-companion-packages.md')],
+  ['ADR 0012', 'Simplify pre-beta versioning and roadmap milestones', linkForSource('docs/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones.md')],
+  ['ADR 0013', 'Use fixed ranking with consumer-side sorting', linkForSource('docs/adr/0013-use-fixed-ranking-with-consumer-side-sorting.md')],
 ];
 ---
 <PattrnLayout title="Pattrn ADRs" description="Pattrn architecture decision records." current="adr">
@@ -14,7 +20,7 @@ const adrs = [
     <p class="eyebrow">ADRs</p>
     <h1>Decision records, not a general docs bucket.</h1>
     <p class="lede">Architecture Decision Records capture durable product, architecture, package-boundary, compatibility, and workflow decisions. Accepted ADRs guide future changes unless a newer ADR supersedes or amends them.</p>
-    <div class="actions"><a class="button" href={`${adrRoot}/README.md`} rel="noreferrer">Open ADR index ↗</a></div>
+    <div class="actions"><a class="button" href={getSourceUrl('docs/adr/README.md')} rel="noreferrer">Open ADR index ↗</a></div>
   </section>
   <section class="section">
     <div class="section-heading"><p class="eyebrow">Recommended read order</p><h2>Start with the binding decisions.</h2><p>These records are the first stops when changing public behavior, package boundaries, docs, or validation policy.</p></div>

@@ -1,0 +1,205 @@
+{
+  "project": {
+    "name": "Pattrn",
+    "slug": "pattrn",
+    "repo": "https://github.com/SimonGelbart/pattrn",
+    "sourceRoot": "https://github.com/SimonGelbart/pattrn/blob/main"
+  },
+  "docs": [
+    {
+      "source": "README.md",
+      "route": "/",
+      "title": "Pattrn",
+      "section": "Overview",
+      "render": false
+    },
+    {
+      "source": "docs/README.md",
+      "route": "/docs/",
+      "title": "Documentation",
+      "section": "Docs",
+      "render": false
+    },
+    {
+      "source": "docs/roadmap.md",
+      "route": "/roadmap/",
+      "title": "Roadmap",
+      "section": "Roadmap",
+      "render": false
+    },
+    {
+      "source": "docs/reference/benchmarks.md",
+      "route": "/benchmarks/",
+      "title": "Benchmarks",
+      "section": "Benchmarks",
+      "render": false
+    },
+    {
+      "source": "docs/adr/README.md",
+      "route": "/adr/",
+      "title": "Architecture Decision Records",
+      "section": "ADRs",
+      "render": false
+    },
+    {
+      "source": "docs/tutorials/first-index.md",
+      "route": "/tutorials/first-index/",
+      "title": "Build your first Pattrn index",
+      "section": "Tutorials"
+    },
+    {
+      "source": "docs/tutorials/examples.md",
+      "route": "/tutorials/examples/",
+      "title": "Examples",
+      "section": "Tutorials"
+    },
+    {
+      "source": "docs/how-to/select-best-match.md",
+      "route": "/how-to/select-best-match/",
+      "title": "Select a best match",
+      "section": "How-to"
+    },
+    {
+      "source": "docs/explanation/package-boundaries.md",
+      "route": "/explanation/package-boundaries/",
+      "title": "Package boundaries",
+      "section": "Explanation"
+    },
+    {
+      "source": "docs/reference/api.md",
+      "route": "/reference/api/",
+      "title": "Core API",
+      "section": "Reference"
+    },
+    {
+      "source": "docs/reference/pattern-segments.md",
+      "route": "/reference/pattern-segments/",
+      "title": "Generic pattern segments",
+      "section": "Reference"
+    },
+    {
+      "source": "docs/reference/matching-semantics.md",
+      "route": "/reference/matching-semantics/",
+      "title": "Matching semantics",
+      "section": "Reference"
+    },
+    {
+      "source": "docs/reference/ranking-specificity.md",
+      "route": "/reference/ranking-specificity/",
+      "title": "Ranking and specificity",
+      "section": "Reference"
+    },
+    {
+      "source": "docs/reference/compatibility-semantics.md",
+      "route": "/reference/compatibility-semantics/",
+      "title": "Compatibility semantics",
+      "section": "Reference"
+    },
+    {
+      "source": "docs/reference/duplicate-behavior.md",
+      "route": "/reference/duplicate-behavior/",
+      "title": "Duplicate behavior",
+      "section": "Reference"
+    },
+    {
+      "source": "docs/reference/diagnostics.md",
+      "route": "/reference/diagnostics/",
+      "title": "Diagnostics",
+      "section": "Reference"
+    },
+    {
+      "source": "docs/reference/limitations.md",
+      "route": "/reference/limitations/",
+      "title": "Known limitations",
+      "section": "Reference"
+    },
+    {
+      "source": "docs/reference/project-profile.md",
+      "route": "/reference/project-profile/",
+      "title": "Project profile",
+      "section": "Reference"
+    },
+    {
+      "source": "docs/reference/validation.md",
+      "route": "/reference/validation/",
+      "title": "Validation reference",
+      "section": "Maintainer guidance"
+    },
+    {
+      "source": "docs/reference/repository-layout.md",
+      "route": "/reference/repository-layout/",
+      "title": "Repository layout",
+      "section": "Maintainer guidance"
+    },
+    {
+      "source": "docs/reference/git-workflow.md",
+      "route": "/reference/git-workflow/",
+      "title": "Git workflow",
+      "section": "Maintainer guidance"
+    },
+    {
+      "source": "docs/reference/documentation-standards.md",
+      "route": "/reference/documentation-standards/",
+      "title": "Documentation standards",
+      "section": "Maintainer guidance"
+    },
+    {
+      "source": "docs/packages/pattrn.md",
+      "route": "/packages/pattrn/",
+      "title": "Pattrn",
+      "section": "Packages"
+    },
+    {
+      "source": "docs/packages/pattrn-strings.md",
+      "route": "/packages/strings/",
+      "title": "Pattrn.Strings",
+      "section": "Packages"
+    },
+    {
+      "source": "docs/packages/pattrn-dependency-injection.md",
+      "route": "/packages/dependency-injection/",
+      "title": "Pattrn.DependencyInjection",
+      "section": "Packages"
+    },
+    {
+      "source": "docs/packages/pattrn-routing.md",
+      "route": "/packages/routing/",
+      "title": "Pattrn.Routing",
+      "section": "Packages"
+    },
+    {
+      "source": "docs/adr/0001-core-remains-segmented-and-domain-neutral.md",
+      "route": "/adr/0001-core-remains-segmented-and-domain-neutral/",
+      "title": "ADR 0001: Core remains segmented and domain-neutral",
+      "section": "ADRs"
+    },
+    {
+      "source": "docs/adr/0003-explicit-pattern-segments-are-primary.md",
+      "route": "/adr/0003-explicit-pattern-segments-are-primary/",
+      "title": "ADR 0003: Explicit pattern segments are the primary core model",
+      "section": "ADRs"
+    },
+    {
+      "source": "docs/adr/0004-companion-packages.md",
+      "route": "/adr/0004-companion-packages/",
+      "title": "ADR 0004: Strings, DI, and Routing are companion packages",
+      "section": "ADRs"
+    },
+    {
+      "source": "docs/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones.md",
+      "route": "/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones/",
+      "title": "ADR 0012: Simplify pre-beta versioning and roadmap milestones",
+      "section": "ADRs"
+    },
+    {
+      "source": "docs/adr/0013-use-fixed-ranking-with-consumer-side-sorting.md",
+      "route": "/adr/0013-use-fixed-ranking-with-consumer-side-sorting/",
+      "title": "ADR 0013: Use fixed ranking with consumer-side sorting",
+      "section": "ADRs"
+    }
+  ],
+  "exclude": [
+    "docs/archive/**",
+    "docs/benchmark-results/**"
+  ]
+}

@@ -1,12 +1,17 @@
 ---
 import PattrnLayout from '../../layouts/PattrnLayout.astro';
-const docsRoot = 'https://github.com/SimonGelbart/pattrn/blob/main/docs';
-const repoRoot = 'https://github.com/SimonGelbart/pattrn/blob/main';
+import { getRouteForSource, getSourceUrl, withBase } from '../../lib/docs';
+
+function linkForSource(source: string) {
+  const route = getRouteForSource(source);
+  return route ? withBase(route) : getSourceUrl(source);
+}
+
 const groups = [
-  { title: 'Start', text: 'Start here for the current user-facing path and the core mental model.', links: [['Core usage', `${repoRoot}/README.md#core-usage`], ['Pattern segments', `${docsRoot}/reference/pattern-segments.md`], ['Matching semantics', `${docsRoot}/reference/matching-semantics.md`]] },
-  { title: 'Understand', text: 'Use these when changing behavior, explaining tradeoffs, or reviewing compatibility.', links: [['Package boundaries', `${docsRoot}/explanation/package-boundaries.md`], ['Ranking and specificity', `${docsRoot}/reference/ranking-specificity.md`], ['Duplicate behavior', `${docsRoot}/reference/duplicate-behavior.md`], ['Diagnostics', `${docsRoot}/reference/diagnostics.md`]] },
-  { title: 'Operate', text: 'Maintainer-oriented references for validation, evidence, and repository workflow.', links: [['Validation', `${docsRoot}/reference/validation.md`], ['Benchmarks', `${docsRoot}/reference/benchmarks.md`], ['Repository layout', `${docsRoot}/reference/repository-layout.md`]] },
-  { title: 'Packages', text: 'Package-scoped README sources and companion-package guidance.', links: [['Core', `${docsRoot}/packages/pattrn.md`], ['Strings', `${docsRoot}/packages/pattrn-strings.md`], ['Dependency injection', `${docsRoot}/packages/pattrn-dependency-injection.md`], ['Routing', `${docsRoot}/packages/pattrn-routing.md`]] },
+  { title: 'Start', text: 'Start here for the current user-facing path and the core mental model.', links: [['Core usage', `${getSourceUrl('README.md')}#core-usage`], ['Pattern segments', linkForSource('docs/reference/pattern-segments.md')], ['Matching semantics', linkForSource('docs/reference/matching-semantics.md')]] },
+  { title: 'Understand', text: 'Use these when changing behavior, explaining tradeoffs, or reviewing compatibility.', links: [['Package boundaries', linkForSource('docs/explanation/package-boundaries.md')], ['Ranking and specificity', linkForSource('docs/reference/ranking-specificity.md')], ['Duplicate behavior', linkForSource('docs/reference/duplicate-behavior.md')], ['Diagnostics', linkForSource('docs/reference/diagnostics.md')]] },
+  { title: 'Operate', text: 'Maintainer-oriented references for validation, evidence, and repository workflow.', links: [['Validation', linkForSource('docs/reference/validation.md')], ['Benchmarks', withBase('/benchmarks/')], ['Repository layout', linkForSource('docs/reference/repository-layout.md')]] },
+  { title: 'Packages', text: 'Package-scoped README sources and companion-package guidance.', links: [['Core', linkForSource('docs/packages/pattrn.md')], ['Strings', linkForSource('docs/packages/pattrn-strings.md')], ['Dependency injection', linkForSource('docs/packages/pattrn-dependency-injection.md')], ['Routing', linkForSource('docs/packages/pattrn-routing.md')]] },
 ];
 ---
 <PattrnLayout title="Pattrn docs" description="Curated documentation index for Pattrn." current="docs">

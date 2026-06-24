@@ -1,0 +1,38 @@
+---
+import DocLayout from '../layouts/DocLayout.astro';
+import { getRenderableDocs, getSourceUrl, routeToParam } from '../lib/docs';
+
+const docModules = import.meta.glob('../../docs/**/*.md');
+
+type MarkdownModule = {
+  Content?: unknown;
+  default?: unknown;
+  frontmatter?: Record<string, unknown>;
+};
+
+export async function getStaticPaths() {
+  return getRenderableDocs().map((doc) => ({
+    params: { doc: routeToParam(doc.route) },
+    props: { doc },
+  }));
+}
+
+const { doc } = Astro.props;
+const moduleKey = `../../${doc.source}`;
+const loadModule = docModules[moduleKey];
+
+if (!loadModule) {
+  throw new Error(`No Markdown module found for ${doc.source}. Check docs.site.json and the docs tree.`);
+}
+
+const markdownModule = (await loadModule()) as MarkdownModule;
+const Content = (markdownModule.Content ?? markdownModule.default) as any;
+const frontmatter = markdownModule.frontmatter ?? {};
+
+if (!Content) {
+  throw new Error(`Markdown module for ${doc.source} did not expose renderable content.`);
+}
+---
+<DocLayout doc={doc} frontmatter={frontmatter} sourceUrl={getSourceUrl(doc.source)}>
+  <Content />
+</DocLayout>
