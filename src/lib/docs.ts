@@ -1,0 +1,94 @@
+import manifest from '../../docs.site.json';
+
+export type SiteDoc = {
+  source: string;
+  route: string;
+  title: string;
+  section: string;
+  render?: boolean;
+};
+
+export type DocsManifest = {
+  project: {
+    name: string;
+    slug: string;
+    repo: string;
+    sourceRoot: string;
+  };
+  docs: SiteDoc[];
+  exclude?: string[];
+};
+
+export const docsManifest = manifest as DocsManifest;
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+export function withBase(route: string) {
+  const normalizedRoute = route.startsWith('/') ? route : `/${route}`;
+  return `${base}${normalizedRoute}`;
+}
+
+export function getAllDocs() {
+  return docsManifest.docs;
+}
+
+export function getRenderableDocs() {
+  return docsManifest.docs.filter((doc) => doc.render !== false);
+}
+
+export function getDocByRoute(route: string) {
+  const normalizedRoute = normalizeRoute(route);
+  return docsManifest.docs.find((doc) => normalizeRoute(doc.route) === normalizedRoute);
+}
+
+export function getRouteForSource(source: string) {
+  const normalizedSource = normalizeSource(source);
+  return docsManifest.docs.find((doc) => normalizeSource(doc.source) === normalizedSource)?.route;
+}
+
+export function getSourceUrl(source: string) {
+  return `${docsManifest.project.sourceRoot}/${normalizeSource(source)}`;
+}
+
+export function routeToParam(route: string) {
+  return normalizeRoute(route).replace(/^\//, '').replace(/\/$/, '');
+}
+
+export function getTopLevelKey(section: string) {
+  switch (section) {
+    case 'Reference':
+    case 'Maintainer guidance':
+      return 'reference';
+    case 'Packages':
+      return 'packages';
+    case 'ADRs':
+      return 'adr';
+    case 'Roadmap':
+      return 'roadmap';
+    case 'Benchmarks':
+      return 'benchmarks';
+    default:
+      return 'docs';
+  }
+}
+
+export function getDocsBySection() {
+  const sections = new Map<string, SiteDoc[]>();
+
+  for (const doc of getRenderableDocs()) {
+    const sectionDocs = sections.get(doc.section) ?? [];
+    sectionDocs.push(doc);
+    sections.set(doc.section, sectionDocs);
+  }
+
+  return Array.from(sections, ([section, docs]) => ({ section, docs }));
+}
+
+export function normalizeSource(source: string) {
+  return source.replace(/\\/g, '/').replace(/^\.\//, '').replace(/\/+/g, '/');
+}
+
+export function normalizeRoute(route: string) {
+  const prefixed = route.startsWith('/') ? route : `/${route}`;
+  return prefixed.endsWith('/') ? prefixed : `${prefixed}/`;
+}
