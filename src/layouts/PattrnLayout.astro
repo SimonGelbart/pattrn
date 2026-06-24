@@ -1,0 +1,103 @@
+---
+import '../styles/site.css';
+
+const {
+  title = 'Pattrn — Segmented matching for .NET',
+  description = 'A dedicated project site for Pattrn, a pre-beta .NET library experiment for explicit segmented-pattern matching.',
+  current = '',
+} = Astro.props;
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const withBase = (path: string) => `${base}${path}`;
+
+const nav = [
+  { href: withBase('/'), label: 'Overview', key: 'overview', description: 'project shape and status' },
+  { href: withBase('/docs/'), label: 'Docs', key: 'docs', description: 'curated documentation map' },
+  { href: withBase('/adr/'), label: 'ADRs', key: 'adr', description: 'architecture decisions' },
+  { href: withBase('/roadmap/'), label: 'Roadmap', key: 'roadmap', description: 'pre-beta product direction' },
+  { href: withBase('/benchmarks/'), label: 'Benchmarks', key: 'benchmarks', description: 'CI-owned evidence' },
+  { href: 'https://simongelbart.github.io/', label: 'Main site', key: 'main', description: 'return to the lab' },
+  { href: 'https://github.com/SimonGelbart/pattrn', label: 'GitHub ↗', key: 'github', description: 'inspect the source', external: true },
+];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet" />
+    <script is:inline>
+      (() => {
+        try {
+          const theme = localStorage.getItem('site-theme');
+          if (theme === 'light' || theme === 'dark') document.documentElement.setAttribute('data-theme', theme);
+        } catch {}
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href={withBase('/')} aria-current={current === 'overview' ? 'page' : undefined}>Pattrn <small>project site</small></a>
+      <nav class="desktop-nav" aria-label="Pattrn navigation">
+        {nav.map((item) => <a href={item.href} aria-current={current === item.key ? 'page' : undefined} rel={item.external ? 'noreferrer' : undefined}>{item.label}</a>)}
+      </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle>Theme: System</button>
+      <details class="mobile-nav">
+        <summary>Menu</summary>
+        <div class="mobile-nav__panel">
+          {nav.map((item) => (
+            <a href={item.href} aria-current={current === item.key ? 'page' : undefined} rel={item.external ? 'noreferrer' : undefined}>
+              <span>{item.label}</span>
+              <small>{item.description}</small>
+            </a>
+          ))}
+        </div>
+      </details>
+    </header>
+    <main><slot /></main>
+    <footer class="site-footer">
+      <span>© Simon Gelbart</span>
+      <span>Pattrn is a pre-beta .NET segmented-pattern matching experiment.</span>
+    </footer>
+    <script is:inline>
+      (() => {
+        const storageKey = 'site-theme';
+        const themes = ['system', 'light', 'dark'];
+        const getStoredTheme = () => {
+          try {
+            const value = localStorage.getItem(storageKey);
+            return themes.includes(value) ? value : 'system';
+          } catch { return 'system'; }
+        };
+        const setStoredTheme = (theme) => {
+          try {
+            if (theme === 'system') localStorage.removeItem(storageKey);
+            else localStorage.setItem(storageKey, theme);
+          } catch {}
+        };
+        const applyTheme = (theme) => {
+          if (theme === 'system') document.documentElement.removeAttribute('data-theme');
+          else document.documentElement.setAttribute('data-theme', theme);
+          document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+            const label = theme.charAt(0).toUpperCase() + theme.slice(1);
+            button.textContent = `Theme: ${label}`;
+            button.setAttribute('aria-label', `Current theme: ${label}. Click to change theme.`);
+          });
+        };
+        applyTheme(getStoredTheme());
+        document.addEventListener('click', (event) => {
+          const button = event.target.closest('[data-theme-toggle]');
+          if (!button) return;
+          const current = getStoredTheme();
+          const next = themes[(themes.indexOf(current) + 1) % themes.length];
+          setStoredTheme(next);
+          applyTheme(next);
+        });
+      })();
+    </script>
+  </body>
+</html>

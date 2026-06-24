@@ -1,0 +1,35 @@
+---
+import PattrnLayout from '../../layouts/PattrnLayout.astro';
+const docsRoot = 'https://github.com/SimonGelbart/pattrn/blob/main/docs';
+const repoRoot = 'https://github.com/SimonGelbart/pattrn/blob/main';
+const groups = [
+  { title: 'Start', text: 'Start here for the current user-facing path and the core mental model.', links: [['Core usage', `${repoRoot}/README.md#core-usage`], ['Pattern segments', `${docsRoot}/reference/pattern-segments.md`], ['Matching semantics', `${docsRoot}/reference/matching-semantics.md`]] },
+  { title: 'Understand', text: 'Use these when changing behavior, explaining tradeoffs, or reviewing compatibility.', links: [['Package boundaries', `${docsRoot}/explanation/package-boundaries.md`], ['Ranking and specificity', `${docsRoot}/reference/ranking-specificity.md`], ['Duplicate behavior', `${docsRoot}/reference/duplicate-behavior.md`], ['Diagnostics', `${docsRoot}/reference/diagnostics.md`]] },
+  { title: 'Operate', text: 'Maintainer-oriented references for validation, evidence, and repository workflow.', links: [['Validation', `${docsRoot}/reference/validation.md`], ['Benchmarks', `${docsRoot}/reference/benchmarks.md`], ['Repository layout', `${docsRoot}/reference/repository-layout.md`]] },
+  { title: 'Packages', text: 'Package-scoped README sources and companion-package guidance.', links: [['Core', `${docsRoot}/packages/pattrn.md`], ['Strings', `${docsRoot}/packages/pattrn-strings.md`], ['Dependency injection', `${docsRoot}/packages/pattrn-dependency-injection.md`], ['Routing', `${docsRoot}/packages/pattrn-routing.md`]] },
+];
+---
+<PattrnLayout title="Pattrn docs" description="Curated documentation index for Pattrn." current="docs">
+  <section class="page-heading narrow">
+    <p class="eyebrow">Docs</p>
+    <h1>Documentation by intent.</h1>
+    <p class="lede">The Markdown files in <code>docs/**</code> remain the canonical project documentation. This route is a curated public index into the current docs path.</p>
+  </section>
+  <section class="section">
+    <div class="grid grid--two">
+      {groups.map((group) => (
+        <article class="card">
+          <p class="meta-line">{group.title}</p>
+          <h2>{group.title}</h2>
+          <p>{group.text}</p>
+          <ul class="list-plain">
+            {group.links.map(([label, href]) => <li><a class="text-link" href={href} rel="noreferrer">{label} ↗</a></li>)}
+          </ul>
+        </article>
+      ))}
+    </div>
+  </section>
+  <section class="section section-compact">
+    <aside class="note callout"><p><strong>Migration note:</strong> this first Astro shell does not render every Markdown file as a styled route. The curated pages preserve the stable project URLs while keeping the repository docs canonical.</p></aside>
+  </section>
+</PattrnLayout>

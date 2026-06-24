@@ -1,0 +1,96 @@
+---
+import PattrnLayout from '../layouts/PattrnLayout.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const withBase = (path: string) => `${base}${path}`;
+---
+<PattrnLayout current="overview">
+  <section class="hero">
+    <p class="eyebrow">Pattrn project site</p>
+    <h1>Explicit segmented-pattern matching for .NET.</h1>
+    <p class="lede">Pattrn is a pre-beta .NET library experiment for explicit segmented-pattern matching.</p>
+    <p class="lede">It indexes segmented patterns once, then resolves matching inputs predictably through explicit semantics, package boundaries, diagnostics, and CI-owned benchmark evidence.</p>
+    <div class="actions">
+      <a class="button" href={withBase('/docs/')}>Read the docs</a>
+      <a class="button" href={withBase('/adr/')}>View ADRs</a>
+      <a class="button" href="https://github.com/SimonGelbart/pattrn" rel="noreferrer">Open repo ↗</a>
+    </div>
+    <dl class="hero-metadata">
+      <div><dt>Platform</dt><dd>.NET 10</dd></div>
+      <div><dt>Status</dt><dd>Pre-beta product shaping</dd></div>
+      <div><dt>Core model</dt><dd>Explicit pattern segments</dd></div>
+      <div><dt>Evidence</dt><dd>Docs, ADRs, tests, CI benchmarks</dd></div>
+    </dl>
+  </section>
+
+  <section class="section split">
+    <div class="section-heading">
+      <p class="eyebrow">What it is</p>
+      <h2>A small matching engine, not a framework.</h2>
+      <p>Pattrn is reusable backend infrastructure for matching hierarchical segmented keys against registered patterns.</p>
+    </div>
+    <div class="panel accent-panel">
+      <p>The core package understands literals, parameters, wildcards, terminal catch-alls, captures, duplicates, specificity metadata, deterministic matching, and optional diagnostics.</p>
+      <p>HTTP, filesystem, routing, authorization, tenant, OpenAPI, and domain-specific semantics stay outside the core.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-heading">
+      <p class="eyebrow">Package family</p>
+      <h2>One generic core with narrow companions.</h2>
+      <p>Each package has a defined role so the core matching model stays explicit and domain-neutral.</p>
+    </div>
+    <div class="grid">
+      <article class="card"><p class="meta-line">Core</p><h3><code>Pattrn</code></h3><p>Immutable segmented-pattern index, detailed matches, captures, duplicate behavior, ranking metadata, and diagnostics.</p></article>
+      <article class="card"><p class="meta-line">String ergonomics</p><h3><code>Pattrn.Strings</code></h3><p>String splitting, separators, case sensitivity, trimming, normalization, and compact string-path builders.</p></article>
+      <article class="card"><p class="meta-line">Application integration</p><h3><code>Pattrn.DependencyInjection</code></h3><p>Thin Microsoft.Extensions.DependencyInjection registration for singleton indexes and named or keyed indexes.</p></article>
+      <article class="card"><p class="meta-line">Preview</p><h3><code>Pattrn.Routing</code></h3><p>Framework-neutral route-template parsing helpers built on top of the generic core.</p></article>
+    </div>
+  </section>
+
+  <section class="section split">
+    <div class="section-heading">
+      <p class="eyebrow">Matching model</p>
+      <h2>Explicit segments define the mental model.</h2>
+      <p>String and tokenized APIs can exist for convenience, but they compile into typed pattern segments instead of defining the core semantics.</p>
+    </div>
+    <article class="panel">
+      <p>Patterns are registered as segmented values with explicit segment kinds. Matching answers which registrations match, what captures were produced, and which ranking metadata applies.</p>
+      <div class="chip-row">
+        <span class="chip">Literal</span><span class="chip">Parameter</span><span class="chip">Wildcard</span><span class="chip">Catch-all</span><span class="chip">Capture</span>
+      </div>
+    </article>
+  </section>
+
+  <section class="section">
+    <div class="section-heading">
+      <p class="eyebrow">Evidence and guardrails</p>
+      <h2>Performance claims need CI-owned evidence.</h2>
+      <p>The current benchmark source of truth is the GitHub Actions benchmark workflow, not locally committed machine output.</p>
+    </div>
+    <div class="grid grid--two">
+      <article class="card callout"><h3>CI benchmark artifacts</h3><p>Workflow runs should produce raw BenchmarkDotNet artifacts, grouped summaries, workflow metadata, and job summaries for review.</p><a class="text-link" href={withBase('/benchmarks/')}>Read benchmark policy</a></article>
+      <article class="card"><h3>Guardrail language</h3><p>Guardrail statuses are intentionally conservative: missing or ambiguous evidence should be treated as follow-up work before strengthening claims.</p></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-heading">
+      <p class="eyebrow">Documentation map</p>
+      <h2>Curated entry points first.</h2>
+      <p>The repository Markdown remains canonical. This site provides stable project routes and high-signal entry points into the docs.</p>
+    </div>
+    <div class="doc-grid">
+      <a class="doc-link" href={withBase('/docs/')}><strong>Docs</strong><p>Start, understand, operate, and package documentation links.</p></a>
+      <a class="doc-link" href={withBase('/adr/')}><strong>ADRs</strong><p>Decision records for architecture, semantics, packaging, and validation policy.</p></a>
+      <a class="doc-link" href={withBase('/roadmap/')}><strong>Roadmap</strong><p>Pre-beta product direction, status, boundaries, and package strategy.</p></a>
+      <a class="doc-link" href={withBase('/reference/')}><strong>Reference</strong><p>API, segment model, matching, ranking, diagnostics, validation, and layout references.</p></a>
+      <a class="doc-link" href={withBase('/benchmarks/')}><strong>Benchmarks</strong><p>CI-owned benchmark evidence and guardrail rules.</p></a>
+      <a class="doc-link" href={withBase('/packages/')}><strong>Packages</strong><p>Package roles and stability posture.</p></a>
+    </div>
+  </section>
+
+  <section class="section section-compact">
+    <aside class="note"><p><strong>Current status:</strong> Pattrn is pre-beta and pre-1.0. Roadmap milestones describe product readiness, not release-train numbers.</p></aside>
+  </section>
+</PattrnLayout>

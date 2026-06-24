@@ -1,0 +1,28 @@
+---
+import PattrnLayout from '../../layouts/PattrnLayout.astro';
+const docsRoot = 'https://github.com/SimonGelbart/pattrn/blob/main/docs/packages';
+const packages = [
+  { name: 'Pattrn', role: 'Core package', status: 'Pre-beta stable candidate', href: `${docsRoot}/pattrn.md`, text: 'Generic segmented-pattern matching, explicit PatternSegment registration, immutable compiled indexes, detailed matching, captures, ranking metadata, duplicate behavior, and optional diagnostics.' },
+  { name: 'Pattrn.Strings', role: 'String ergonomics', status: 'Pre-beta stable candidate', href: `${docsRoot}/pattrn-strings.md`, text: 'String splitting, separators, case sensitivity, trimming, empty segment behavior, normalization, and ergonomic string-path builders and indexes.' },
+  { name: 'Pattrn.DependencyInjection', role: 'Application integration', status: 'Pre-beta stable candidate', href: `${docsRoot}/pattrn-dependency-injection.md`, text: 'Thin Microsoft.Extensions.DependencyInjection integration for registering compiled indexes as singletons and keeping application wiring framework-neutral.' },
+  { name: 'Pattrn.Routing', role: 'Routing companion', status: 'Preview', href: `${docsRoot}/pattrn-routing.md`, text: 'Framework-neutral route-template parsing, structural route-template compilation, metadata preservation, optional/defaulted segment expansion, and route-layer validation.' },
+];
+---
+<PattrnLayout title="Pattrn packages" description="Package family overview for Pattrn." current="packages">
+  <section class="page-heading narrow">
+    <p class="eyebrow">Packages</p>
+    <h1>Package boundaries are part of the product.</h1>
+    <p class="lede">Pattrn keeps the core matcher domain-neutral and moves syntax or integration concerns into focused companion packages.</p>
+  </section>
+  <section class="section">
+    <div class="package-list">
+      {packages.map((pkg) => (
+        <a class="package-row" href={pkg.href} rel="noreferrer">
+          <div class="package-row__meta"><span>{pkg.role}</span><strong>{pkg.status}</strong></div>
+          <div><h2><code>{pkg.name}</code></h2><p>{pkg.text}</p><p class="meta-line">Read package docs ↗</p></div>
+        </a>
+      ))}
+    </div>
+  </section>
+  <section class="section section-compact"><aside class="note callout"><p><strong>Stability posture:</strong> pre-beta stable candidate means the package is being shaped toward beta readiness, not that the public API is frozen.</p></aside></section>
+</PattrnLayout>

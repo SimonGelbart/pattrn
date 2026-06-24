@@ -1,0 +1,40 @@
+---
+import PattrnLayout from '../../layouts/PattrnLayout.astro';
+const benchmarkPolicy = 'https://github.com/SimonGelbart/pattrn/blob/main/docs/reference/benchmarks.md';
+const actionsUrl = 'https://github.com/SimonGelbart/pattrn/actions';
+---
+<PattrnLayout title="Pattrn benchmarks" description="Benchmark evidence and guardrails for Pattrn." current="benchmarks">
+  <section class="page-heading narrow">
+    <p class="eyebrow">Benchmarks</p>
+    <h1>CI-owned evidence, not local folklore.</h1>
+    <p class="lede">Benchmark evidence comes from GitHub Actions workflow artifacts and summaries, not locally committed machine output.</p>
+    <div class="actions"><a class="button" href={benchmarkPolicy} rel="noreferrer">Read benchmark policy ↗</a><a class="button" href={actionsUrl} rel="noreferrer">Open workflow runs ↗</a></div>
+  </section>
+
+  <section class="section split">
+    <div class="section-heading"><p class="eyebrow">Source of truth</p><h2>Current commits need workflow-backed artifacts.</h2><p>The benchmark project exists to keep performance claims measurable and protect the read path from regressions as matching becomes more expressive.</p></div>
+    <article class="panel accent-panel"><p>A benchmark run should produce raw BenchmarkDotNet artifacts, workflow metadata, grouped benchmark summaries, a GitHub job summary, and a downloadable benchmark artifact.</p></article>
+  </section>
+
+  <section class="section">
+    <div class="section-heading"><p class="eyebrow">Grouped summaries</p><h2>Evidence should be reviewable by area.</h2><p>Grouped benchmark reports are derived from BenchmarkDotNet JSON produced by the workflow run. They are not hand-maintained performance tables.</p></div>
+    <div class="grid">
+      <article class="card"><h3>Core hot path</h3><p>Value matching and protected read-path operations.</p></article>
+      <article class="card"><h3>Detailed matching</h3><p>Match metadata, captures, deduplication, and materialization.</p></article>
+      <article class="card"><h3>Routing preview</h3><p>Route parsing, route splitting, helper matching, and pre-split route matching.</p></article>
+      <article class="card"><h3>Builder / validation</h3><p>Build-time behavior, diagnostics, validation, and large-pattern construction.</p></article>
+      <article class="card"><h3>String helpers</h3><p>String splitting, normalization, and convenience facade costs.</p></article>
+      <article class="card"><h3>Unclassified</h3><p>Rows that require follow-up instead of being hidden.</p></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-heading"><p class="eyebrow">Guardrail status</p><h2>Unknown is safer than unsupported certainty.</h2><p>Guardrail statuses should make missing or ambiguous evidence visible.</p></div>
+    <div class="grid">
+      <article class="card"><p class="status-chip">Pass</p><h3>Evidence found</h3><p>The relevant rows were found and match the expectation.</p></article>
+      <article class="card"><p class="status-chip">Review</p><h3>Human review needed</h3><p>Relevant rows were found, but the result needs human review.</p></article>
+      <article class="card callout"><p class="status-chip">Unknown</p><h3>Evidence is missing or ambiguous</h3><p>Treat unclassified rows and unknown guardrails as follow-up items before using a run to support a performance-sensitive decision.</p></article>
+    </div>
+  </section>
+  <section class="section section-compact"><aside class="note"><p>Old committed benchmark reports are historical evidence only. Do not cite them as proof for current performance claims.</p></aside></section>
+</PattrnLayout>

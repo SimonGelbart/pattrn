@@ -1,0 +1,39 @@
+---
+import PattrnLayout from '../../layouts/PattrnLayout.astro';
+const roadmap = 'https://github.com/SimonGelbart/pattrn/blob/main/docs/roadmap.md';
+---
+<PattrnLayout title="Pattrn roadmap" description="Pattrn pre-beta product roadmap and status." current="roadmap">
+  <section class="page-heading narrow">
+    <p class="eyebrow">Roadmap</p>
+    <h1>Pre-beta product shaping.</h1>
+    <p class="lede">Pattrn is pre-beta and pre-1.0. Roadmap milestones describe product readiness, not package-version numbers.</p>
+    <div class="actions"><a class="button" href={roadmap} rel="noreferrer">Read source roadmap ↗</a></div>
+  </section>
+
+  <section class="section split">
+    <div class="section-heading">
+      <p class="eyebrow">North star</p>
+      <h2>A compiled segmented-pattern index for backend apps and libraries.</h2>
+      <p>Pattrn should help applications answer which registered entries match a segmented key, why they match, and how matches should be ranked.</p>
+    </div>
+    <article class="panel accent-panel"><p>The core owns matching mechanics, captures, specificity metadata, duplicate behavior, and diagnostics. It does not own domain-specific interpretation.</p></article>
+  </section>
+
+  <section class="section">
+    <div class="section-heading"><p class="eyebrow">Product boundaries</p><h2>The core knows segments, not domains.</h2><p>Domain concerns belong in companion packages or consuming applications.</p></div>
+    <div class="grid grid--two">
+      <article class="card"><h3>Core responsibilities</h3><ul class="list-plain"><li>segments and pattern segments;</li><li>literals, parameters, wildcards, and catch-alls;</li><li>captures and duplicate registrations;</li><li>specificity metadata and deterministic matching;</li><li>optional diagnostics.</li></ul></article>
+      <article class="card"><h3>Outside the core</h3><ul class="list-plain"><li>HTTP and ASP.NET Core behavior;</li><li>filesystem, authorization, tenant, or business-rule semantics;</li><li>OpenAPI, endpoint metadata, and framework-specific precedence;</li><li>domain interpretation of matched values.</li></ul></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-heading"><p class="eyebrow">Package strategy</p><h2>Stable-scope packages first, preview routing separately.</h2><p>The roadmap keeps the generic core separate from string ergonomics, dependency-injection integration, and routing syntax helpers.</p></div>
+    <div class="doc-grid">
+      <a class="doc-link" href="https://github.com/SimonGelbart/pattrn/blob/main/docs/packages/pattrn.md" rel="noreferrer"><strong><code>Pattrn</code></strong><p>Core generic segmented-pattern matching.</p></a>
+      <a class="doc-link" href="https://github.com/SimonGelbart/pattrn/blob/main/docs/packages/pattrn-strings.md" rel="noreferrer"><strong><code>Pattrn.Strings</code></strong><p>String-path ergonomics and normalization.</p></a>
+      <a class="doc-link" href="https://github.com/SimonGelbart/pattrn/blob/main/docs/packages/pattrn-dependency-injection.md" rel="noreferrer"><strong><code>Pattrn.DependencyInjection</code></strong><p>Thin backend application integration.</p></a>
+      <a class="doc-link" href="https://github.com/SimonGelbart/pattrn/blob/main/docs/packages/pattrn-routing.md" rel="noreferrer"><strong><code>Pattrn.Routing</code></strong><p>Framework-neutral route-template parsing preview.</p></a>
+    </div>
+  </section>
+</PattrnLayout>
