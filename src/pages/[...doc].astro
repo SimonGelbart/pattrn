@@ -25,8 +25,8 @@ if (!loadModule) {
   throw new Error(`No Markdown module found for ${doc.source}. Check docs.site.json and the docs tree.`);
 }
 
-const markdownModule = await loadModule() as MarkdownModule;
-const Content = markdownModule.Content ?? markdownModule.default;
+const markdownModule = (await loadModule()) as MarkdownModule;
+const Content = (markdownModule.Content ?? markdownModule.default) as any;
 const frontmatter = markdownModule.frontmatter ?? {};
 
 if (!Content) {
