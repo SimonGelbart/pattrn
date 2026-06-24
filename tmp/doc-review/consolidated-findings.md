@@ -8,6 +8,7 @@
 - Phase 4 documentation map completed with explicit path ownership, topic ownership, docs-site curation rules, and standards update proposals.
 - Phase 5 consolidation/archive/delete planning completed with overlap checks, canonicalization actions, and approval gating.
 - Phase 6 user-journey review completed across the required newcomer path.
+- Phase 7 implementation/validation completed for approved non-destructive documentation cleanup decisions.
 
 ## Confirmed findings
 - Primary current entry path is `README.md` -> `docs/README.md` -> tutorials/how-to/reference/package docs/ADRs.
@@ -83,7 +84,18 @@
 - D-010 (`Q13`): Make strict newcomer path the first visible section in `docs/README.md`; move and condense maintainer/historical/archive/benchmark sections.
 - D-011 (`Q14`): Add direct core package install instructions to `docs/packages/pattrn.md` and add a compact package-selection decision table with one canonical owner and links.
 
+## Phase 7 implementation outcomes
+- `README.md` was trimmed to short-entry scope (overview, package summary, first-use example, docs-hub links) and stale direction wording was removed.
+- `docs/packages/pattrn.md` became the canonical package-selection/install owner with direct install snippet and compact package-choice table.
+- `docs/README.md` now starts with a strict newcomer path and moves maintainer/historical sections lower in condensed form.
+- `docs/reference/api.md` now includes compact builder maintenance API coverage (`Contains*`, `Remove*`, `RemoveAll*`, `Clear`, convenience overload families).
+- `docs/packages/pattrn-routing.md` now includes a dedicated low-allocation helper section for `TryMatchRoute*` and `GetRoute*UpperBound`.
+- `docs/reference/pattern-segments.md` now includes catch-all in the segment-kind table and a dedicated catch-all subsection.
+- `docs/reference/documentation-standards.md` now codifies documentation path-ownership and docs-site curation rules.
+- `docs/adr/README.md` now serves as the complete canonical ADR index (statuses, topic labels, public relevance, task-based read order).
+- `docs.site.json` now renders all accepted non-superseded ADRs currently present in `docs/adr/`.
+- `CHANGELOG.md` now frames `3.0.0-alpha.*` entries as historical pre-beta chronology and points to ADR 0012 + roadmap for current version policy.
+
 ## Open risks
-- Implementation sequencing risk: approved policy changes span multiple current docs and can drift if not executed in the decided canonical order.
 - Benchmark evidence risk remains during transition: raw benchmark markdown stays committed until dedicated retention cleanup validates summary/artifact sufficiency.
-- Historical-framing risk remains until changelog and archive-link updates are actually implemented in product docs.
+- ADR index/manifest synchronization can drift if future ADR additions or status changes are not updated in both `docs/adr/README.md` and `docs.site.json`.

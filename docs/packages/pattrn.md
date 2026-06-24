@@ -6,6 +6,14 @@ Fast immutable segmented-pattern matching for .NET 10.
 
 Pattrn is pre-beta. The current package version is intentionally simple and centralized. Roadmap milestones describe product readiness, not release-train numbers.
 
+## Install
+
+```xml
+<PackageReference Include="Pattrn" Version="0.1.0-alpha.1" />
+```
+
+See [packaging reference](../reference/packaging.md) for centralized versioning policy and package metadata details.
+
 ## Packages
 
 | Package | Purpose | Status |
@@ -14,6 +22,17 @@ Pattrn is pre-beta. The current package version is intentionally simple and cent
 | `Pattrn.Strings` | String splitting, normalization, and string-path ergonomics. | Pre-beta stable candidate. |
 | `Pattrn.DependencyInjection` | Thin Microsoft.Extensions.DependencyInjection integration. | Pre-beta stable candidate. |
 | `Pattrn.Routing` | Framework-neutral route-template parsing helpers built on the generic core. | Preview. |
+
+## Which package should I install?
+
+This table is the canonical package-selection reference.
+
+| If you need... | Install | Then add |
+|---|---|---|
+| Generic segmented matching on already-split segments | `Pattrn` | Nothing else |
+| Dotted/slashed string-path helpers and normalization | `Pattrn` + `Pattrn.Strings` | String normalization options and string-builder facade |
+| Microsoft.Extensions.DependencyInjection helpers | `Pattrn` + `Pattrn.DependencyInjection` | DI registration extensions |
+| Route-template parsing/expansion helpers | `Pattrn` + `Pattrn.Routing` | Route-specific helper APIs (preview) |
 
 ## Core usage
 
@@ -186,6 +205,6 @@ Key pages:
 
 ## Product direction
 
-The next product work is project foundation and ADR cleanup, followed by ranking/specificity documentation, internal architecture cleanup, diagnostics hardening, serialization-friendly registrations, benchmark/CI hardening, documentation and samples, and then a beta feedback surface.
+For current milestone status and sequencing, see the [roadmap](../roadmap.md). Historical alpha-train context is preserved in [CHANGELOG.md](../../CHANGELOG.md) and archive docs.
 
 Routing remains preview. Globbing, ASP.NET Core helpers, source generators, analyzers, custom ranking plugins, and multidimensional matching helpers are deferred until after the core/string/DI product is ready for beta feedback.

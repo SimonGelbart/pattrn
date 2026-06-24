@@ -133,6 +133,20 @@ RemoveAllPattern(...);
 
 See [generic pattern segments](pattern-segments.md).
 
+## Builder maintenance and convenience APIs
+
+`PattrnIndexBuilder<TSegment, TValue>` also exposes maintenance and convenience families for tokenized and explicit-segment workflows:
+
+| Family | Methods |
+|---|---|
+| Containment checks | `Contains(...)`, `ContainsPattern(...)` |
+| Remove one value | `Remove(...)`, `RemovePattern(...)` |
+| Remove all values for a pattern | `RemoveAll(...)`, `RemoveAllPattern(...)` |
+| Reset builder state | `Clear()` |
+| Convenience registration | `Add(...)`, `AddRange(...)`, `AddPattern(...)`, `AddPatternRange(...)` |
+
+Each family includes span-first overloads plus `ReadOnlyMemory<T>` and `IEnumerable<T>` overloads for convenience.
+
 
 
 ## Tokenized convenience registration
@@ -232,4 +246,4 @@ builder.ValidateOnBuild(diagnostic => diagnostic.Kind == PatternDiagnosticKind.O
 
 ## Preview status
 
-`Pattrn`, `Pattrn.Strings`, and `Pattrn.DependencyInjection` are stable candidates before beta. `Pattrn.Routing` remains preview. Public API names may still change before beta when doing so makes the long-term surface clearer. See [project profile](project-profile.md) and [release decisions](../archive/pre-beta/release/release-decisions.md).
+`Pattrn`, `Pattrn.Strings`, and `Pattrn.DependencyInjection` are stable candidates before beta. `Pattrn.Routing` remains preview. Public API names may still change before beta when doing so makes the long-term surface clearer. See [project profile](project-profile.md), [roadmap](../roadmap.md), and the [archive index](../archive/README.md) for historical release context.

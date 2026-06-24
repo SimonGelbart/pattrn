@@ -17,3 +17,8 @@
 | Q13 | Phase 6 | Should `docs/README.md` separate a strict newcomer path from maintainer/historical sections on the same page? | No | Phase 6 found onboarding clarity loss when the docs hub mixes first-use navigation with large maintainer/archive sections. | Any docs hub navigation cleanup phase. | Resolved (D-010) |
 | Q14 | Phase 6 | Should `docs/packages/pattrn.md` include direct install instructions and a compact package-selection decision table? | No | First-time users can identify package names, but install/selection guidance is still distributed and partially implicit. | Any package-doc onboarding improvement phase. | Resolved (D-011) |
 | Q15 | Phase 6 | Should current reference pages avoid direct links to specific archive release files and route through `docs/archive/README.md` instead? | No | Phase 6 found archive cross-links in current reference/package pages that can blur current vs historical guidance. | Any archive-link framing cleanup phase. | Resolved (D-004) |
+
+## Phase 7 status
+
+- Remaining blocking questions: none.
+- Remaining nonblocking questions: none.

@@ -2,7 +2,7 @@
 
 Pattrn documentation should be durable, accurate, and easy to maintain.
 
-## Organization
+## Diataxis organization
 
 Use the Diataxis structure for new durable docs:
 
@@ -12,11 +12,29 @@ Use the Diataxis structure for new durable docs:
 - `docs/explanation/` for conceptual background;
 - `docs/adr/` for Architecture Decision Records.
 
-Existing alpha-era folders may stay while they are reconciled, archived, or migrated.
+Older alpha-era material may remain under `docs/archive/pre-beta/` while it is reconciled as historical context.
 
-## Source of truth
+## Path ownership map
 
-Prefer one canonical source and link to it.
+Use these canonical ownership boundaries.
+
+| Path | Canonical purpose |
+|---|---|
+| `README.md` | Short product overview + first-use example + links to docs hub. |
+| `docs/README.md` | Canonical docs navigation with newcomer path first. |
+| `docs/tutorials/` | Guided learning flows. |
+| `docs/how-to/` | Task-oriented procedures. |
+| `docs/reference/` | Stable contracts, semantics, and maintainer reference. |
+| `docs/explanation/` | Design rationale and conceptual framing. |
+| `docs/packages/` | Package-scoped README content for NuGet package docs. |
+| `docs/adr/` | Decision records only (status-bearing ADRs and ADR index). |
+| `docs/archive/` | Historical pre-beta context only. |
+| `docs/benchmark-results/` | Historical benchmark evidence only. |
+| `docs.site.json` | Public docs-surface curation manifest. |
+
+## Source-of-truth rules
+
+Prefer one canonical source and link to it instead of duplicating long-form content.
 
 Avoid duplicating:
 
@@ -27,8 +45,24 @@ Avoid duplicating:
 - environment-specific paths;
 - implementation details that are private by design.
 
+## Current vs historical rules
+
+- Current user-facing docs should prioritize current reference/roadmap/project-profile sources.
+- Link to archive material only when historical context is needed, and label it clearly as historical.
+- Keep `CHANGELOG.md` as public release history while clearly framing alpha-train entries as historical pre-beta context.
+- Committed benchmark markdown is historical evidence; current benchmark proof comes from CI workflow artifacts and summaries.
+
+## docs.site.json curation rules
+
+`docs.site.json` is a curation layer for current public docs, not a list of every markdown file.
+
+- Include current public pages in active user/maintainer paths.
+- Keep explicit excludes for `docs/archive/**` and `docs/benchmark-results/**`.
+- Do not route raw logs, generated benchmark dumps, or transitional scratch/review notes.
+- Keep ADR routing aligned with `docs/adr/README.md`: render all accepted, non-superseded ADRs unless an ADR is intentionally maintainer-only.
+
 ## Staleness rules
 
-When documentation disagrees with code, tests, ADRs, or the current roadmap, either update it or mark it historical.
+When documentation disagrees with code, tests, accepted ADRs, or the current roadmap, either update it or mark it historical.
 
 Do not preserve alpha-era wording merely because it was previously published. Pattrn is pre-beta, and documentation should support the intended long-term product rather than old alpha mechanics.

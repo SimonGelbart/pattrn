@@ -13,3 +13,8 @@
 | D-009 | 2026-06-24 | Q9 | Update `docs/reference/documentation-standards.md` now to codify documentation path-ownership map and `docs.site.json` public-surface curation rules. | Documentation governance | `docs/reference/documentation-standards.md`, `docs.site.json` | - | Immediate standards codification approved. |
 | D-010 | 2026-06-24 | Q13 | Update `docs/README.md` so first visible section is a strict newcomer path; move maintainer/historical/archive/benchmark sections lower and condense them to avoid interrupting first-use navigation. | Docs hub onboarding | `docs/README.md` | - | Prioritizes newcomer-first navigation ordering. |
 | D-011 | 2026-06-24 | Q14 | Add direct install instructions for core package in `docs/packages/pattrn.md`; add compact "which package should I install?" decision table in `docs/README.md`, `docs/packages/pattrn.md`, or both with one canonical owner and cross-links. | Package install guidance | `docs/packages/pattrn.md`, `docs/README.md` | - | Requires explicit canonical owner for decision table content. |
+
+## Phase 7 application status
+
+- Applied in Phase 7: D-001, D-003, D-004, D-005, D-006, D-007, D-008, D-009, D-010, D-011.
+- Deferred by approved policy: D-002 (raw benchmark markdown retention cleanup remains a follow-up phase).
