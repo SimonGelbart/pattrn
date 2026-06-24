@@ -71,13 +71,19 @@
 - Core package install and package-selection guidance can be made more explicit for first-time users.
 
 ## Resolved decisions
-- None added in Phase 6.
+- D-001 (`Q1`/`Q10`): Perform full ADR audit/classification, then render all accepted non-superseded ADRs in `docs.site.json` unless intentionally maintainer-only; make `docs/adr/README.md` the canonical complete ADR index.
+- D-002 (`Q2`): Adopt summary-only benchmark retention target, but keep existing `docs/benchmark-results/**/raw/*.md` in the first implementation pass pending dedicated retention cleanup.
+- D-003 (`Q3`/`Q12`): Keep `CHANGELOG.md` public and reframe alpha-train entries in place as historical/pre-beta context; do not move changelog sections to archive yet.
+- D-004 (`Q4`/`Q15`): Avoid direct links from current reference/package docs to specific archive release files unless essential; prefer current docs and route historical context through `docs/archive/README.md` or explicit historical labels.
+- D-005 (`Q5`/`Q11`): Trim root `README.md` to short-entry scope and keep package-depth content in `docs/packages/pattrn.md`; avoid near-duplicate long-form content.
+- D-006 (`Q6`): Expand `docs/reference/api.md` with compact builder maintenance API coverage (`Contains*`, `Remove*`, `RemoveAll*`, `Clear`, range/convenience overload families).
+- D-007 (`Q7`): Add low-allocation routing helper section in `docs/packages/pattrn-routing.md` for `TryMatchRoute*` and `GetRoute*UpperBound`.
+- D-008 (`Q8`): Add catch-all coverage to `docs/reference/pattern-segments.md` segment-kind table and a short catch-all subsection.
+- D-009 (`Q9`): Update `docs/reference/documentation-standards.md` now with path-ownership map and `docs.site.json` public-surface curation rules.
+- D-010 (`Q13`): Make strict newcomer path the first visible section in `docs/README.md`; move and condense maintainer/historical/archive/benchmark sections.
+- D-011 (`Q14`): Add direct core package install instructions to `docs/packages/pattrn.md` and add a compact package-selection decision table with one canonical owner and links.
 
 ## Open risks
-- Cleanup actions may accidentally remove historically required evidence without explicit maintainer retention decisions.
-- Manifest coverage decisions (rendered vs source-link ADRs) can create discoverability inconsistencies if not made explicitly.
-- Versioning posture confusion may persist for readers if `CHANGELOG.md` remains unreframed against ADR 0012.
-- Public API discoverability risk remains if docs continue to document only partial builder/routing helper surfaces.
-- Without codifying map ownership into `docs/reference/documentation-standards.md`, path responsibilities may drift again.
-- Destructive cleanup before approvals could violate documentation auditability and historical retention expectations.
-- Onboarding effectiveness may remain lower than intended if newcomer navigation continues to mix current guidance with maintainer/historical context on the same primary hub page.
+- Implementation sequencing risk: approved policy changes span multiple current docs and can drift if not executed in the decided canonical order.
+- Benchmark evidence risk remains during transition: raw benchmark markdown stays committed until dedicated retention cleanup validates summary/artifact sufficiency.
+- Historical-framing risk remains until changelog and archive-link updates are actually implemented in product docs.
