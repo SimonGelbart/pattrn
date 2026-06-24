@@ -61,8 +61,7 @@ jobs:
           --
           --filter "$BENCHMARK_FILTER"
           --join
-          --exporters json
-          --exporters markdown
+          --exporters JSON GitHub
           --strategy "$BENCHMARK_STRATEGY"
           --artifacts "$BENCHMARK_ARTIFACTS"
 
