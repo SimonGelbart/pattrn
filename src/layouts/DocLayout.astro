@@ -3,6 +3,7 @@ import PattrnLayout from './PattrnLayout.astro';
 import DocsNav from '../components/DocsNav.astro';
 import SourceLink from '../components/SourceLink.astro';
 import { getTopLevelKey } from '../lib/docs';
+import '../styles/docs.css';
 
 const { doc, frontmatter = {}, sourceUrl } = Astro.props;
 const title = frontmatter.title ?? doc.title;
