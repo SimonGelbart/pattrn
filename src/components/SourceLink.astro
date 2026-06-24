@@ -1,0 +1,7 @@
+---
+const { href, label = 'View source' } = Astro.props;
+---
+<a class="source-link" href={href} rel="noreferrer">
+  <span>{label}</span>
+  <span aria-hidden="true">↗</span>
+</a>
