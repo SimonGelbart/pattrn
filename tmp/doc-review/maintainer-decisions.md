@@ -18,3 +18,8 @@
 
 - Applied in Phase 7: D-001, D-003, D-004, D-005, D-006, D-007, D-008, D-009, D-010, D-011.
 - Deferred by approved policy: D-002 (raw benchmark markdown retention cleanup remains a follow-up phase).
+
+## Phase 9 application status
+
+- Final report phase reused recorded decisions D-001 through D-011 for consolidated reporting context.
+- No new maintainer answers or new decision IDs were introduced in Phase 9.
