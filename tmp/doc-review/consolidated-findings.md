@@ -7,6 +7,7 @@
 - Phase 3 docs-vs-code gap analysis completed with claim-level verification against source/tests/samples.
 - Phase 4 documentation map completed with explicit path ownership, topic ownership, docs-site curation rules, and standards update proposals.
 - Phase 5 consolidation/archive/delete planning completed with overlap checks, canonicalization actions, and approval gating.
+- Phase 6 user-journey review completed across the required newcomer path.
 
 ## Confirmed findings
 - Primary current entry path is `README.md` -> `docs/README.md` -> tutorials/how-to/reference/package docs/ADRs.
@@ -17,6 +18,7 @@
 - Core docs claims for `TryMatch`/`TryMatchDetailed` failure semantics, catch-all behavior, specificity ordering, diagnostics separation, and build-validation controls are aligned with implementation and tests.
 - Phase 4 establishes explicit ownership boundaries for README, docs index, Diataxis folders, package docs, archive, benchmark-results, ADRs, and `docs.site.json` public routing.
 - Phase 5 establishes a non-destructive execution order: governance consolidation first, then approved archival/deletion work with explicit gates.
+- Phase 6 confirms the required newcomer path works end-to-end, but highlights onboarding clarity issues caused by stale direction text, fragmented package-install guidance, and mixed newcomer/maintainer/historical navigation on the docs hub.
 
 ## Contradictions
 - `CHANGELOG.md` presents a `3.0.0-alpha.*` release train without strong historical framing, conflicting with current ADR/roadmap version-reset posture (`0.1.0-alpha.1` centralized pre-beta policy).
@@ -49,6 +51,13 @@
 - Identified delete candidates and explicitly marked approval requirements before destructive actions.
 - Added approval matrix to separate safe consolidation from actions requiring maintainer sign-off.
 
+## User journey outcomes (Phase 6)
+- Required path navigation works in sequence.
+- New-user onboarding is partially diluted by mixed maintainer/historical navigation blocks in `docs/README.md`.
+- Package install/selection guidance is present but not sufficiently explicit on the core package page.
+- Stale direction text in README/package README can conflict with roadmap-based "current status" understanding.
+- Reference coverage remains strong, with catch-all visibility in `pattern-segments.md` still a discoverability gap.
+
 ## Archive/delete candidates
 - Candidate for policy decision: raw generated benchmark markdown files under `docs/benchmark-results/**/raw/*.md`.
 - Candidate for consolidation (not immediate deletion): alpha-era chronology in `CHANGELOG.md` versus archive release docs.
@@ -58,9 +67,11 @@
 - Current path is clear at top-level, but discoverability gaps exist between full accepted ADR set and rendered ADR subset.
 - Some current reference pages link directly into archive release notes, which can blur active vs historical guidance.
 - Key low-allocation/public API behaviors are discoverable in code/tests but underrepresented in docs (builder maintenance and routing try/upper-bound helpers).
+- Newcomer-first flow is currently mixed with maintainer and historical sections in the docs hub.
+- Core package install and package-selection guidance can be made more explicit for first-time users.
 
 ## Resolved decisions
-- None added in Phase 5.
+- None added in Phase 6.
 
 ## Open risks
 - Cleanup actions may accidentally remove historically required evidence without explicit maintainer retention decisions.
@@ -69,3 +80,4 @@
 - Public API discoverability risk remains if docs continue to document only partial builder/routing helper surfaces.
 - Without codifying map ownership into `docs/reference/documentation-standards.md`, path responsibilities may drift again.
 - Destructive cleanup before approvals could violate documentation auditability and historical retention expectations.
+- Onboarding effectiveness may remain lower than intended if newcomer navigation continues to mix current guidance with maintainer/historical context on the same primary hub page.
