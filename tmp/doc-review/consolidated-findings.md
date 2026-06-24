@@ -6,6 +6,7 @@
 - Phase 2 internal consistency audit completed with claim-level contradiction/redundancy/staleness analysis.
 - Phase 3 docs-vs-code gap analysis completed with claim-level verification against source/tests/samples.
 - Phase 4 documentation map completed with explicit path ownership, topic ownership, docs-site curation rules, and standards update proposals.
+- Phase 5 consolidation/archive/delete planning completed with overlap checks, canonicalization actions, and approval gating.
 
 ## Confirmed findings
 - Primary current entry path is `README.md` -> `docs/README.md` -> tutorials/how-to/reference/package docs/ADRs.
@@ -15,6 +16,7 @@
 - Core product-boundary and ranking claims are internally consistent across README, reference docs, accepted ADRs, source, and tests.
 - Core docs claims for `TryMatch`/`TryMatchDetailed` failure semantics, catch-all behavior, specificity ordering, diagnostics separation, and build-validation controls are aligned with implementation and tests.
 - Phase 4 establishes explicit ownership boundaries for README, docs index, Diataxis folders, package docs, archive, benchmark-results, ADRs, and `docs.site.json` public routing.
+- Phase 5 establishes a non-destructive execution order: governance consolidation first, then approved archival/deletion work with explicit gates.
 
 ## Contradictions
 - `CHANGELOG.md` presents a `3.0.0-alpha.*` release train without strong historical framing, conflicting with current ADR/roadmap version-reset posture (`0.1.0-alpha.1` centralized pre-beta policy).
@@ -40,6 +42,13 @@
 - Confirmed governance rule: committed benchmark reports are historical evidence; current benchmark proof comes from CI-owned artifacts/summaries.
 - Proposed docs-site curation guardrails to keep public routes focused on current docs and exclude archive/transitional/raw output areas.
 
+## Consolidation/archive/delete outcomes (Phase 5)
+- Completed required overlap checks across README/docs hub, roadmap/release history, reference/package docs, archive/current docs, benchmark docs, changelog/archive notes, and docs-site manifest/index alignment.
+- Produced consolidation plan with canonical sources and implementation sequencing.
+- Identified archive-move candidates as policy-controlled actions rather than immediate edits.
+- Identified delete candidates and explicitly marked approval requirements before destructive actions.
+- Added approval matrix to separate safe consolidation from actions requiring maintainer sign-off.
+
 ## Archive/delete candidates
 - Candidate for policy decision: raw generated benchmark markdown files under `docs/benchmark-results/**/raw/*.md`.
 - Candidate for consolidation (not immediate deletion): alpha-era chronology in `CHANGELOG.md` versus archive release docs.
@@ -51,7 +60,7 @@
 - Key low-allocation/public API behaviors are discoverable in code/tests but underrepresented in docs (builder maintenance and routing try/upper-bound helpers).
 
 ## Resolved decisions
-- None added in Phase 4.
+- None added in Phase 5.
 
 ## Open risks
 - Cleanup actions may accidentally remove historically required evidence without explicit maintainer retention decisions.
@@ -59,3 +68,4 @@
 - Versioning posture confusion may persist for readers if `CHANGELOG.md` remains unreframed against ADR 0012.
 - Public API discoverability risk remains if docs continue to document only partial builder/routing helper surfaces.
 - Without codifying map ownership into `docs/reference/documentation-standards.md`, path responsibilities may drift again.
+- Destructive cleanup before approvals could violate documentation auditability and historical retention expectations.
