@@ -1,6 +1,8 @@
 ---
 import PattrnLayout from '../../layouts/PattrnLayout.astro';
-const benchmarkPolicy = 'https://github.com/SimonGelbart/pattrn/blob/main/docs/reference/benchmarks.md';
+import { getSourceUrl } from '../../lib/docs';
+
+const benchmarkPolicy = getSourceUrl('docs/reference/benchmarks.md');
 const actionsUrl = 'https://github.com/SimonGelbart/pattrn/actions';
 ---
 <PattrnLayout title="Pattrn benchmarks" description="Benchmark evidence and guardrails for Pattrn." current="benchmarks">

@@ -1,15 +1,22 @@
 ---
 import PattrnLayout from '../../layouts/PattrnLayout.astro';
-const refRoot = 'https://github.com/SimonGelbart/pattrn/blob/main/docs/reference';
+import { getRouteForSource, getSourceUrl, withBase } from '../../lib/docs';
+
+function linkForSource(source: string) {
+  const route = getRouteForSource(source);
+  return route ? withBase(route) : getSourceUrl(source);
+}
+
 const references = [
-  ['API overview', `${refRoot}/api.md`, 'Core public API map and entry points.'],
-  ['Pattern segments', `${refRoot}/pattern-segments.md`, 'Literal, parameter, wildcard, and catch-all segment model.'],
-  ['Matching semantics', `${refRoot}/matching-semantics.md`, 'What matches, why, and how detailed matching behaves.'],
-  ['Ranking and specificity', `${refRoot}/ranking-specificity.md`, 'Deterministic ranking metadata and specificity model.'],
-  ['Duplicate behavior', `${refRoot}/duplicate-behavior.md`, 'How duplicate registrations and materialization are handled.'],
-  ['Diagnostics', `${refRoot}/diagnostics.md`, 'Opt-in explanation APIs and rejection diagnostics.'],
-  ['Validation', `${refRoot}/validation.md`, 'Validation posture and maintainer checks.'],
-  ['Repository layout', `${refRoot}/repository-layout.md`, 'Where code, docs, tests, and workflow assets live.'],
+  ['API overview', linkForSource('docs/reference/api.md'), 'Core public API map and entry points.'],
+  ['Pattern segments', linkForSource('docs/reference/pattern-segments.md'), 'Literal, parameter, wildcard, and catch-all segment model.'],
+  ['Matching semantics', linkForSource('docs/reference/matching-semantics.md'), 'What matches, why, and how detailed matching behaves.'],
+  ['Ranking and specificity', linkForSource('docs/reference/ranking-specificity.md'), 'Deterministic ranking metadata and specificity model.'],
+  ['Duplicate behavior', linkForSource('docs/reference/duplicate-behavior.md'), 'How duplicate registrations and materialization are handled.'],
+  ['Diagnostics', linkForSource('docs/reference/diagnostics.md'), 'Opt-in explanation APIs and rejection diagnostics.'],
+  ['Validation', linkForSource('docs/reference/validation.md'), 'Validation posture and maintainer checks.'],
+  ['Repository layout', linkForSource('docs/reference/repository-layout.md'), 'Where code, docs, tests, and workflow assets live.'],
+  ['Benchmarks', withBase('/benchmarks/'), 'Benchmark evidence policy and CI guardrail context.'],
 ];
 ---
 <PattrnLayout title="Pattrn reference" description="Reference map for Pattrn docs." current="reference">

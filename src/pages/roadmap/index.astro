@@ -1,6 +1,13 @@
 ---
 import PattrnLayout from '../../layouts/PattrnLayout.astro';
-const roadmap = 'https://github.com/SimonGelbart/pattrn/blob/main/docs/roadmap.md';
+import { getRouteForSource, getSourceUrl, withBase } from '../../lib/docs';
+
+function linkForSource(source: string) {
+  const route = getRouteForSource(source);
+  return route ? withBase(route) : getSourceUrl(source);
+}
+
+const roadmap = getSourceUrl('docs/roadmap.md');
 ---
 <PattrnLayout title="Pattrn roadmap" description="Pattrn pre-beta product roadmap and status." current="roadmap">
   <section class="page-heading narrow">
@@ -30,10 +37,10 @@ const roadmap = 'https://github.com/SimonGelbart/pattrn/blob/main/docs/roadmap.m
   <section class="section">
     <div class="section-heading"><p class="eyebrow">Package strategy</p><h2>Stable-scope packages first, preview routing separately.</h2><p>The roadmap keeps the generic core separate from string ergonomics, dependency-injection integration, and routing syntax helpers.</p></div>
     <div class="doc-grid">
-      <a class="doc-link" href="https://github.com/SimonGelbart/pattrn/blob/main/docs/packages/pattrn.md" rel="noreferrer"><strong><code>Pattrn</code></strong><p>Core generic segmented-pattern matching.</p></a>
-      <a class="doc-link" href="https://github.com/SimonGelbart/pattrn/blob/main/docs/packages/pattrn-strings.md" rel="noreferrer"><strong><code>Pattrn.Strings</code></strong><p>String-path ergonomics and normalization.</p></a>
-      <a class="doc-link" href="https://github.com/SimonGelbart/pattrn/blob/main/docs/packages/pattrn-dependency-injection.md" rel="noreferrer"><strong><code>Pattrn.DependencyInjection</code></strong><p>Thin backend application integration.</p></a>
-      <a class="doc-link" href="https://github.com/SimonGelbart/pattrn/blob/main/docs/packages/pattrn-routing.md" rel="noreferrer"><strong><code>Pattrn.Routing</code></strong><p>Framework-neutral route-template parsing preview.</p></a>
+      <a class="doc-link" href={linkForSource('docs/packages/pattrn.md')} rel="noreferrer"><strong><code>Pattrn</code></strong><p>Core generic segmented-pattern matching.</p></a>
+      <a class="doc-link" href={linkForSource('docs/packages/pattrn-strings.md')} rel="noreferrer"><strong><code>Pattrn.Strings</code></strong><p>String-path ergonomics and normalization.</p></a>
+      <a class="doc-link" href={linkForSource('docs/packages/pattrn-dependency-injection.md')} rel="noreferrer"><strong><code>Pattrn.DependencyInjection</code></strong><p>Thin backend application integration.</p></a>
+      <a class="doc-link" href={linkForSource('docs/packages/pattrn-routing.md')} rel="noreferrer"><strong><code>Pattrn.Routing</code></strong><p>Framework-neutral route-template parsing preview.</p></a>
     </div>
   </section>
 </PattrnLayout>
