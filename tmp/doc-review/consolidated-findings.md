@@ -9,6 +9,7 @@
 - Phase 5 consolidation/archive/delete planning completed with overlap checks, canonicalization actions, and approval gating.
 - Phase 6 user-journey review completed across the required newcomer path.
 - Phase 7 implementation/validation completed for approved non-destructive documentation cleanup decisions.
+- Phase 8 design-only skill framework completed for reusable AI-assisted documentation management workflow execution.
 
 ## Confirmed findings
 - Primary current entry path is `README.md` -> `docs/README.md` -> tutorials/how-to/reference/package docs/ADRs.
@@ -95,6 +96,19 @@
 - `docs/adr/README.md` now serves as the complete canonical ADR index (statuses, topic labels, public relevance, task-based read order).
 - `docs.site.json` now renders all accepted non-superseded ADRs currently present in `docs/adr/`.
 - `CHANGELOG.md` now frames `3.0.0-alpha.*` entries as historical pre-beta chronology and points to ADR 0012 + roadmap for current version policy.
+
+## Phase 8 skill-design outcomes
+- Added `tmp/doc-review/08-ai-documentation-skills.md` as a design-only specification for seven reusable workflow skills:
+  1. documentation inventory,
+  2. documentation consistency audit,
+  3. docs-vs-code gap analysis,
+  4. maintainer decision capture,
+  5. documentation implementation,
+  6. validation/reporting,
+  7. ADR/docs-site synchronization.
+- Each skill now has standardized fields: purpose, inputs, required reading, steps, outputs, stop conditions, execution mode (read-only vs may-edit-after-approval), and explicit `tmp/doc-review` update behavior.
+- Phase 8 intentionally introduced no product-doc edits, no file moves/deletes/archives, and no executable skill-file additions.
+- The resulting design provides a reusable phase template while preserving existing approval gates for destructive actions and implementation edits.
 
 ## Open risks
 - Benchmark evidence risk remains during transition: raw benchmark markdown stays committed until dedicated retention cleanup validates summary/artifact sufficiency.

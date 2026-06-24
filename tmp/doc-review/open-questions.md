@@ -22,3 +22,8 @@
 
 - Remaining blocking questions: none.
 - Remaining nonblocking questions: none.
+
+## Phase 8 status
+
+- Remaining blocking questions: none.
+- Remaining nonblocking questions: none.
