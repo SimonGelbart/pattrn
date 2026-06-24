@@ -1,0 +1,29 @@
+---
+import PattrnLayout from '../../layouts/PattrnLayout.astro';
+const refRoot = 'https://github.com/SimonGelbart/pattrn/blob/main/docs/reference';
+const references = [
+  ['API overview', `${refRoot}/api.md`, 'Core public API map and entry points.'],
+  ['Pattern segments', `${refRoot}/pattern-segments.md`, 'Literal, parameter, wildcard, and catch-all segment model.'],
+  ['Matching semantics', `${refRoot}/matching-semantics.md`, 'What matches, why, and how detailed matching behaves.'],
+  ['Ranking and specificity', `${refRoot}/ranking-specificity.md`, 'Deterministic ranking metadata and specificity model.'],
+  ['Duplicate behavior', `${refRoot}/duplicate-behavior.md`, 'How duplicate registrations and materialization are handled.'],
+  ['Diagnostics', `${refRoot}/diagnostics.md`, 'Opt-in explanation APIs and rejection diagnostics.'],
+  ['Validation', `${refRoot}/validation.md`, 'Validation posture and maintainer checks.'],
+  ['Repository layout', `${refRoot}/repository-layout.md`, 'Where code, docs, tests, and workflow assets live.'],
+];
+---
+<PattrnLayout title="Pattrn reference" description="Reference map for Pattrn docs." current="reference">
+  <section class="page-heading narrow">
+    <p class="eyebrow">Reference</p>
+    <h1>Stable reference map.</h1>
+    <p class="lede">This page points to the canonical reference documents for API shape, matching behavior, diagnostics, validation, and repository structure.</p>
+  </section>
+  <section class="section">
+    <div class="doc-grid">
+      {references.map(([label, href, text]) => (
+        <a class="doc-link" href={href} rel="noreferrer"><strong>{label} ↗</strong><p>{text}</p></a>
+      ))}
+    </div>
+  </section>
+  <section class="section section-compact"><aside class="note"><p>The Astro shell intentionally keeps this route curated in the first migration PR. Full Markdown rendering can be added later after the project site shell is stable.</p></aside></section>
+</PattrnLayout>
