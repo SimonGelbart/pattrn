@@ -138,7 +138,7 @@ def classify(row: BenchmarkRow) -> str:
         return "String helpers"
     if "detailed" in haystack or "capture" in haystack or "duplicate" in haystack or "matchtoarray" in haystack:
         return "Detailed matching"
-    if "pattrnindexbenchmarks" in haystack and ("matchtospan" in haystack or "trymatchtospan" in haystack or "upperbound" in haystack):
+    if "pattrnindex" in haystack and ("matchtospan" in haystack or "trymatchtospan" in haystack or "upperbound" in haystack):
         return "Core hot path"
     return "Unclassified"
 
