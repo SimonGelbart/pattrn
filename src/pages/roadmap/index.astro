@@ -1,11 +1,6 @@
 ---
 import PattrnLayout from '../../layouts/PattrnLayout.astro';
-import { getRouteForSource, getSourceUrl, withBase } from '../../lib/docs';
-
-function linkForSource(source: string) {
-  const route = getRouteForSource(source);
-  return route ? withBase(route) : getSourceUrl(source);
-}
+import { getSourceUrl, linkForSource } from '../../lib/docs';
 
 const roadmap = getSourceUrl('docs/roadmap.md');
 ---
@@ -37,10 +32,10 @@ const roadmap = getSourceUrl('docs/roadmap.md');
   <section class="section">
     <div class="section-heading"><p class="eyebrow">Package strategy</p><h2>Stable-scope packages first, preview routing separately.</h2><p>The roadmap keeps the generic core separate from string ergonomics, dependency-injection integration, and routing syntax helpers.</p></div>
     <div class="doc-grid">
-      <a class="doc-link" href={linkForSource('docs/packages/pattrn.md')} rel="noreferrer"><strong><code>Pattrn</code></strong><p>Core generic segmented-pattern matching.</p></a>
-      <a class="doc-link" href={linkForSource('docs/packages/pattrn-strings.md')} rel="noreferrer"><strong><code>Pattrn.Strings</code></strong><p>String-path ergonomics and normalization.</p></a>
-      <a class="doc-link" href={linkForSource('docs/packages/pattrn-dependency-injection.md')} rel="noreferrer"><strong><code>Pattrn.DependencyInjection</code></strong><p>Thin backend application integration.</p></a>
-      <a class="doc-link" href={linkForSource('docs/packages/pattrn-routing.md')} rel="noreferrer"><strong><code>Pattrn.Routing</code></strong><p>Framework-neutral route-template parsing preview.</p></a>
+      <a class="doc-link" href={linkForSource('docs/packages/pattrn.md', 'Pattrn').href}><strong><code>Pattrn</code></strong><p>Core generic segmented-pattern matching.</p></a>
+      <a class="doc-link" href={linkForSource('docs/packages/pattrn-strings.md', 'Pattrn.Strings').href}><strong><code>Pattrn.Strings</code></strong><p>String-path ergonomics and normalization.</p></a>
+      <a class="doc-link" href={linkForSource('docs/packages/pattrn-dependency-injection.md', 'Pattrn.DependencyInjection').href}><strong><code>Pattrn.DependencyInjection</code></strong><p>Thin backend application integration.</p></a>
+      <a class="doc-link" href={linkForSource('docs/packages/pattrn-routing.md', 'Pattrn.Routing').href}><strong><code>Pattrn.Routing</code></strong><p>Framework-neutral route-template parsing preview.</p></a>
     </div>
   </section>
 </PattrnLayout>

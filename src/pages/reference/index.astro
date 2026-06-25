@@ -1,36 +1,59 @@
 ---
 import PattrnLayout from '../../layouts/PattrnLayout.astro';
-import { getRouteForSource, getSourceUrl, withBase } from '../../lib/docs';
+import { linkForSource, routeLink, type SiteLink } from '../../lib/docs';
 
-function linkForSource(source: string) {
-  const route = getRouteForSource(source);
-  return route ? withBase(route) : getSourceUrl(source);
-}
+type ReferenceGroup = {
+  title: string;
+  items: (SiteLink & { text: string })[];
+};
 
-const references = [
-  ['API overview', linkForSource('docs/reference/api.md'), 'Core public API map and entry points.'],
-  ['Pattern segments', linkForSource('docs/reference/pattern-segments.md'), 'Literal, parameter, wildcard, and catch-all segment model.'],
-  ['Matching semantics', linkForSource('docs/reference/matching-semantics.md'), 'What matches, why, and how detailed matching behaves.'],
-  ['Ranking and specificity', linkForSource('docs/reference/ranking-specificity.md'), 'Deterministic ranking metadata and specificity model.'],
-  ['Duplicate behavior', linkForSource('docs/reference/duplicate-behavior.md'), 'How duplicate registrations and materialization are handled.'],
-  ['Diagnostics', linkForSource('docs/reference/diagnostics.md'), 'Opt-in explanation APIs and rejection diagnostics.'],
-  ['Validation', linkForSource('docs/reference/validation.md'), 'Validation posture and maintainer checks.'],
-  ['Repository layout', linkForSource('docs/reference/repository-layout.md'), 'Where code, docs, tests, and workflow assets live.'],
-  ['Benchmarks', withBase('/benchmarks/'), 'Benchmark evidence policy and CI guardrail context.'],
+const groups: ReferenceGroup[] = [
+  {
+    title: 'API and semantics',
+    items: [
+      { ...linkForSource('docs/reference/api.md', 'Core API'), text: 'Core public API map and entry points.' },
+      { ...linkForSource('docs/reference/pattern-segments.md', 'Pattern segments'), text: 'Literal, parameter, wildcard, and catch-all segment model.' },
+      { ...linkForSource('docs/reference/matching-semantics.md', 'Matching semantics'), text: 'What matches, why, and how detailed matching behaves.' },
+      { ...linkForSource('docs/reference/ranking-specificity.md', 'Ranking and specificity'), text: 'Deterministic ranking metadata and specificity model.' },
+      { ...linkForSource('docs/reference/compatibility-semantics.md', 'Compatibility semantics'), text: 'Compatibility posture for pre-beta evolution.' },
+      { ...linkForSource('docs/reference/duplicate-behavior.md', 'Duplicate behavior'), text: 'Duplicate registration and materialization behavior.' },
+      { ...linkForSource('docs/reference/diagnostics.md', 'Diagnostics'), text: 'Opt-in explanation APIs and rejection diagnostics.' },
+      { ...linkForSource('docs/reference/limitations.md', 'Known limitations'), text: 'Current boundaries and intentionally unsupported behavior.' },
+    ],
+  },
+  {
+    title: 'Maintainer reference',
+    items: [
+      { ...linkForSource('docs/reference/project-profile.md', 'Project profile'), text: 'Durable public facts about Pattrn.' },
+      { ...linkForSource('docs/reference/validation.md', 'Validation'), text: 'Validation posture and maintainer checks.' },
+      { ...linkForSource('docs/reference/repository-layout.md', 'Repository layout'), text: 'Where code, docs, tests, and workflow assets live.' },
+      { ...linkForSource('docs/reference/git-workflow.md', 'Git workflow'), text: 'Branch, commit, and remote operation guidance.' },
+      { ...linkForSource('docs/reference/documentation-standards.md', 'Documentation standards'), text: 'Documentation ownership, curation, and staleness rules.' },
+    ],
+  },
+  {
+    title: 'Evidence',
+    items: [
+      { ...routeLink('/benchmarks/', 'Benchmarks'), text: 'Benchmark evidence policy and CI guardrail context.' },
+    ],
+  },
 ];
 ---
 <PattrnLayout title="Pattrn reference" description="Reference map for Pattrn docs." current="reference">
   <section class="page-heading narrow">
     <p class="eyebrow">Reference</p>
     <h1>Stable reference map.</h1>
-    <p class="lede">This page points to the canonical reference documents for API shape, matching behavior, diagnostics, validation, and repository structure.</p>
+    <p class="lede">Use this curated map for API shape, matching behavior, maintainer guidance, and benchmark evidence. Current Markdown references render as styled project routes when they are part of the public route manifest.</p>
   </section>
-  <section class="section">
-    <div class="doc-grid">
-      {references.map(([label, href, text]) => (
-        <a class="doc-link" href={href} rel="noreferrer"><strong>{label} ↗</strong><p>{text}</p></a>
-      ))}
-    </div>
-  </section>
-  <section class="section section-compact"><aside class="note"><p>The Astro shell intentionally keeps this route curated in the first migration PR. Full Markdown rendering can be added later after the project site shell is stable.</p></aside></section>
+  {groups.map((group) => (
+    <section class="section">
+      <div class="section-heading"><p class="eyebrow">Reference</p><h2>{group.title}</h2></div>
+      <div class="doc-grid">
+        {group.items.map((link) => (
+          <a class="doc-link" href={link.href} rel={link.external ? 'noreferrer' : undefined}><strong>{link.label}{link.external ? ' ↗' : ''}</strong><p>{link.text}</p></a>
+        ))}
+      </div>
+    </section>
+  ))}
+  <section class="section section-compact"><aside class="note"><p>This route remains a curated index. It highlights the reference paths reviewers need most instead of listing every rendered page.</p></aside></section>
 </PattrnLayout>

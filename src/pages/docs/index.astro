@@ -1,24 +1,55 @@
 ---
 import PattrnLayout from '../../layouts/PattrnLayout.astro';
-import { getRouteForSource, getSourceUrl, withBase } from '../../lib/docs';
+import { linkForSource, sourceLink, routeLink, type SiteLink } from '../../lib/docs';
 
-function linkForSource(source: string) {
-  const route = getRouteForSource(source);
-  return route ? withBase(route) : getSourceUrl(source);
-}
-
-const groups = [
-  { title: 'Start', text: 'Start here for the current user-facing path and the core mental model.', links: [['Core usage', `${getSourceUrl('README.md')}#core-usage`], ['Pattern segments', linkForSource('docs/reference/pattern-segments.md')], ['Matching semantics', linkForSource('docs/reference/matching-semantics.md')]] },
-  { title: 'Understand', text: 'Use these when changing behavior, explaining tradeoffs, or reviewing compatibility.', links: [['Package boundaries', linkForSource('docs/explanation/package-boundaries.md')], ['Ranking and specificity', linkForSource('docs/reference/ranking-specificity.md')], ['Duplicate behavior', linkForSource('docs/reference/duplicate-behavior.md')], ['Diagnostics', linkForSource('docs/reference/diagnostics.md')]] },
-  { title: 'Operate', text: 'Maintainer-oriented references for validation, evidence, and repository workflow.', links: [['Validation', linkForSource('docs/reference/validation.md')], ['Benchmarks', withBase('/benchmarks/')], ['Repository layout', linkForSource('docs/reference/repository-layout.md')]] },
-  { title: 'Packages', text: 'Package-scoped README sources and companion-package guidance.', links: [['Core', linkForSource('docs/packages/pattrn.md')], ['Strings', linkForSource('docs/packages/pattrn-strings.md')], ['Dependency injection', linkForSource('docs/packages/pattrn-dependency-injection.md')], ['Routing', linkForSource('docs/packages/pattrn-routing.md')]] },
+const groups: { title: string; text: string; links: SiteLink[] }[] = [
+  {
+    title: 'Start',
+    text: 'Begin with the current user-facing path, first index walkthrough, and core mental model.',
+    links: [
+      sourceLink('README.md#core-usage', 'Core usage'),
+      linkForSource('docs/tutorials/first-index.md', 'Build your first index'),
+      linkForSource('docs/reference/pattern-segments.md', 'Pattern segments'),
+      linkForSource('docs/reference/matching-semantics.md', 'Matching semantics'),
+    ],
+  },
+  {
+    title: 'Understand',
+    text: 'Use these when changing behavior, explaining tradeoffs, or reviewing compatibility.',
+    links: [
+      linkForSource('docs/explanation/package-boundaries.md', 'Package boundaries'),
+      linkForSource('docs/reference/ranking-specificity.md', 'Ranking and specificity'),
+      linkForSource('docs/reference/duplicate-behavior.md', 'Duplicate behavior'),
+      linkForSource('docs/reference/diagnostics.md', 'Diagnostics'),
+    ],
+  },
+  {
+    title: 'Operate',
+    text: 'Maintainer-oriented references for validation, evidence, and repository workflow.',
+    links: [
+      linkForSource('docs/reference/validation.md', 'Validation'),
+      routeLink('/benchmarks/', 'Benchmarks'),
+      linkForSource('docs/reference/repository-layout.md', 'Repository layout'),
+      linkForSource('docs/reference/git-workflow.md', 'Git workflow'),
+    ],
+  },
+  {
+    title: 'Packages',
+    text: 'Package-scoped docs and companion-package guidance.',
+    links: [
+      linkForSource('docs/packages/pattrn.md', 'Core'),
+      linkForSource('docs/packages/pattrn-strings.md', 'Strings'),
+      linkForSource('docs/packages/pattrn-dependency-injection.md', 'Dependency injection'),
+      linkForSource('docs/packages/pattrn-routing.md', 'Routing'),
+    ],
+  },
 ];
 ---
 <PattrnLayout title="Pattrn docs" description="Curated documentation index for Pattrn." current="docs">
   <section class="page-heading narrow">
     <p class="eyebrow">Docs</p>
-    <h1>Documentation by intent.</h1>
-    <p class="lede">The Markdown files in <code>docs/**</code> remain the canonical project documentation. This route is a curated public index into the current docs path.</p>
+    <h1>Documentation hub.</h1>
+    <p class="lede">Markdown files in <code>docs/**</code> remain the canonical project documentation. Selected current docs render as styled project routes, while source links stay available for review and source-only material.</p>
   </section>
   <section class="section">
     <div class="grid grid--two">
@@ -28,13 +59,13 @@ const groups = [
           <h2>{group.title}</h2>
           <p>{group.text}</p>
           <ul class="list-plain">
-            {group.links.map(([label, href]) => <li><a class="text-link" href={href} rel="noreferrer">{label} ↗</a></li>)}
+            {group.links.map((link) => <li><a class="text-link" href={link.href} rel={link.external ? 'noreferrer' : undefined}>{link.label}{link.external ? ' ↗' : ''}</a></li>)}
           </ul>
         </article>
       ))}
     </div>
   </section>
   <section class="section section-compact">
-    <aside class="note callout"><p><strong>Migration note:</strong> this first Astro shell does not render every Markdown file as a styled route. The curated pages preserve the stable project URLs while keeping the repository docs canonical.</p></aside>
+    <aside class="note callout"><p><strong>Curated route:</strong> this page is an intentional landing page for documentation paths, not a generated dump of every published route.</p></aside>
   </section>
 </PattrnLayout>
