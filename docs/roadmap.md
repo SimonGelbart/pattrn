@@ -1,67 +1,60 @@
-# Pattrn Product Roadmap
+# Pattrn Roadmap
 
-> **Pattrn is a fast, immutable, segmented-pattern index for .NET 10 backend apps and libraries.**
->
-> It gives applications deterministic matching, captures, specificity metadata, and optional diagnostics without tying the core to routing, globbing, authorization, filesystems, or framework-specific semantics.
+## North star
 
-## Status
+Pattrn is a small, fast, deterministic compiled index for matching hierarchical segmented keys in .NET backend applications and libraries.
+
+Given:
+
+```text
+registered segmented patterns
++
+an incoming segmented key/path
+```
+
+Pattrn answers:
+
+```text
+what matched
+why it matched
+what was captured
+how matches are ranked
+```
+
+Pattrn should be useful anywhere an application or library needs deterministic matching over structured hierarchical keys without adopting a full framework-specific router, globber, authorization engine, business-rule engine, or filesystem abstraction.
+
+## Product stage
 
 Pattrn is pre-beta and pre-1.0.
 
-The project is not constrained by old alpha-era APIs or release numbering. Breaking alpha-era APIs, docs, and package metadata is acceptable when doing so makes the long-term product smaller, clearer, faster, or more predictable.
+The project is not bound by old alpha-era APIs, package metadata, roadmap structure, or historical documentation. Breaking alpha-era choices is acceptable when doing so makes the long-term product smaller, clearer, faster, more deterministic, or easier to maintain.
 
-Use this rule during pre-beta work:
+Roadmap milestones describe product readiness, not package version numbers.
 
-```text
-If preserving an old alpha API or process makes the long-term product worse,
-break the alpha-era choice and document the migration.
-```
+## Product positioning
 
-## Versioning posture
+Pattrn should compete as infrastructure.
 
-Roadmap milestones describe product readiness, not package-version numbers.
-
-Package versions are centralized in `Directory.Build.props`. Dependency versions are centralized in `Directory.Packages.props`. Until beta, the package version line is intentionally simple and may reset because no real users depend on the previous alpha train.
-
-SemVer, breaking-change, and stable release policies should be finalized before beta/1.0.
-
-## North Star
-
-Pattrn should become a reusable, high-performance segmented-pattern matching toolkit for .NET backend applications and library authors.
-
-It answers this question:
+The strongest positioning is:
 
 ```text
-Given a collection of hierarchical patterns and an incoming segmented key,
-which registered entries match, why do they match, and how should matches be ranked?
+A compiled segmented-pattern index for backend apps and libraries.
 ```
 
-The intended model is:
+Pattrn can support routing, globbing, authorization, feature-flag, policy, dispatch, and lookup use cases as a lower-level engine, but the core should not own those domains.
 
-```text
-Input:
-  registered segmented patterns
-  incoming segmented path/key
-
-Output:
-  matching values
-  captures
-  specificity/ranking metadata
-  optional diagnostics
-```
-
-## Target Users
+## Target users
 
 Primary users:
 
 - backend application developers;
-- infrastructure/library authors;
+- infrastructure and platform library authors;
 - framework-adjacent library authors;
-- developers building dispatch, policy, routing-like, or lookup systems.
+- developers building dispatch, policy, routing-like, or hierarchical lookup systems.
 
 Representative use cases:
 
-- backend path and key matching;
+- backend path/key matching;
 - plugin command dispatch;
 - message-topic matching;
 - event-stream topic matching;
@@ -72,25 +65,11 @@ Representative use cases:
 - namespace/type/member lookup;
 - command-line command trees;
 - route-like matching outside a full web framework;
-- filesystem-policy matching later through a companion package.
+- future filesystem-policy matching through a companion package.
 
-## Product Positioning
+## Product boundaries
 
-Pattrn should compete as infrastructure.
-
-It should not initially compete by claiming to be a full replacement for ASP.NET Core routing, filesystem globbing, authorization frameworks, or business-rule engines.
-
-The strongest positioning is:
-
-```text
-A compiled segmented-pattern index for backend apps and libraries.
-```
-
-Pattrn can support routing, globbing, authorization, and policy use cases as a lower-level engine, but it should not own those domains in the core.
-
-## Product Boundaries
-
-The core should know about:
+The core owns:
 
 - segments;
 - pattern segments;
@@ -100,79 +79,84 @@ The core should know about:
 - terminal catch-alls;
 - captures;
 - duplicate registrations;
-- specificity metadata;
-- deterministic matching;
+- duplicate value behavior;
+- deterministic specificity/ranking metadata;
+- immutable compiled indexes;
+- value matching;
+- detailed matching;
 - optional diagnostics.
 
-The core should not know about:
+The core does not own:
 
 - HTTP;
-- ASP.NET Core;
-- filesystems;
-- endpoint metadata;
+- ASP.NET Core endpoint behavior;
+- filesystem semantics;
+- glob syntax;
 - authorization policy semantics;
-- tenants;
+- tenant semantics;
 - business rules;
 - OpenAPI;
-- source-code analysis;
-- framework-specific route behavior.
+- source generation;
+- analyzers;
+- framework-specific route precedence;
+- async I/O;
+- application dispatch.
 
 Those concerns belong in companion packages or consuming applications.
 
-## Package Strategy
+## Package strategy
 
-### Stable-scope packages for beta and 1.0
+### Stable candidate packages for beta
 
 #### `Pattrn`
 
-The core package.
+The generic segmented-pattern matching core.
 
 Responsibilities:
 
-- generic segmented-pattern matching;
-- explicit `PatternSegment<TSegment>` registration;
-- immutable compiled index;
-- fast value matching;
+- explicit pattern segment registration;
+- immutable compiled indexes;
+- value matching;
 - detailed matching;
 - captures;
-- deterministic ranking metadata;
 - duplicate behavior;
+- deterministic ranking metadata;
 - optional diagnostics.
 
 #### `Pattrn.Strings`
 
-String-path ergonomics.
+String-path ergonomics over the core model.
 
 Responsibilities:
 
 - string splitting;
 - separators;
-- case sensitivity;
 - trimming;
 - empty segment behavior;
+- case sensitivity;
 - custom string normalization;
 - ergonomic string-path builders and indexes.
 
 #### `Pattrn.DependencyInjection`
 
-Backend application integration.
+Thin backend application integration.
 
 Responsibilities:
 
 - registering compiled indexes as singletons;
-- named/keyed index registration;
-- keeping DI usage thin and framework-neutral.
+- named or keyed index registration;
+- keeping DI usage framework-neutral and optional.
 
 ### Preview package
 
 #### `Pattrn.Routing`
 
-Routing remains important, but it should not block the first stable product.
+Routing remains preview until explicitly stabilized.
 
 Responsibilities:
 
 - framework-neutral route-template parsing;
-- structural route-template compilation;
+- structural route-template compilation into core pattern segments;
 - route metadata preservation;
 - optional/defaulted segment expansion;
 - route-layer validation.
@@ -182,46 +166,42 @@ Non-responsibilities:
 - replacing ASP.NET Core endpoint routing;
 - implementing endpoint dispatch;
 - owning HTTP method semantics;
-- enforcing framework-specific route precedence;
+- enforcing ASP.NET Core route precedence;
 - becoming a web framework abstraction.
 
 ### Post-1.0 candidates
 
-- `Pattrn.Globbing`
-- `Pattrn.AspNetCore`
-- optional advanced diagnostics package if diagnostics outgrow the core;
-- composite or partitioned matching helpers;
-- ranking extensibility only after real demand appears.
+Post-1.0 candidates should be added only after the core/string/DI product is stable and real user demand exists.
 
-## Product Principles
+Candidates:
+
+- `Pattrn.Globbing`;
+- `Pattrn.AspNetCore`;
+- optional advanced diagnostics package;
+- analyzers;
+- source generators;
+- composite or partitioned matching helpers;
+- custom ranking extensibility.
+
+## Product principles
 
 ### 1. Explicit segments first
 
-The primary model should use explicit pattern segment kinds.
-
-```csharp
-builder.AddPattern(
-    patternId: "users-by-id",
-    value: handler,
-    segments:
-    [
-        PatternSegment.Literal("api"),
-        PatternSegment.Literal("users"),
-        PatternSegment.Parameter("id")
-    ]);
-```
+The primary model is explicit pattern segment registration.
 
 String and tokenized APIs can exist for convenience, but they should compile into explicit pattern segments and should not define the core mental model.
 
 ### 2. Matching is separate from interpretation
 
-The core can answer which pattern matched, what was captured, and which specificity metadata applies. The consumer decides what the value means, whether a domain constraint rejects the match, and whether metadata changes priority.
+The core answers which pattern matched, what was captured, and which specificity metadata applies.
+
+The consumer decides what the value means, whether domain constraints reject the match, and whether domain metadata changes priority.
 
 ### 3. Fast paths stay fast
 
-The main matching path should optimize for repeated reads against an immutable compiled index.
+The main matching path optimizes for repeated reads against an immutable compiled index.
 
-Diagnostics, rejected-candidate explanations, route validation, and normalization notes should be optional because they are more expensive.
+Diagnostics, rejected-candidate explanations, route validation, string parsing, and normalization are useful but should remain outside the protected hot path.
 
 ### 4. Behavior must be deterministic
 
@@ -233,180 +213,250 @@ The following behavior must be deterministic, documented, and tested:
 - duplicate value handling;
 - capture behavior;
 - terminal catch-all behavior;
-- optional/defaulted route expansion;
+- prefix matching behavior;
 - tie-breaking;
 - diagnostics stability posture.
 
-### 5. Companion packages stay thin
+### 5. Builders are construction objects
 
-Companion packages should translate domain-friendly syntax into the generic core model.
+Builders are mutable, single-writer construction objects.
+
+Compiled indexes are immutable snapshots and are safe for concurrent readers.
+
+Applications that load registrations concurrently should collect registrations first, order them deterministically, apply them to a builder from one writer, and then publish the compiled index.
+
+### 6. Companion packages stay thin
+
+Companion packages translate domain-friendly syntax into the generic core model.
 
 They should not force domain concepts back into the core.
 
-### 6. .NET 10 only for now
+### 7. .NET 10 only for now
 
-Pattrn should target .NET 10 only for the current product cycle.
+Pattrn targets .NET 10 for the current product cycle.
 
-### 7. Stabilize before expanding
+Broader target framework support is deferred until the stable product surface is clearer.
 
-Do not add globbing, ASP.NET Core integration, source generators, analyzers, or custom ranking plugins before the core/string/DI product is beta-ready.
+### 8. Stabilize before expanding
 
-## Ranking Strategy
-
-Ranking should use:
-
-```text
-fixed built-in deterministic ranking
-+
-exposed metadata for consumer-side custom sorting
-```
-
-Avoid a public ranking plugin or comparer before beta. Advanced users can sort detailed matches themselves using exposed metadata.
-
-A configurable ranking comparer or `SpecificityOptions` type can be added later if real users need it.
+Do not add globbing, ASP.NET Core integration, source generators, analyzers, custom ranking plugins, or multidimensional matching helpers before the core/string/DI product is beta-ready.
 
 ## Roadmap
 
-### Project foundation and ADRs
+### 0. Product identity and operating model
 
-Goal: make product direction, workflow, and historical choices explicit before stabilizing more APIs.
+Goal: turn Pattrn from a locally grown experiment into a serious infrastructure library with a clear product direction, durable decisions, quality gates, and a living backlog.
 
 Scope:
 
-- create `docs/adr/` and record historical product-boundary decisions;
-- add durable repository workflow/reference docs;
-- align README and roadmap with product positioning;
-- simplify pre-beta versioning and centralize package/dependency versions;
-- remove stale documentation that treats local execution mechanics as product policy;
-- link or archive historical architecture review docs.
+- rewrite the roadmap around the north star;
+- keep current docs focused on current product truth;
+- leave discarded alpha-era notes to Git history;
+- capture durable decisions as ADRs;
+- use GitHub Issues as the living backlog;
+- define initial milestones: pre-beta, beta, 1.0, post-1.0;
+- define issue labels for area, type, priority, and status.
 
 Exit criteria:
 
-- ADR index exists;
-- major architectural choices have status, context, decision, consequences, and historical context;
-- README and roadmap agree on product positioning;
-- validation commands and package metadata reflect the real repository.
+- roadmap is strategic rather than a task dump;
+- ADRs capture durable decisions;
+- current docs do not expose obsolete alpha-era history;
+- GitHub Issues contain the active backlog;
+- roadmap, docs, and backlog agree on product direction.
 
-### Ranking and specificity contract
+### 1. Core semantics stabilization
+
+Goal: make the core matching model stable enough for beta feedback.
+
+Scope:
+
+- explicit pattern segment API;
+- literal behavior;
+- named parameter behavior;
+- wildcard behavior;
+- terminal catch-all behavior;
+- exact matching;
+- prefix matching;
+- capture behavior;
+- duplicate structural pattern behavior;
+- duplicate value behavior;
+- match ordering;
+- registration-order tie-breaking;
+- builder lifecycle;
+- compiled index lifecycle.
+
+Exit criteria:
+
+- core matching semantics are documented;
+- tests protect the documented behavior;
+- public API shape is reviewed before beta;
+- no domain-specific semantics leak into the core;
+- no async matching API is introduced;
+- no thread-safe mutable builder contract is introduced.
+
+### 2. Ranking and specificity contract
 
 Goal: make match ordering explicit, deterministic, and stable enough for beta feedback.
 
-Decision record: [ADR 0013: Use fixed ranking with consumer-side sorting](adr/0013-use-fixed-ranking-with-consumer-side-sorting.md).
+Scope:
+
+- document built-in precedence;
+- document registration-order tie-breaking;
+- document duplicate behavior effects on ranking;
+- document prefix traversal ordering;
+- expose enough metadata for consumer-side sorting;
+- keep built-in ranking fixed for beta;
+- defer public ranking plugins or custom comparers.
+
+Exit criteria:
+
+- users can predict why one match appears before another;
+- detailed match metadata supports consumer-side sorting;
+- tests cover ambiguous and near-ambiguous pattern families;
+- route-specific precedence does not leak into the generic core.
+
+### 3. Performance gates and benchmark pipeline
+
+Goal: make “fast” a product contract, not a marketing claim, without bloating ordinary CI.
 
 Scope:
 
-- document literal, parameter, wildcard, and catch-all precedence;
-- document registration-order tie-breaking;
-- document duplicate structural pattern behavior and duplicate value behavior;
-- document capture behavior and detailed match metadata;
-- show consumer-side custom sorting using metadata;
-- keep built-in ranking fixed for beta;
-- do not add a public ranking comparer yet.
+- add fast allocation smoke tests for protected hot paths;
+- keep full BenchmarkDotNet runs out of ordinary CI;
+- split focused benchmark workflows by product area;
+- preserve one benchmark artifact layout and summary generator;
+- add benchmark coverage for all protected hot paths;
+- add `TryMatch` benchmark coverage;
+- add `Pattrn.Strings` benchmark coverage or remove claimed string benchmark coverage;
+- add a benchmark coverage matrix;
+- add baseline comparison for full and focused benchmark runs;
+- document which results are official performance evidence.
+
+Protected hot paths:
+
+- `Match(..., Span<TValue>)`;
+- `TryMatch(...)` when destination is large enough;
+- `GetMatchCountUpperBound(...)`;
+- detailed matching into caller-provided buffers where applicable;
+- pre-split route matching while routing remains preview.
 
 Exit criteria:
 
-- ranking rules are documented;
-- ambiguous and near-ambiguous pattern tests exist;
-- default ranking remains allocation-conscious;
-- no route-specific precedence leaks into the generic core;
-- public ranking extensibility remains deferred until real beta feedback requires it.
+- smoke tests block obvious hot-path allocation regressions;
+- official benchmark artifacts are the source of current performance evidence;
+- benchmark docs match actual benchmark coverage;
+- core span hot paths remain allocation-free;
+- benchmark workflow can compare candidate results against a known baseline;
+- README performance claims are backed by current benchmark artifacts.
 
-### Internal architecture cleanup
-
-Goal: keep the engine fast while making the implementation easier to reason about.
-
-Candidate internal separations:
-
-- exact-only matcher;
-- wildcard/catch-all matcher;
-- prefix matcher;
-- detailed match collector;
-- capture collector;
-- capture counter;
-- rejected-candidate explainer;
-- specificity/ranking helper;
-- child lookup helper.
-
-Exit criteria:
-
-- public API remains stable unless a deliberate pre-beta breaking change is chosen;
-- hot paths remain fast;
-- matching internals are easier to test and audit.
-
-### Diagnostics and validation hardening
+### 4. Diagnostics and validation hardening
 
 Goal: make Pattrn trustworthy and explainable without polluting hot paths.
 
 Scope:
 
-- duplicate structural patterns;
-- duplicate parameter names;
-- ambiguous pattern families;
-- unreachable registrations where practical;
+- duplicate structural pattern diagnostics;
+- duplicate parameter name diagnostics;
+- ambiguous pattern-family diagnostics;
+- wildcard and catch-all overlap diagnostics where practical;
 - invalid catch-all placement;
 - invalid string options;
-- invalid route syntax;
-- route constraint failures;
-- rejected-candidate explanations.
+- invalid route syntax in routing package;
+- rejected-candidate explanations;
+- diagnostic stability policy;
+- benchmarks for diagnostic and explanation paths.
 
 Exit criteria:
 
 - diagnostic model is documented;
-- diagnostic stability posture is explicit;
+- expensive explanations remain opt-in;
+- diagnostics do not change the value-only hot path;
 - important validation cases have tests;
-- expensive explanations remain opt-in.
+- users can debug surprising matches without guessing.
 
-### Serialization-friendly registrations
+### 5. Serialization-friendly registrations and deterministic rebuild
 
-Goal: support backend apps that load patterns from configuration, databases, generated files, or external metadata.
+Goal: support backend applications that load patterns from configuration, databases, generated files, plugins, or external metadata.
 
 Scope:
 
-- add stable registration DTOs rather than serializing compiled internals;
-- include pattern id, segment kind, segment value, parameter name, catch-all marker, registration order, optional value key, and optional metadata key;
-- document how to rebuild an index from registrations.
+- design stable registration DTOs;
+- include pattern id;
+- include registration order;
+- include segment kind and value;
+- include parameter name and catch-all marker;
+- include optional value key and metadata key;
+- support JSON roundtrip;
+- document deterministic rebuild;
+- document async/concurrent loading followed by single-writer build;
+- keep compiled index internals private and non-serialized.
 
 Exit criteria:
 
 - registration DTOs roundtrip through JSON;
 - docs show how to rebuild an index from registrations;
-- compiled index internals are not serialized.
+- applications can load registrations concurrently and build deterministically;
+- compiled index internals remain private.
 
-### Benchmark and CI hardening
+### 6. Package stabilization
 
-Goal: make product quality measurable.
+Goal: prepare the beta package set.
+
+Stable candidate scope:
+
+- `Pattrn`;
+- `Pattrn.Strings`;
+- `Pattrn.DependencyInjection`.
+
+Preview scope:
+
+- `Pattrn.Routing`.
 
 Scope:
 
-- refresh benchmark baselines;
-- document allocation expectations;
-- strengthen CI with analyzers, public API checks, package validation, test coverage reporting, docs link checks, and light allocation/performance smoke checks where practical.
+- audit package README files;
+- align package docs with actual package responsibilities;
+- ensure examples compile;
+- review package metadata;
+- define package stability posture;
+- keep companion packages thin;
+- keep routing clearly marked as preview.
 
 Exit criteria:
 
-- protected hot paths remain within guardrails;
-- CI verifies build, tests, package metadata, and public API stability;
-- release criteria are measurable.
+- stable candidate packages have coherent docs and examples;
+- package responsibilities are clear;
+- routing remains useful but non-blocking;
+- no post-1.0 package candidate blocks beta.
 
-### Documentation and samples
+### 7. Documentation and samples
 
 Goal: make adoption obvious for backend developers and library authors.
 
 Scope:
 
-- organize docs using Diataxis;
-- keep README short, accurate, and adoption-oriented;
-- ensure samples compile and use intended beta-first API style;
-- archive or clearly mark alpha-era docs as historical;
-- keep migration notes current.
+- keep README short and adoption-oriented;
+- maintain a clear newcomer path;
+- polish first-index tutorial;
+- add or polish package selection guide;
+- add best-match how-to;
+- add performance model explanation;
+- add use-in-async-apps guide;
+- add rebuild-from-registrations guide;
+- document limitations honestly;
+- add docs link checks if practical;
+- ensure samples compile.
 
 Exit criteria:
 
-- tutorials, how-to guides, reference docs, and explanation docs cover the stable candidate APIs;
+- new users can understand what Pattrn is in minutes;
+- tutorials, how-to guides, reference docs, and explanation docs cover stable candidate APIs;
+- documentation does not expose obsolete alpha-era history;
 - samples compile;
-- stale docs are reconciled or archived.
+- limitations are clear.
 
-### Beta feedback surface
+### 8. Beta feedback surface
 
 Goal: declare the intended beta API surface and invite real-world feedback.
 
@@ -422,15 +472,26 @@ Preview or non-blocking scope:
 
 Excluded from beta:
 
-- globbing;
+- async matching APIs;
+- thread-safe mutable builder;
+- globbing package;
 - ASP.NET Core package;
 - source generators;
 - custom ranking plugin;
 - analyzer package;
-- async APIs;
-- multidimensional matching helpers.
+- multidimensional matching helpers;
+- compiled-index serialization format.
 
-### Focused stable release
+Exit criteria:
+
+- beta scope is explicit;
+- public API surface is reviewed;
+- performance gates are active;
+- docs explain stable vs preview packages;
+- known limitations are documented;
+- GitHub Issues track beta feedback.
+
+### 9. Focused 1.0
 
 Goal: ship a stable, focused, trustworthy matching toolkit.
 
@@ -445,11 +506,20 @@ Stable 1.0 scope:
 - deterministic ranking metadata;
 - duplicate behavior;
 - string path ergonomics;
-- DI registration;
+- dependency-injection registration;
 - stable documentation;
-- clear limitations.
+- clear limitations;
+- benchmark-backed performance posture.
 
-## Explicit Non-Goals
+Exit criteria:
+
+- stable APIs are documented and protected;
+- stable semantics are tested;
+- package boundaries are clear;
+- performance claims are backed by current benchmark evidence;
+- preview/post-1.0 work does not leak into the stable contract.
+
+## Explicit non-goals
 
 Pattrn should not become:
 
@@ -464,3 +534,56 @@ Pattrn should not become:
 - an AI-agent-specific package.
 
 It can support these domains as a lower-level indexing primitive, but it should not own their semantics.
+
+## Backlog policy
+
+The roadmap is strategic.
+
+Implementation work should live in GitHub Issues.
+
+Use:
+
+```text
+Roadmap = product direction and sequencing
+Issues = concrete work items
+ADRs = durable decisions
+Docs = current user-facing truth
+```
+
+Initial milestones:
+
+- pre-beta;
+- beta;
+- 1.0;
+- post-1.0.
+
+Suggested issue label groups:
+
+```text
+area:core
+area:strings
+area:di
+area:routing
+area:benchmarks
+area:docs
+area:diagnostics
+area:ci
+area:serialization
+
+type:feature
+type:cleanup
+type:docs
+type:benchmark
+type:decision
+type:refactor
+type:test
+
+priority:p0
+priority:p1
+priority:p2
+
+status:needs-design
+status:ready
+status:blocked
+status:deferred
+```
