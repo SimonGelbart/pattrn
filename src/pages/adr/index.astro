@@ -1,18 +1,13 @@
 ---
 import PattrnLayout from '../../layouts/PattrnLayout.astro';
-import { getRouteForSource, getSourceUrl, withBase } from '../../lib/docs';
+import { getSourceUrl, linkForSource, type SiteLink } from '../../lib/docs';
 
-function linkForSource(source: string) {
-  const route = getRouteForSource(source);
-  return route ? withBase(route) : getSourceUrl(source);
-}
-
-const adrs = [
-  ['ADR 0001', 'Core remains segmented and domain-neutral', linkForSource('docs/adr/0001-core-remains-segmented-and-domain-neutral.md')],
-  ['ADR 0003', 'Explicit pattern segments are the primary core model', linkForSource('docs/adr/0003-explicit-pattern-segments-are-primary.md')],
-  ['ADR 0004', 'Strings, DI, and Routing are companion packages', linkForSource('docs/adr/0004-companion-packages.md')],
-  ['ADR 0012', 'Simplify pre-beta versioning and roadmap milestones', linkForSource('docs/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones.md')],
-  ['ADR 0013', 'Use fixed ranking with consumer-side sorting', linkForSource('docs/adr/0013-use-fixed-ranking-with-consumer-side-sorting.md')],
+const adrs: ({ id: string; title: string } & SiteLink)[] = [
+  { id: 'ADR 0001', title: 'Core remains segmented and domain-neutral', ...linkForSource('docs/adr/0001-core-remains-segmented-and-domain-neutral.md', 'Read decision record') },
+  { id: 'ADR 0003', title: 'Explicit pattern segments are the primary core model', ...linkForSource('docs/adr/0003-explicit-pattern-segments-are-primary.md', 'Read decision record') },
+  { id: 'ADR 0004', title: 'Strings, DI, and Routing are companion packages', ...linkForSource('docs/adr/0004-companion-packages.md', 'Read decision record') },
+  { id: 'ADR 0012', title: 'Simplify pre-beta versioning and roadmap milestones', ...linkForSource('docs/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones.md', 'Read decision record') },
+  { id: 'ADR 0013', title: 'Use fixed ranking with consumer-side sorting', ...linkForSource('docs/adr/0013-use-fixed-ranking-with-consumer-side-sorting.md', 'Read decision record') },
 ];
 ---
 <PattrnLayout title="Pattrn ADRs" description="Pattrn architecture decision records." current="adr">
@@ -25,10 +20,10 @@ const adrs = [
   <section class="section">
     <div class="section-heading"><p class="eyebrow">Recommended read order</p><h2>Start with the binding decisions.</h2><p>These records are the first stops when changing public behavior, package boundaries, docs, or validation policy.</p></div>
     <div class="package-list">
-      {adrs.map(([id, title, href]) => (
-        <a class="package-row" href={href} rel="noreferrer">
-          <div class="package-row__meta"><span>Record</span><strong>{id}</strong></div>
-          <div><h3>{title}</h3><p>Read source decision record ↗</p></div>
+      {adrs.map((adr) => (
+        <a class="package-row" href={adr.href} rel={adr.external ? 'noreferrer' : undefined}>
+          <div class="package-row__meta"><span>Record</span><strong>{adr.id}</strong></div>
+          <div><h3>{adr.title}</h3><p>{adr.label}{adr.external ? ' ↗' : ''}</p></div>
         </a>
       ))}
     </div>

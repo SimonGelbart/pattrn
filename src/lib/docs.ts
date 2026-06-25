@@ -8,6 +8,12 @@ export type SiteDoc = {
   render?: boolean;
 };
 
+export type SiteLink = {
+  label: string;
+  href: string;
+  external: boolean;
+};
+
 export type DocsManifest = {
   project: {
     name: string;
@@ -48,6 +54,25 @@ export function getRouteForSource(source: string) {
 
 export function getSourceUrl(source: string) {
   return `${docsManifest.project.sourceRoot}/${normalizeSource(source)}`;
+}
+
+export function isExternalHref(href: string) {
+  return /^(?:https?:)?\/\//.test(href);
+}
+
+export function routeLink(route: string, label: string): SiteLink {
+  const href = withBase(route);
+  return { label, href, external: isExternalHref(href) };
+}
+
+export function sourceLink(source: string, label = source): SiteLink {
+  const href = getSourceUrl(source);
+  return { label, href, external: true };
+}
+
+export function linkForSource(source: string, label = source): SiteLink {
+  const route = getRouteForSource(source);
+  return route ? routeLink(route, label) : sourceLink(source, label);
 }
 
 export function routeToParam(route: string) {

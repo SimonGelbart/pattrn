@@ -28,6 +28,8 @@ This manifest records:
 - section grouping metadata for rendered docs navigation;
 - paths intentionally excluded from rendered docs routing (for example archive and historical benchmark output folders).
 
+Entries with `render:false` are represented by curated Astro pages instead of the generic Markdown renderer. They still stay in `docs.site.json` so source links, route ownership, and docs navigation metadata remain explicit.
+
 Astro uses:
 
 - `src/pages/[...doc].astro` to render selected Markdown entries from the manifest as styled `/pattrn/.../` routes;
