@@ -252,5 +252,8 @@
       "section": "ADRs"
     }
   ],
-  "exclude": []
+  "exclude": [
+    "docs/archive/**",
+    "docs/benchmark-results/**"
+  ]
 }
