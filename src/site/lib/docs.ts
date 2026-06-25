@@ -1,4 +1,4 @@
-import manifest from '../../docs.site.json';
+import manifest from '../../../docs.site.json';
 
 export type SiteDoc = {
   source: string;
