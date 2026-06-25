@@ -22,7 +22,7 @@ Use these canonical ownership boundaries.
 | `docs/README.md` | Canonical docs navigation with newcomer path first. |
 | `docs/tutorials/` | Guided learning flows. |
 | `docs/how-to/` | Task-oriented procedures. |
-| `docs/reference/` | Stable contracts, semantics, and maintainer reference. |
+| `docs/reference/` | Stable contracts, semantics, evidence policy, and durable maintainer reference. |
 | `docs/explanation/` | Design rationale and conceptual framing. |
 | `docs/packages/` | Package-scoped README content for NuGet package docs. |
 | `docs/adr/` | Decision records only (status-bearing ADRs and ADR index). |
@@ -47,6 +47,12 @@ Avoid duplicating:
 - Use Git history for discarded alpha-era migration notes, local benchmark reports, release-planning notes, and design drafts.
 - Keep `CHANGELOG.md` as public release history while clearly framing alpha-train entries as historical pre-beta context.
 - Current benchmark proof comes from CI workflow artifacts and summaries, not committed local benchmark output.
+
+## Durable maintainer reference
+
+Maintainer-facing docs may be rendered publicly when they describe durable repository operation rather than local scratch work. Current durable maintainer references include project profile, validation, repository layout, Git workflow, documentation standards, documentation-site operation, benchmark evidence policy, AI documentation-management workflow, and offline-build guidance.
+
+Keep local transcripts, raw benchmark output, generated logs, package caches, and one-off review notes out of the rendered docs surface.
 
 ## docs.site.json curation rules
 

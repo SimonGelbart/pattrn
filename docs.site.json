@@ -117,7 +117,7 @@
       "source": "docs/reference/project-profile.md",
       "route": "/reference/project-profile/",
       "title": "Project profile",
-      "section": "Reference"
+      "section": "Maintainer guidance"
     },
     {
       "source": "docs/reference/validation.md",
@@ -141,6 +141,24 @@
       "source": "docs/reference/documentation-standards.md",
       "route": "/reference/documentation-standards/",
       "title": "Documentation standards",
+      "section": "Maintainer guidance"
+    },
+    {
+      "source": "docs/reference/documentation-site.md",
+      "route": "/reference/documentation-site/",
+      "title": "Documentation site",
+      "section": "Maintainer guidance"
+    },
+    {
+      "source": "docs/reference/ai-documentation-management.md",
+      "route": "/reference/ai-documentation-management/",
+      "title": "AI documentation management",
+      "section": "Maintainer guidance"
+    },
+    {
+      "source": "docs/reference/building-offline.md",
+      "route": "/reference/building-offline/",
+      "title": "Building offline",
       "section": "Maintainer guidance"
     },
     {
@@ -171,85 +189,99 @@
       "source": "docs/adr/0001-core-remains-segmented-and-domain-neutral.md",
       "route": "/adr/0001-core-remains-segmented-and-domain-neutral/",
       "title": "ADR 0001: Core remains segmented and domain-neutral",
-      "section": "ADRs"
+      "section": "ADRs",
+      "status": "Accepted"
     },
     {
       "source": "docs/adr/0002-target-dotnet-10-only.md",
       "route": "/adr/0002-target-dotnet-10-only/",
       "title": "ADR 0002: Target .NET 10 only for the current product cycle",
-      "section": "ADRs"
+      "section": "ADRs",
+      "status": "Accepted"
     },
     {
       "source": "docs/adr/0003-explicit-pattern-segments-are-primary.md",
       "route": "/adr/0003-explicit-pattern-segments-are-primary/",
       "title": "ADR 0003: Explicit pattern segments are the primary core model",
-      "section": "ADRs"
+      "section": "ADRs",
+      "status": "Accepted"
     },
     {
       "source": "docs/adr/0004-companion-packages.md",
       "route": "/adr/0004-companion-packages/",
       "title": "ADR 0004: Strings, DI, and Routing are companion packages",
-      "section": "ADRs"
+      "section": "ADRs",
+      "status": "Accepted"
     },
     {
       "source": "docs/adr/0005-routing-remains-preview.md",
       "route": "/adr/0005-routing-remains-preview/",
       "title": "ADR 0005: Routing remains preview and outside the initial stable scope",
-      "section": "ADRs"
+      "section": "ADRs",
+      "status": "Accepted"
     },
     {
       "source": "docs/adr/0006-globbing-is-post-1-0.md",
       "route": "/adr/0006-globbing-is-post-1-0/",
       "title": "ADR 0006: Globbing is deferred to a post-1.0 companion package",
-      "section": "ADRs"
+      "section": "ADRs",
+      "status": "Accepted"
     },
     {
       "source": "docs/adr/0007-matching-apis-remain-synchronous.md",
       "route": "/adr/0007-matching-apis-remain-synchronous/",
       "title": "ADR 0007: Matching APIs remain synchronous",
-      "section": "ADRs"
+      "section": "ADRs",
+      "status": "Accepted"
     },
     {
       "source": "docs/adr/0008-aspnetcore-behavior-stays-outside-core.md",
       "route": "/adr/0008-aspnetcore-behavior-stays-outside-core/",
       "title": "ADR 0008: ASP.NET Core behavior stays outside the core",
-      "section": "ADRs"
+      "section": "ADRs",
+      "status": "Accepted"
     },
     {
       "source": "docs/adr/0009-compiled-index-internals-are-private.md",
       "route": "/adr/0009-compiled-index-internals-are-private/",
       "title": "ADR 0009: Compiled index internals are private and not serialized",
-      "section": "ADRs"
+      "section": "ADRs",
+      "status": "Accepted"
     },
     {
       "source": "docs/adr/0010-performance-guardrails-are-release-gates.md",
       "route": "/adr/0010-performance-guardrails-are-release-gates/",
       "title": "ADR 0010: Performance guardrails are release gates",
-      "section": "ADRs"
+      "section": "ADRs",
+      "status": "Accepted"
     },
     {
       "source": "docs/adr/0011-diagnostics-are-optional-not-hot-path.md",
       "route": "/adr/0011-diagnostics-are-optional-not-hot-path/",
       "title": "ADR 0011: Diagnostics are optional and not hot-path behavior",
-      "section": "ADRs"
+      "section": "ADRs",
+      "status": "Accepted"
     },
     {
       "source": "docs/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones.md",
       "route": "/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones/",
       "title": "ADR 0012: Simplify pre-beta versioning and roadmap milestones",
-      "section": "ADRs"
+      "section": "ADRs",
+      "status": "Accepted"
     },
     {
       "source": "docs/adr/0013-use-fixed-ranking-with-consumer-side-sorting.md",
       "route": "/adr/0013-use-fixed-ranking-with-consumer-side-sorting/",
       "title": "ADR 0013: Use fixed ranking with consumer-side sorting",
-      "section": "ADRs"
+      "section": "ADRs",
+      "status": "Accepted"
     },
     {
       "source": "docs/adr/0014-builders-single-writer-compiled-indexes-concurrent-reader-safe.md",
       "route": "/adr/0014-builders-single-writer-compiled-indexes-concurrent-reader-safe/",
       "title": "ADR 0014: Builders are single-writer and compiled indexes are concurrent-reader safe",
-      "section": "ADRs"
+      "section": "ADRs",
+      "status": "Accepted"
     }
   ],
   "exclude": [
