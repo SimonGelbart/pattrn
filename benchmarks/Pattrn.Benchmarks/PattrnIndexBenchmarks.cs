@@ -9,6 +9,7 @@ public class PattrnIndexBenchmarks
     private PattrnIndex<string, int> _index = null!;
     private string[] _path = [];
     private int[] _valueDestination = [];
+    private int[] _insufficientValueDestination = [];
     private PatternMatch<int>[] _matchDestination = [];
     private PatternCapture<string>[] _captureDestination = [];
 
@@ -94,8 +95,10 @@ public class PattrnIndexBenchmarks
         }
 
         _index = builder.Build(options);
-        _valueDestination = new int[Math.Max(1, _index.GetMatchCountUpperBound(_path))];
-        _matchDestination = new PatternMatch<int>[Math.Max(1, _index.GetMatchCountUpperBound(_path))];
+        var matchUpperBound = _index.GetMatchCountUpperBound(_path);
+        _valueDestination = new int[Math.Max(1, matchUpperBound)];
+        _insufficientValueDestination = new int[Math.Max(0, matchUpperBound - 1)];
+        _matchDestination = new PatternMatch<int>[Math.Max(1, matchUpperBound)];
         _captureDestination = new PatternCapture<string>[Math.Max(1, _index.GetCaptureCountUpperBound(_path))];
     }
 
@@ -132,6 +135,20 @@ public class PattrnIndexBenchmarks
     public int Trie_MatchToSpan()
     {
         return _index.Match(_path, _valueDestination);
+    }
+
+    [Benchmark]
+    public int Trie_TryMatchToSpan_SufficientDestination()
+    {
+        var succeeded = _index.TryMatch(_path, _valueDestination, out var written);
+        return succeeded ? written : -1;
+    }
+
+    [Benchmark]
+    public int Trie_TryMatchToSpan_InsufficientDestination()
+    {
+        var succeeded = _index.TryMatch(_path, _insufficientValueDestination, out var written);
+        return succeeded ? written : -1;
     }
 
     [Benchmark]

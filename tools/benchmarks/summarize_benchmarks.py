@@ -138,7 +138,7 @@ def classify(row: BenchmarkRow) -> str:
         return "String helpers"
     if "detailed" in haystack or "capture" in haystack or "duplicate" in haystack or "matchtoarray" in haystack:
         return "Detailed matching"
-    if "pattrnindexbenchmarks" in haystack and ("matchtospan" in haystack or "upperbound" in haystack):
+    if "pattrnindexbenchmarks" in haystack and ("matchtospan" in haystack or "trymatchtospan" in haystack or "upperbound" in haystack):
         return "Core hot path"
     return "Unclassified"
 
@@ -155,7 +155,7 @@ def zero_alloc(rows: list[BenchmarkRow]) -> str:
 def guardrails(rows: list[BenchmarkRow]) -> list[dict[str, str]]:
     def matches(*needles: str) -> list[BenchmarkRow]:
         return [r for r in rows if all(n.lower() in " ".join([r.benchmark_type, r.method, r.scenario or "", r.display_info or ""]).lower() for n in needles)]
-    core = [r for r in rows if r.group == "Core hot path" and ("MatchToSpan" in r.method or "UpperBound" in r.method)]
+    core = [r for r in rows if r.group == "Core hot path" and ("MatchToSpan" in r.method or "TryMatchToSpan" in r.method or "UpperBound" in r.method)]
     presplit = matches("RouteIndex_MatchPreSplit", "Span")
     non_hot = [r for r in rows if r.group in {"Detailed matching", "Routing preview", "String helpers"}]
     return [
