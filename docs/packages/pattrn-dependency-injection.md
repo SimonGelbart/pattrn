@@ -114,4 +114,4 @@ Preview:
 - `IPattrnRegistrationSource<TSegment, TValue>`.
 - `PattrnRegistrationContext<TSegment, TValue>`.
 
-See [project profile](../reference/project-profile.md) and [roadmap](../roadmap.md) for current package-level stability posture. Historical release notes are available from the [archive index](../archive/README.md).
+See [project profile](../reference/project-profile.md) and [roadmap](../roadmap.md) for current package-level stability posture.

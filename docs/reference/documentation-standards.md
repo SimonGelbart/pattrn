@@ -12,8 +12,6 @@ Use the Diataxis structure for new durable docs:
 - `docs/explanation/` for conceptual background;
 - `docs/adr/` for Architecture Decision Records.
 
-Older alpha-era material may remain under `docs/archive/pre-beta/` while it is reconciled as historical context.
-
 ## Path ownership map
 
 Use these canonical ownership boundaries.
@@ -28,8 +26,6 @@ Use these canonical ownership boundaries.
 | `docs/explanation/` | Design rationale and conceptual framing. |
 | `docs/packages/` | Package-scoped README content for NuGet package docs. |
 | `docs/adr/` | Decision records only (status-bearing ADRs and ADR index). |
-| `docs/archive/` | Historical pre-beta context only. |
-| `docs/benchmark-results/` | Historical benchmark evidence only. |
 | `docs.site.json` | Public docs-surface curation manifest. |
 
 ## Source-of-truth rules
@@ -48,16 +44,15 @@ Avoid duplicating:
 ## Current vs historical rules
 
 - Current user-facing docs should prioritize current reference/roadmap/project-profile sources.
-- Link to archive material only when historical context is needed, and label it clearly as historical.
+- Use Git history for discarded alpha-era migration notes, local benchmark reports, release-planning notes, and design drafts.
 - Keep `CHANGELOG.md` as public release history while clearly framing alpha-train entries as historical pre-beta context.
-- Committed benchmark markdown is historical evidence; current benchmark proof comes from CI workflow artifacts and summaries.
+- Current benchmark proof comes from CI workflow artifacts and summaries, not committed local benchmark output.
 
 ## docs.site.json curation rules
 
 `docs.site.json` is a curation layer for current public docs, not a list of every markdown file.
 
 - Include current public pages in active user/maintainer paths.
-- Keep explicit excludes for `docs/archive/**` and `docs/benchmark-results/**`.
 - Do not route raw logs, generated benchmark dumps, or transitional scratch/review notes.
 - Keep ADR routing aligned with `docs/adr/README.md`: render all accepted, non-superseded ADRs unless an ADR is intentionally maintainer-only.
 

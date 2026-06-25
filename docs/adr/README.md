@@ -21,6 +21,7 @@ ADRs capture durable product, architecture, package-boundary, compatibility, and
 | [0011](0011-diagnostics-are-optional-not-hot-path.md) | Diagnostics are optional and not hot-path behavior | Accepted | diagnostics, performance | Public |
 | [0012](0012-simplify-pre-beta-versioning-and-roadmap-milestones.md) | Simplify pre-beta versioning and roadmap milestones | Accepted | versioning, roadmap | Public |
 | [0013](0013-use-fixed-ranking-with-consumer-side-sorting.md) | Use fixed ranking with consumer-side sorting | Accepted | ranking, matching-semantics | Public |
+| [0014](0014-builders-single-writer-compiled-indexes-concurrent-reader-safe.md) | Builders are single-writer and compiled indexes are concurrent-reader safe | Accepted | concurrency, api-shape | Public |
 | [0000 template](0000-adr-template.md) | ADR template | Proposed | process, authoring | Maintainer-only authoring aid |
 
 ## Task-based read order
@@ -67,10 +68,4 @@ Do not rewrite a historical ADR to hide a change in direction. If the project in
 
 ## Historical sources
 
-These ADRs summarize and stabilize decisions that were previously spread across README sections, release docs, benchmark notes, the living roadmap, and historical design reviews such as:
-
-- `docs/archive/pre-beta/design/architecture.md`
-- `docs/archive/pre-beta/design/state-of-the-art-architecture-review.md`
-- `docs/archive/`
-- `docs/archive/pre-beta/release/`
-- `docs/benchmark-results/`
+These ADRs summarize and stabilize durable decisions that were previously spread across README sections, release docs, benchmark notes, the living roadmap, and historical design reviews. The discarded source notes are intentionally left to Git history.

@@ -246,4 +246,4 @@ builder.ValidateOnBuild(diagnostic => diagnostic.Kind == PatternDiagnosticKind.O
 
 ## Preview status
 
-`Pattrn`, `Pattrn.Strings`, and `Pattrn.DependencyInjection` are stable candidates before beta. `Pattrn.Routing` remains preview. Public API names may still change before beta when doing so makes the long-term surface clearer. See [project profile](project-profile.md), [roadmap](../roadmap.md), and the [archive index](../archive/README.md) for historical release context.
+`Pattrn`, `Pattrn.Strings`, and `Pattrn.DependencyInjection` are stable candidates before beta. `Pattrn.Routing` remains preview. Public API names may still change before beta when doing so makes the long-term surface clearer. See [project profile](project-profile.md) and [roadmap](../roadmap.md) for current package-level stability posture.

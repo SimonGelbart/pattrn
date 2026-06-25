@@ -244,10 +244,13 @@
       "route": "/adr/0013-use-fixed-ranking-with-consumer-side-sorting/",
       "title": "ADR 0013: Use fixed ranking with consumer-side sorting",
       "section": "ADRs"
+    },
+    {
+      "source": "docs/adr/0014-builders-single-writer-compiled-indexes-concurrent-reader-safe.md",
+      "route": "/adr/0014-builders-single-writer-compiled-indexes-concurrent-reader-safe/",
+      "title": "ADR 0014: Builders are single-writer and compiled indexes are concurrent-reader safe",
+      "section": "ADRs"
     }
   ],
-  "exclude": [
-    "docs/archive/**",
-    "docs/benchmark-results/**"
-  ]
+  "exclude": []
 }
