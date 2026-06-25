@@ -16,6 +16,7 @@ Pattrn documentation is organized around the current pre-beta product state. Use
 - [Root README](../README.md) for the short product overview and first example.
 - [Project profile](reference/project-profile.md) for durable package/status facts.
 - [Validation](reference/validation.md) for CI-first validation policy.
+- [Benchmarks](reference/benchmarks.md) for evidence policy and benchmark workflow expectations.
 - [Architecture decisions](adr/README.md) for accepted decision history.
 
 ## Packages
@@ -35,9 +36,14 @@ Pattrn documentation is organized around the current pre-beta product state. Use
 ## Maintainer guidance
 
 - [`../AGENTS.md`](../AGENTS.md)
+- [Project profile](reference/project-profile.md)
+- [Validation](reference/validation.md)
 - [Repository layout](reference/repository-layout.md)
 - [Git workflow](reference/git-workflow.md)
 - [Documentation standards](reference/documentation-standards.md)
+- [Documentation site](reference/documentation-site.md)
+- [AI documentation management](reference/ai-documentation-management.md)
+- [Building offline](reference/building-offline.md)
 
 ## Historical material
 

@@ -6,6 +6,7 @@ export type SiteDoc = {
   title: string;
   section: string;
   render?: boolean;
+  status?: string;
 };
 
 export type SiteLink = {
@@ -97,7 +98,22 @@ export function getTopLevelKey(section: string) {
   }
 }
 
-export function getDocsBySection() {
+export function getDocsForSection(section: string, { renderableOnly = false } = {}) {
+  const docs = renderableOnly ? getRenderableDocs() : getAllDocs();
+  return docs.filter((doc) => doc.section === section);
+}
+
+export function getRenderableDocsBySection(section: string) {
+  return getDocsForSection(section, { renderableOnly: true });
+}
+
+export function getDocsBySection(): { section: string; docs: SiteDoc[] }[];
+export function getDocsBySection(section: string): SiteDoc[];
+export function getDocsBySection(section?: string) {
+  if (section) {
+    return getDocsForSection(section, { renderableOnly: true });
+  }
+
   const sections = new Map<string, SiteDoc[]>();
 
   for (const doc of getRenderableDocs()) {

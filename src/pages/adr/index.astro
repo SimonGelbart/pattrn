@@ -1,12 +1,31 @@
 ---
 import PattrnLayout from '../../site/layouts/PattrnLayout.astro';
-import { getSourceUrl, linkForSource, type SiteLink } from '../../site/lib/docs';
+import { getDocsForSection, getSourceUrl, linkForSource, withBase, type SiteDoc, type SiteLink } from '../../site/lib/docs';
 
-const adrs: ({ id: string; title: string } & SiteLink)[] = [
+type AdrLink = SiteDoc & { id: string; displayTitle: string; status: string };
+type RecommendedAdr = { id: string; title: string } & SiteLink;
+
+const adrNumberPattern = /^docs\/adr\/(\d{4})-/;
+
+const allAdrs: AdrLink[] = getDocsForSection('ADRs', { renderableOnly: true })
+  .filter((doc) => adrNumberPattern.test(doc.source))
+  .sort((left, right) => left.source.localeCompare(right.source))
+  .map((doc) => {
+    const id = doc.source.match(adrNumberPattern)?.[1] ?? '????';
+    const prefix = `ADR ${id}: `;
+    return {
+      ...doc,
+      id: `ADR ${id}`,
+      displayTitle: doc.title.startsWith(prefix) ? doc.title.slice(prefix.length) : doc.title,
+      status: doc.status ?? 'Accepted',
+    };
+  });
+
+const recommended: RecommendedAdr[] = [
   { id: 'ADR 0001', title: 'Core remains segmented and domain-neutral', ...linkForSource('docs/adr/0001-core-remains-segmented-and-domain-neutral.md', 'Read decision record') },
   { id: 'ADR 0003', title: 'Explicit pattern segments are the primary core model', ...linkForSource('docs/adr/0003-explicit-pattern-segments-are-primary.md', 'Read decision record') },
   { id: 'ADR 0004', title: 'Strings, DI, and Routing are companion packages', ...linkForSource('docs/adr/0004-companion-packages.md', 'Read decision record') },
-  { id: 'ADR 0012', title: 'Simplify pre-beta versioning and roadmap milestones', ...linkForSource('docs/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones.md', 'Read decision record') },
+  { id: 'ADR 0010', title: 'Performance guardrails are release gates', ...linkForSource('docs/adr/0010-performance-guardrails-are-release-gates.md', 'Read decision record') },
   { id: 'ADR 0013', title: 'Use fixed ranking with consumer-side sorting', ...linkForSource('docs/adr/0013-use-fixed-ranking-with-consumer-side-sorting.md', 'Read decision record') },
 ];
 ---
@@ -18,9 +37,9 @@ const adrs: ({ id: string; title: string } & SiteLink)[] = [
     <div class="actions"><a class="button" href={getSourceUrl('docs/adr/README.md')} rel="noreferrer">Open ADR index ↗</a></div>
   </section>
   <section class="section">
-    <div class="section-heading"><p class="eyebrow">Recommended read order</p><h2>Start with the binding decisions.</h2><p>These records are the first stops when changing public behavior, package boundaries, docs, or validation policy.</p></div>
+    <div class="section-heading"><p class="eyebrow">Recommended read order</p><h2>Start with the decisions most changes touch.</h2><p>Use the full list below for complete accepted decision history. Start here when changing public behavior, package boundaries, roadmap policy, or validation evidence.</p></div>
     <div class="package-list">
-      {adrs.map((adr) => (
+      {recommended.map((adr) => (
         <a class="package-row" href={adr.href} rel={adr.external ? 'noreferrer' : undefined}>
           <div class="package-row__meta"><span>Record</span><strong>{adr.id}</strong></div>
           <div><h3>{adr.title}</h3><p>{adr.label}{adr.external ? ' ↗' : ''}</p></div>
@@ -28,5 +47,16 @@ const adrs: ({ id: string; title: string } & SiteLink)[] = [
       ))}
     </div>
   </section>
-  <section class="section section-compact"><aside class="note callout"><p><strong>Change rule:</strong> do not rewrite a historical ADR to hide a change in direction. Add a new ADR when the project intentionally changes direction.</p></aside></section>
+  <section class="section">
+    <div class="section-heading"><p class="eyebrow">All accepted public ADRs</p><h2>Manifest-driven decision index.</h2><p>This list is generated from <code>docs.site.json</code>, so newly curated accepted ADRs appear here through manifest data rather than page-specific rows.</p></div>
+    <div class="package-list">
+      {allAdrs.map((adr) => (
+        <a class="package-row" href={withBase(adr.route)}>
+          <div class="package-row__meta"><span>{adr.status}</span><strong>{adr.id}</strong></div>
+          <div><h3>{adr.displayTitle}</h3><p>Read decision record</p></div>
+        </a>
+      ))}
+    </div>
+  </section>
+  <section class="section section-compact"><aside class="note callout"><p><strong>Status values:</strong> ADRs use Proposed, Accepted, Superseded, or Deprecated. <strong>Change rule:</strong> do not rewrite a historical ADR to hide a change in direction. Add a new ADR when the project intentionally changes direction.</p></aside></section>
 </PattrnLayout>
