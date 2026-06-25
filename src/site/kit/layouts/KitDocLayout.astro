@@ -1,0 +1,31 @@
+---
+import KitDocsNav from '../components/KitDocsNav.astro';
+import KitSourceLink from '../components/KitSourceLink.astro';
+import { getTopLevelKey } from '../lib/docs';
+import '../styles/docs.css';
+
+const { doc, frontmatter = {}, sourceUrl, shell: Shell, titleSuffix = '', defaultDescriptionPrefix = 'Documentation' } = Astro.props;
+const title = frontmatter.title ?? doc.title;
+const description = frontmatter.description ?? `${defaultDescriptionPrefix}: ${doc.title}.`;
+const current = getTopLevelKey(doc.section);
+const pageTitle = titleSuffix ? `${title} — ${titleSuffix}` : title;
+---
+<Shell title={pageTitle} description={description} current={current}>
+  <section class="page-heading narrow doc-heading">
+    <p class="eyebrow">{doc.section}</p>
+    <h1>{title}</h1>
+    {frontmatter.description && <p class="lede">{frontmatter.description}</p>}
+    <div class="actions">
+      <KitSourceLink href={sourceUrl} />
+    </div>
+  </section>
+
+  <section class="section doc-shell">
+    <KitDocsNav currentRoute={doc.route} />
+    <article class="doc-article">
+      <div class="doc-content">
+        <slot />
+      </div>
+    </article>
+  </section>
+</Shell>

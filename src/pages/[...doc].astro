@@ -1,6 +1,6 @@
 ---
-import DocLayout from '../site/layouts/DocLayout.astro';
-import { getRenderableDocs, getSourceUrl, routeToParam } from '../site/lib/docs';
+import PattrnDocLayout from '../site/project/layouts/PattrnDocLayout.astro';
+import { getRenderableDocs, getSourceUrl, routeToParam } from '../site/kit/lib/docs';
 
 const docModules = import.meta.glob('../../docs/**/*.md');
 
@@ -33,6 +33,6 @@ if (!Content) {
   throw new Error(`Markdown module for ${doc.source} did not expose renderable content.`);
 }
 ---
-<DocLayout doc={doc} frontmatter={frontmatter} sourceUrl={getSourceUrl(doc.source)}>
+<PattrnDocLayout doc={doc} frontmatter={frontmatter} sourceUrl={getSourceUrl(doc.source)}>
   <Content />
-</DocLayout>
+</PattrnDocLayout>
