@@ -1,6 +1,6 @@
 ---
-import DocLayout from '../layouts/DocLayout.astro';
-import { getRenderableDocs, getSourceUrl, routeToParam } from '../lib/docs';
+import DocLayout from '../site/layouts/DocLayout.astro';
+import { getRenderableDocs, getSourceUrl, routeToParam } from '../site/lib/docs';
 
 const docModules = import.meta.glob('../../docs/**/*.md');
 

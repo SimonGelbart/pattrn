@@ -21,6 +21,19 @@
 | `src/Pattrn.Routing` | Preview route-template companion package. |
 | `samples/` | Compileable examples. |
 
+## Documentation site source boundaries
+
+The published Pattrn Pages site is an Astro application, but `docs/**` remains the canonical documentation content. Keep the source boundaries explicit:
+
+| Path | Purpose |
+|---|---|
+| `docs/**` | Canonical Markdown documentation source. |
+| `docs.site.json` | Curation manifest for rendered documentation routes, source links, and navigation metadata. |
+| `src/pages/**` | Astro route entry points for public Pages URLs. Keep route files here to preserve Astro's route convention. |
+| `src/site/**` | Pattrn Pages implementation details: layouts, components, documentation helpers, and site CSS. |
+
+Generated site output is build artifact content only. Do not edit generated HTML by hand or treat it as repository documentation source.
+
 ## Quality and automation
 
 | Path | Purpose |
