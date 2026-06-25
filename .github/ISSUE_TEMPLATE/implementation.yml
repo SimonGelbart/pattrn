@@ -1,0 +1,163 @@
+name: Implementation task
+description: A scoped task that should be implementable by a human or AI agent.
+title: "[Task]: "
+labels: ["status:needs-design"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for implementation, documentation, test, CI, benchmark, or cleanup work.
+
+        A good issue should be clear enough that a human or AI agent can:
+        1. triage whether it is ready;
+        2. identify the affected area;
+        3. implement the change within scope;
+        4. validate the result;
+        5. open a focused PR linked to this issue.
+
+  - type: dropdown
+    id: readiness
+    attributes:
+      label: Readiness
+      description: Can this issue be implemented without a product/design decision?
+      options:
+        - Needs design
+        - Ready to implement
+        - Blocked
+        - Deferred
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is missing, unclear, broken, risky, or not industrialized enough?
+      placeholder: |
+        Example:
+        TryMatch is listed as a protected hot path, but the benchmark suite does not currently measure it directly.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it matters
+      description: Explain the product, quality, maintenance, or user impact.
+      placeholder: |
+        Example:
+        Pattrn's performance claims should be backed by explicit benchmark evidence before beta.
+    validations:
+      required: true
+
+  - type: textarea
+    id: desired_outcome
+    attributes:
+      label: Desired outcome
+      description: What should be true when this issue is resolved?
+      placeholder: |
+        Example:
+        BenchmarkDotNet includes TryMatch scenarios for sufficient and insufficient destination buffers.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_scope
+    attributes:
+      label: Proposed scope
+      description: List the expected work. Keep this concrete and focused.
+      value: |
+        - 
+        - 
+        - 
+    validations:
+      required: true
+
+  - type: textarea
+    id: affected_areas
+    attributes:
+      label: Likely affected areas
+      description: List files, packages, docs, tests, workflows, or benchmark projects likely to change.
+      placeholder: |
+        Example:
+        - benchmarks/Pattrn.Benchmarks/
+        - docs/reference/benchmarks.md
+        - .github/workflows/benchmarks.yml
+    validations:
+      required: false
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints and product boundaries
+      description: What must not change? Mention ADRs, roadmap boundaries, hot-path rules, package boundaries, or non-goals.
+      placeholder: |
+        Example:
+        - Do not add async matching APIs.
+        - Do not change core matching semantics.
+        - Keep diagnostics out of the value-only hot path.
+        - Keep companion packages thin.
+    validations:
+      required: true
+
+  - type: textarea
+    id: linked_context
+    attributes:
+      label: Linked context
+      description: Link related ADRs, docs, issues, PRs, benchmark reports, or design notes.
+      placeholder: |
+        Example:
+        - ADR 0010: Performance guardrails are release gates
+        - ADR 0014: Builders are single-writer and compiled indexes are concurrent-reader safe
+        - docs/reference/benchmarks.md
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      description: Objective checklist for completion.
+      value: |
+        - [ ] 
+        - [ ] 
+        - [ ] 
+    validations:
+      required: true
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation
+      description: Commands or checks that should pass. If unknown, say what should be discovered.
+      placeholder: |
+        Example:
+        - dotnet test
+        - dotnet run --project benchmarks/Pattrn.Benchmarks -c Release -- --filter '*TryMatch*'
+        - docs links checked manually
+    validations:
+      required: true
+
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of scope
+      description: What should the implementer avoid doing in this issue?
+      value: |
+        - 
+        - 
+    validations:
+      required: true
+
+  - type: textarea
+    id: agent_instructions
+    attributes:
+      label: Notes for AI/human implementer
+      description: Extra instructions for an AI agent or contributor.
+      placeholder: |
+        Example:
+        Start by inspecting existing benchmark scenarios and benchmark docs.
+        Prefer extending the current benchmark structure instead of inventing a parallel system.
+        Keep the PR focused and link it back to this issue.
+    validations:
+      required: false
