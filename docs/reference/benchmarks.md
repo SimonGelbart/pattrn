@@ -57,6 +57,32 @@ The grouped summary includes guardrail statuses for protected hot paths:
 
 `Unknown` is intentionally preferred when evidence is missing or ambiguous. Treat unclassified rows and `Unknown` guardrails as follow-up items before using a run to support a performance-sensitive decision.
 
+## Coverage matrix
+
+This matrix maps product/performance claims to current smoke-test and BenchmarkDotNet coverage.
+
+`Present` means the repository contains current test or benchmark coverage for that row.
+`Missing` means the claim is intentionally not covered yet and should link to a follow-up issue when known.
+`Unknown` means coverage could not be confirmed from the current docs, scripts, or benchmark project.
+`Not protected` means the behavior is intentionally outside the protected allocation-sensitive hot path, even when it has functional tests or benchmarks.
+
+Do not treat this matrix as benchmark-result evidence. Current performance proof still comes from workflow-produced benchmark artifacts for the commit under review.
+
+| Area | Claim / behavior | Smoke-test coverage | BenchmarkDotNet coverage | Evidence source | Status | Follow-up |
+|---|---|---|---|---|---|---|
+| Core hot path | `Match(..., Span<TValue>)` for segmented paths writes into caller-provided buffers. | Unknown; functional destination-span tests exist, but no current allocation smoke test was found. | Present | `tests/Pattrn.Tests/CoreMatchingTests.cs`; `PattrnIndexBenchmarks.Trie_MatchToSpan`; workflow `Core hot path` grouped rows | Partial | [#27](https://github.com/SimonGelbart/pattrn/issues/27) |
+| Core hot path | `TryMatch(...)` with a sufficient destination reports success without materializing result arrays. | Unknown; functional `TryMatch` tests exist, but no current allocation smoke test was found. | Missing | `tests/Pattrn.Tests/TryMatchTests.cs`; no `TryMatch` method in `benchmarks/Pattrn.Benchmarks/PattrnIndexBenchmarks.cs` | Partial | [#27](https://github.com/SimonGelbart/pattrn/issues/27), [#28](https://github.com/SimonGelbart/pattrn/issues/28) |
+| Core hot path | `GetMatchCountUpperBound(...)` provides caller-buffer sizing for segmented paths. | Unknown; functional upper-bound tests exist, but no current allocation smoke test was found. | Present | `tests/Pattrn.Tests/CoreMatchingTests.cs`; `PattrnIndexBenchmarks.Trie_GetMatchCountUpperBound`; workflow `Core hot path` grouped rows | Partial | [#27](https://github.com/SimonGelbart/pattrn/issues/27) |
+| Detailed matching | `MatchDetailed(...)` writes matches and captures into caller-provided buffers. | Unknown; functional detailed low-allocation API tests exist, but no current allocation smoke test was found. | Present | `tests/Pattrn.Tests/CompatibilitySemanticsTests.cs`; `PattrnIndexBenchmarks.Trie_MatchDetailedToSpans`; workflow `Detailed matching` grouped rows | Partial | [#27](https://github.com/SimonGelbart/pattrn/issues/27) |
+| Convenience API | `MatchToArray` and materializing core APIs allocate result arrays for convenience. | Not protected | Present | `PattrnIndexBenchmarks.Trie_MatchToArray`; `PattrnIndexBenchmarks.Trie_MatchDetailedToArray`; workflow `Detailed matching` grouped rows | Covered |  |
+| String helpers | `Pattrn.Strings` splitting, normalization, and string convenience facade costs stay separate from core segmented span claims. | Not protected | Missing | String helper code and tests exist, but no `Pattrn.Strings` BenchmarkDotNet class or method was found. | Missing | [#29](https://github.com/SimonGelbart/pattrn/issues/29) |
+| Routing preview | Pre-split route matching uses the core segmented matcher after route paths are already split. | Unknown; functional route span tests exist, but no current allocation smoke test was found. | Present | `tests/Pattrn.Routing.Tests/RoutePatternExtensionTests.cs`; `RoutingBenchmarks.RouteIndex_MatchPreSplitToSpan`; workflow `Routing preview` grouped rows | Partial | [#27](https://github.com/SimonGelbart/pattrn/issues/27) |
+| Routing preview | Route parsing, route splitting, and route convenience matching remain preview and are not core hot-path proof. | Not protected | Present | `RoutingBenchmarks.RoutePattern_Parse`; `RoutingBenchmarks.RoutePattern_SplitPath`; `RoutingBenchmarks.RoutePattern_SplitPathToSpan`; `RoutingBenchmarks.RouteIndex_MatchRouteToSpan`; workflow `Routing preview` grouped rows | Covered |  |
+| Builder / validation | Builder construction, diagnostic scanning, and opt-in build validation costs are build-time behavior. | Not protected | Present | `BuilderBenchmarks.Build`; `BuilderBenchmarks.GetDiagnostics`; `BuilderBenchmarks.BuildWithValidation`; workflow `Builder / validation` grouped rows | Covered |  |
+| Diagnostics | Explanation and diagnostic paths stay outside default matching hot paths. | Not protected | Partial; builder diagnostics are benchmarked, but matcher explanation paths are not covered. | `BuilderBenchmarks.GetDiagnostics`; no explanation benchmark class or method was found. | Partial | [#40](https://github.com/SimonGelbart/pattrn/issues/40) |
+| Benchmark pipeline | Grouped summary generation classifies BenchmarkDotNet rows into documented report categories and emits workflow artifacts. | N/A | N/A | `.github/workflows/benchmarks.yml`; `tools/benchmarks/summarize_benchmarks.py` | Covered | [#31](https://github.com/SimonGelbart/pattrn/issues/31) |
+| Benchmark pipeline | Baseline comparison for candidate benchmark runs. | N/A | N/A | No baseline comparison step or script was found in the benchmark workflow. | Missing | [#32](https://github.com/SimonGelbart/pattrn/issues/32) |
+
 ## Benchmark groups
 
 Current grouped reports classify existing benchmark rows by benchmark class and method names. Avoid renaming benchmark methods solely for report presentation because stable names make historical comparison easier.
