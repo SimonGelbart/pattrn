@@ -30,9 +30,10 @@ The published Pattrn Pages site is an Astro application, but `docs/**` remains t
 | `docs/**` | Canonical Markdown documentation source. |
 | `docs.site.json` | Curation manifest for rendered documentation routes, source links, and navigation metadata. |
 | `src/pages/**` | Astro route entry points for public Pages URLs. Keep route files here to preserve Astro's route convention. |
-| `src/site/**` | Pattrn Pages implementation details: layouts, components, documentation helpers, and site CSS. |
+| `src/site/kit/**` | Internal reusable Lab Pages kit primitives: manifest helpers, source-link and docs-navigation components, rendered-doc layout, and shared docs CSS. |
+| `src/site/project/**` | Pattrn-specific Pages implementation: project shell layout, project navigation, project copy, and Pattrn visual styling. |
 
-Generated site output is build artifact content only. Do not edit generated HTML by hand or treat it as repository documentation source.
+Keep `src/pages/**` as route entry points, `src/site/kit/**` as reusable project-site infrastructure, and `src/site/project/**` as Pattrn-specific composition. Generated site output is build artifact content only. Do not edit generated HTML by hand or treat it as repository documentation source.
 
 ## Quality and automation
 

@@ -4,9 +4,7 @@ This directory contains the Astro implementation for the Pattrn documentation si
 
 It renders selected canonical Markdown files from `docs/**` through routes declared in `docs.site.json`.
 
-- `components/` contains reusable site UI.
-- `layouts/` contains page and document layouts.
-- `lib/` contains docs manifest and link helpers.
-- `styles/` contains site CSS.
+- `kit/` contains internal reusable Lab Pages primitives for project documentation sites.
+- `project/` contains Pattrn-specific site composition, copy, navigation, and visual styling.
 
-Do not treat this directory as canonical documentation content. Update `docs/**` for documentation changes.
+Keep public route entry points in `src/pages/**`. Do not treat this directory as canonical documentation content. Update `docs/**` for documentation changes.

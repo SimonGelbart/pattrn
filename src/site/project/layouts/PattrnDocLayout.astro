@@ -1,0 +1,9 @@
+---
+import KitDocLayout from '../../kit/layouts/KitDocLayout.astro';
+import PattrnLayout from './PattrnLayout.astro';
+
+const { doc, frontmatter = {}, sourceUrl } = Astro.props;
+---
+<KitDocLayout doc={doc} frontmatter={frontmatter} sourceUrl={sourceUrl} shell={PattrnLayout} titleSuffix="Pattrn" defaultDescriptionPrefix="Pattrn documentation">
+  <slot />
+</KitDocLayout>
