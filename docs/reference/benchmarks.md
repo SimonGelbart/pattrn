@@ -78,7 +78,8 @@ Do not treat this matrix as benchmark-result evidence. Current performance proof
 | Area | Claim / behavior | Smoke-test coverage | BenchmarkDotNet coverage | Evidence source | Status | Follow-up |
 |---|---|---|---|---|---|---|
 | Core hot path | `Match(..., Span<TValue>)` for segmented paths writes into caller-provided buffers. | Present | Present | `tests/Pattrn.Tests/PerformanceSmokeTests.cs`; `PattrnIndexBenchmarks.Trie_MatchToSpan`; workflow `Core hot path` grouped rows | Covered |  |
-| Core hot path | `TryMatch(...)` with a sufficient destination reports success without materializing result arrays. | Present | Missing | `tests/Pattrn.Tests/PerformanceSmokeTests.cs`; no `TryMatch` method in `benchmarks/Pattrn.Benchmarks/PattrnIndexBenchmarks.cs` | Partial | [#28](https://github.com/SimonGelbart/pattrn/issues/28) |
+| Core hot path | `TryMatch(...)` with a sufficient destination reports success without materializing result arrays. | Present | Present | `tests/Pattrn.Tests/PerformanceSmokeTests.cs`; `PattrnIndexBenchmarks.Trie_TryMatchToSpan_SufficientDestination`; workflow `Core hot path` grouped rows | Covered |  |
+| Core hot path | `TryMatch(...)` with an insufficient destination reports failure without materializing result arrays. | Present | Present | `tests/Pattrn.Tests/TryMatchTests.cs`; `PattrnIndexBenchmarks.Trie_TryMatchToSpan_InsufficientDestination`; workflow `Core hot path` grouped rows | Covered |  |
 | Core hot path | `GetMatchCountUpperBound(...)` provides caller-buffer sizing for segmented paths. | Present | Present | `tests/Pattrn.Tests/PerformanceSmokeTests.cs`; `PattrnIndexBenchmarks.Trie_GetMatchCountUpperBound`; workflow `Core hot path` grouped rows | Covered |  |
 | Detailed matching | `MatchDetailed(...)` writes matches and captures into caller-provided buffers. | Present | Present | `tests/Pattrn.Tests/PerformanceSmokeTests.cs`; `PattrnIndexBenchmarks.Trie_MatchDetailedToSpans`; workflow `Detailed matching` grouped rows | Covered |  |
 | Convenience API | `MatchToArray` and materializing core APIs allocate result arrays for convenience. | Not protected | Present | `PattrnIndexBenchmarks.Trie_MatchToArray`; `PattrnIndexBenchmarks.Trie_MatchDetailedToArray`; workflow `Detailed matching` grouped rows | Covered |  |
@@ -116,6 +117,7 @@ Measured APIs include:
 
 - `GetMatchCountUpperBound`;
 - `Match` into caller-provided spans;
+- `TryMatch` into caller-provided spans with sufficient and insufficient destinations;
 - `MatchToArray`;
 - `MatchDetailed` into caller-provided match/capture spans;
 - `MatchDetailedToArray`;
