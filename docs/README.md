@@ -1,6 +1,6 @@
 # Documentation
 
-Pattrn documentation is organized around the current pre-beta product state. Use the newcomer path first; maintainer and historical material is intentionally lower on this page.
+Pattrn documentation is organized around the current pre-beta product state. Use the newcomer path first; maintainer material is intentionally lower on this page.
 
 ## Start here (new users)
 
@@ -39,12 +39,8 @@ Pattrn documentation is organized around the current pre-beta product state. Use
 - [Git workflow](reference/git-workflow.md)
 - [Documentation standards](reference/documentation-standards.md)
 
-## Historical context (condensed)
+## Historical material
 
-Use historical links only when you need pre-beta context:
-
-- [Archive index](archive/README.md)
-- [Release-history archive folder](archive/pre-beta/release/)
-- [Historical benchmark summaries](benchmark-results/)
+Pattrn is pre-beta. Alpha-era migration notes, local benchmark reports, release-planning notes, and design drafts are not kept in the current documentation path. Use Git history for old context. Durable product decisions are captured as ADRs.
 
 Current benchmark proof should come from CI workflow artifacts and summaries referenced by [benchmarks reference](reference/benchmarks.md).

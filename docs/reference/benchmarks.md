@@ -14,7 +14,7 @@ The `Benchmarks` GitHub Actions workflow is the benchmark source of truth for cu
 - a GitHub job summary;
 - a downloadable `benchmark-results-<run-id>-<attempt>` artifact.
 
-Do not treat local benchmark output or old committed benchmark reports as current product proof. Keep old reports only as historical evidence.
+Do not treat local benchmark output or old committed benchmark reports as current product proof. Git history is sufficient for retired local reports.
 
 ## Grouped reports
 
@@ -34,7 +34,7 @@ benchmark-ci-results/
     grouped-results.json
 ```
 
-The workflow remains the source of truth for current benchmark evidence. Old committed benchmark reports are historical only and must not be cited as proof for current performance claims.
+The workflow remains the source of truth for current benchmark evidence. Retired local reports must not be cited as proof for current performance claims.
 
 Rows are classified deterministically into these groups:
 
@@ -144,11 +144,3 @@ When reviewing benchmark artifacts, record:
 - allocation data when relevant.
 
 Smoke and dry runs prove the benchmark pipeline works. They are not publishable product-performance evidence.
-
-## Historical reports
-
-Committed benchmark reports under `docs/benchmark-results/` are historical local evidence. They can explain past decisions, but they should not be treated as current proof for new README performance claims.
-
-- [Historical full benchmark baseline](../benchmark-results/latest.md)
-- [Historical routing benchmark baseline](../benchmark-results/routing-latest.md)
-- [Performance guardrails](../benchmark-results/performance-guardrails.md)
