@@ -43,7 +43,8 @@ Rows are classified deterministically into these groups:
 | Core hot path | Value matching and protected read-path operations. |
 | Detailed matching | Match metadata, captures, deduplication, and materialization. |
 | Routing preview | Route parsing, route splitting, route helper matching, and pre-split route matching. |
-| Builder / validation | Build-time behavior, diagnostics, validation, and large-pattern construction. |
+| Builder / validation | Build-time behavior, builder diagnostics, validation, and large-pattern construction. |
+| Diagnostics | Matcher explanation and opt-in rejected-candidate diagnostics. These rows are non-hot-path allocation evidence, not protected core hot-path proof. |
 | String helpers | String splitting, normalization, and convenience facade costs. |
 | Unclassified | Rows that do not match classification rules. These rows are reported and require follow-up instead of being dropped. |
 
@@ -87,7 +88,7 @@ Do not treat this matrix as benchmark-result evidence. Current performance proof
 | Routing preview | Pre-split route matching uses the core segmented matcher after route paths are already split. | Unknown; functional route span tests exist, but no current allocation smoke test was found. | Present | `tests/Pattrn.Routing.Tests/RoutePatternExtensionTests.cs`; `RoutingBenchmarks.RouteIndex_MatchPreSplitToSpan`; workflow `Routing preview` grouped rows | Partial |  |
 | Routing preview | Route parsing, route splitting, and route convenience matching remain preview and are not core hot-path proof. | Not protected | Present | `RoutingBenchmarks.RoutePattern_Parse`; `RoutingBenchmarks.RoutePattern_SplitPath`; `RoutingBenchmarks.RoutePattern_SplitPathToSpan`; `RoutingBenchmarks.RouteIndex_MatchRouteToSpan`; workflow `Routing preview` grouped rows | Covered |  |
 | Builder / validation | Builder construction, diagnostic scanning, and opt-in build validation costs are build-time behavior. | Not protected | Present | `BuilderBenchmarks.Build`; `BuilderBenchmarks.GetDiagnostics`; `BuilderBenchmarks.BuildWithValidation`; workflow `Builder / validation` grouped rows | Covered |  |
-| Diagnostics | Explanation and diagnostic paths stay outside default matching hot paths. | Not protected | Partial; builder diagnostics are benchmarked, but matcher explanation paths are not covered. | `BuilderBenchmarks.GetDiagnostics`; no explanation benchmark class or method was found. | Partial | [#40](https://github.com/SimonGelbart/pattrn/issues/40) |
+| Diagnostics | Explanation and diagnostic paths stay outside default matching hot paths. | Not protected | Present | `BuilderBenchmarks.GetDiagnostics`; `ExplainBenchmarks.Explain_MatchingPath`; `ExplainBenchmarks.Explain_MatchingPathWithRejectedCandidates`; `ExplainBenchmarks.Explain_NoMatchWithRejectedCandidates`; `ExplainBenchmarks.Explain_CaptureHeavyPath`; workflow `Diagnostics` grouped rows | Covered |  |
 | Benchmark pipeline | Grouped summary generation classifies BenchmarkDotNet rows into documented report categories and emits workflow artifacts. | N/A | N/A | `.github/workflows/benchmarks.yml`; `tools/benchmarks/summarize_benchmarks.py` | Covered | [#31](https://github.com/SimonGelbart/pattrn/issues/31) |
 | Benchmark pipeline | Baseline comparison for candidate benchmark runs. | N/A | N/A | No baseline comparison step or script was found in the benchmark workflow. | Missing | [#32](https://github.com/SimonGelbart/pattrn/issues/32) |
 
@@ -154,6 +155,17 @@ Covers build-time behavior:
 - diagnostic scanning on clean builders;
 - diagnostic scanning on ambiguous builders;
 - opt-in build validation overhead.
+
+### `ExplainBenchmarks`
+
+Covers matcher explanation and opt-in diagnostic paths:
+
+- accepted-match explanation without rejected-candidate diagnostics;
+- accepted-match explanation with rejected-candidate diagnostics;
+- no-match explanation with rejected-candidate diagnostics;
+- capture-heavy explanation through terminal catch-all captures.
+
+These benchmarks intentionally measure diagnostics-oriented work performed by `Explain(...)`: copying the explained path, materializing detailed match results, and optionally collecting rejected candidates. They are separated into the `Diagnostics` group and must not be cited as protected core hot-path evidence or compared against `Match(..., Span<TValue>)` as a competing hot-path API.
 
 ## Local preflight
 

@@ -16,6 +16,7 @@ GROUPS = [
     "Detailed matching",
     "Routing preview",
     "Builder / validation",
+    "Diagnostics",
     "String helpers",
     "Unclassified",
 ]
@@ -132,6 +133,8 @@ def classify(row: BenchmarkRow) -> str:
     haystack = " ".join([row.benchmark_type, row.method, row.scenario or "", row.display_info or ""]).lower()
     if "routingbenchmarks" in haystack or "route" in haystack:
         return "Routing preview"
+    if "explainbenchmarks" in haystack or "explain_" in haystack:
+        return "Diagnostics"
     if "builderbenchmarks" in haystack or "diagnostic" in haystack or "validation" in haystack or "build" in haystack:
         return "Builder / validation"
     if "string" in haystack or "split" in haystack or "normaliz" in haystack:
@@ -157,11 +160,11 @@ def guardrails(rows: list[BenchmarkRow]) -> list[dict[str, str]]:
         return [r for r in rows if all(n.lower() in " ".join([r.benchmark_type, r.method, r.scenario or "", r.display_info or ""]).lower() for n in needles)]
     core = [r for r in rows if r.group == "Core hot path" and ("MatchToSpan" in r.method or "TryMatchToSpan" in r.method or "UpperBound" in r.method)]
     presplit = matches("RouteIndex_MatchPreSplit", "Span")
-    non_hot = [r for r in rows if r.group in {"Detailed matching", "Routing preview", "String helpers"}]
+    non_hot = [r for r in rows if r.group in {"Detailed matching", "Routing preview", "Diagnostics", "String helpers"}]
     return [
         {"guardrail": "Core span hot paths allocate 0 B", "status": zero_alloc(core), "evidence": f"rows matched: {len(core)}"},
         {"guardrail": "Pre-split route matching allocates 0 B", "status": zero_alloc(presplit), "evidence": f"rows matched: {len(presplit)}"},
-        {"guardrail": "Non-hot-path allocation is isolated", "status": "Review" if non_hot else "Unknown", "evidence": f"detailed/string/parsing rows: {len(non_hot)}"},
+        {"guardrail": "Non-hot-path allocation is isolated", "status": "Review" if non_hot else "Unknown", "evidence": f"detailed/routing/diagnostics/string rows: {len(non_hot)}"},
     ]
 
 
