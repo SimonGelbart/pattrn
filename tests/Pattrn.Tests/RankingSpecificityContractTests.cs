@@ -55,12 +55,65 @@ public sealed class RankingSpecificityContractTests
             .Add(["orders", "new"], "second", patternId: "second")
             .Build(MatchOptions.PreserveDuplicates);
 
+        var values = index.MatchToArray(["orders", "new"]);
         var matches = index.MatchDetailedToArray(["orders", "new"]);
 
+        ShouldSequenceEqual(values, ["first", "second"]);
         ShouldSequenceEqual(matches.Select(match => match.Value), ["first", "second"]);
         ShouldEqual(matches[0].Specificity, matches[1].Specificity);
         ShouldEqual(matches[0].RegistrationOrder, 0);
         ShouldEqual(matches[1].RegistrationOrder, 1);
+        ShouldEqual(matches[0].PatternId, "first");
+        ShouldEqual(matches[1].PatternId, "second");
+    }
+
+    [Test]
+    public void ValueAndDetailedResultsPreserveRegistrationOrderForEqualSpecificityWildcards()
+    {
+        var index = PattrnIndex<string, string>
+            .Builder("*")
+            .UseDuplicatePatternRegistrationBehavior(DuplicatePatternRegistrationBehavior.Append)
+            .Add(["orders", "*"], "first", patternId: "first-wildcard")
+            .Add(["orders", "*"], "second", patternId: "second-wildcard")
+            .Build(MatchOptions.PreserveDuplicates);
+
+        var values = index.MatchToArray(["orders", "42"]);
+        var matches = index.MatchDetailedToArray(["orders", "42"]);
+
+        ShouldSequenceEqual(values, ["first", "second"]);
+        ShouldSequenceEqual(matches.Select(match => match.Value), values);
+        ShouldSequenceEqual(matches.Select(match => match.RegistrationOrder), [0, 1]);
+        ShouldEqual(matches[0].Specificity, matches[1].Specificity);
+        ShouldEqual(matches[0].PatternId, "first-wildcard");
+        ShouldEqual(matches[1].PatternId, "second-wildcard");
+    }
+
+    [Test]
+    public void ValueAndDetailedResultsPreserveRegistrationOrderForEqualSpecificityParameterPatterns()
+    {
+        var index = PattrnIndex<string, string>
+            .Builder("*")
+            .AddPattern(
+                [PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("id")],
+                "first",
+                patternId: "first-parameter")
+            .AddPattern(
+                [PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("orderId")],
+                "second",
+                patternId: "second-parameter")
+            .Build(MatchOptions.PreserveDuplicates);
+
+        var values = index.MatchToArray(["orders", "42"]);
+        var matches = index.MatchDetailedToArray(["orders", "42"]);
+
+        ShouldSequenceEqual(values, ["first", "second"]);
+        ShouldSequenceEqual(matches.Select(match => match.Value), values);
+        ShouldSequenceEqual(matches.Select(match => match.RegistrationOrder), [0, 1]);
+        ShouldEqual(matches[0].Specificity, matches[1].Specificity);
+        ShouldEqual(matches[0].PatternId, "first-parameter");
+        ShouldEqual(matches[1].PatternId, "second-parameter");
+        ShouldSequenceEqual(matches[0].Captures, [new PatternCapture<string>("id", "42", 1)]);
+        ShouldSequenceEqual(matches[1].Captures, [new PatternCapture<string>("orderId", "42", 1)]);
     }
 
     [Test]
@@ -144,8 +197,10 @@ public sealed class RankingSpecificityContractTests
             .AddPattern([PatternSegment<string>.Literal("files"), PatternSegment<string>.CatchAll("secondPath")], "second")
             .Build(MatchOptions.PreserveDuplicates);
 
+        var values = index.MatchToArray(["files", "a", "b.txt"]);
         var matches = index.MatchDetailedToArray(["files", "a", "b.txt"]);
 
+        ShouldSequenceEqual(values, ["first", "second"]);
         ShouldSequenceEqual(matches.Select(match => match.Value), ["first", "second"]);
         ShouldEqual(matches[0].Specificity, matches[1].Specificity);
         ShouldEqual(matches[0].RegistrationOrder, 0);
