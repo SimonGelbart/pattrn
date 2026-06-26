@@ -152,6 +152,27 @@ public sealed class RankingSpecificityContractTests
     }
 
     [Test]
+    public void PrefixModeIsTraversalOrderedRatherThanGloballySpecificitySorted()
+    {
+        var index = PattrnIndex<string, string>
+            .Builder("*")
+            .Add(["api"], "api-prefix", patternId: "api-prefix")
+            .Add(["api", "orders", "new"], "orders-new-literal", patternId: "orders-new-literal")
+            .Build(new MatchOptions(PrefixMatchMode.IncludePrefixPatterns, DuplicateValueMatchMode.PreserveDuplicates));
+
+        var values = index.MatchToArray(["api", "orders", "new"]);
+        var detailed = index.MatchDetailedToArray(["api", "orders", "new"]);
+
+        ShouldSequenceEqual(values, ["api-prefix", "orders-new-literal"]);
+        ShouldSequenceEqual(detailed.Select(match => match.Value), values);
+        ShouldSequenceEqual(detailed.Select(match => match.Kind), [PatternMatchKind.Exact, PatternMatchKind.Exact]);
+        ShouldSequenceEqual(detailed.Select(match => match.PatternId), ["api-prefix", "orders-new-literal"]);
+        ShouldBeTrue(
+            detailed[1].Specificity > detailed[0].Specificity,
+            "The deeper literal registration is structurally more specific, but prefix traversal emits the prefix node first.");
+    }
+
+    [Test]
     public void PrefixModeStillUsesSpecificityWithinTheSameDepth()
     {
         var index = PattrnIndex<string, string>
@@ -168,6 +189,97 @@ public sealed class RankingSpecificityContractTests
         ShouldSequenceEqual(matches.Select(match => match.Value), ["literal", "parameter", "wildcard"]);
         ShouldBeTrue(matches[0].Specificity > matches[1].Specificity, "Literal should outrank parameter at the same depth.");
         ShouldBeTrue(matches[1].Specificity > matches[2].Specificity, "Parameter should outrank wildcard at the same depth.");
+    }
+
+    [Test]
+    public void PrefixModeUsesSpecificityWithinTheSameDepthIncludingCatchAll()
+    {
+        var index = PattrnIndex<string, string>
+            .Builder("*")
+            .AddPattern(
+                [PatternSegment<string>.Literal("api"), PatternSegment<string>.Literal("orders"), PatternSegment<string>.CatchAll("tail")],
+                "catch-all")
+            .Add(["api", "orders", "*"], "wildcard")
+            .AddPattern(
+                [PatternSegment<string>.Literal("api"), PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("id")],
+                "parameter")
+            .Add(["api", "orders", "new"], "literal")
+            .Build(new MatchOptions(PrefixMatchMode.IncludePrefixPatterns, DuplicateValueMatchMode.PreserveDuplicates));
+
+        var values = index.MatchToArray(["api", "orders", "new"]);
+        var detailed = index.MatchDetailedToArray(["api", "orders", "new"]);
+
+        ShouldSequenceEqual(values, ["literal", "parameter", "wildcard", "catch-all"]);
+        ShouldSequenceEqual(detailed.Select(match => match.Value), values);
+        ShouldSequenceEqual(
+            detailed.Select(match => match.Kind),
+            [PatternMatchKind.Exact, PatternMatchKind.Parameter, PatternMatchKind.Wildcard, PatternMatchKind.CatchAll]);
+        ShouldBeTrue(detailed[0].Specificity > detailed[1].Specificity, "Literal should outrank parameter at the same depth.");
+        ShouldBeTrue(detailed[1].Specificity > detailed[2].Specificity, "Parameter should outrank wildcard at the same depth.");
+        ShouldBeTrue(detailed[2].Specificity > detailed[3].Specificity, "Wildcard should outrank catch-all at the same depth.");
+        ShouldSequenceEqual(detailed[3].Captures, [new PatternCapture<string>("tail", "new", 2)]);
+    }
+
+    [Test]
+    public void PrefixModeEmitsPrefixNodeBeforeSpecificDeeperBranchMatches()
+    {
+        var index = PattrnIndex<string, string>
+            .Builder("*")
+            .Add(["api", "orders"], "orders-prefix")
+            .AddPattern(
+                [PatternSegment<string>.Literal("api"), PatternSegment<string>.Literal("orders"), PatternSegment<string>.CatchAll("tail")],
+                "catch-all")
+            .Add(["api", "orders", "*"], "wildcard")
+            .AddPattern(
+                [PatternSegment<string>.Literal("api"), PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("id")],
+                "parameter")
+            .Add(["api", "orders", "new"], "literal")
+            .Build(new MatchOptions(PrefixMatchMode.IncludePrefixPatterns, DuplicateValueMatchMode.PreserveDuplicates));
+
+        var values = index.MatchToArray(["api", "orders", "new"]);
+        var detailed = index.MatchDetailedToArray(["api", "orders", "new"]);
+
+        ShouldSequenceEqual(values, ["orders-prefix", "literal", "parameter", "wildcard", "catch-all"]);
+        ShouldSequenceEqual(detailed.Select(match => match.Value), values);
+        ShouldSequenceEqual(
+            detailed.Select(match => match.Kind),
+            [PatternMatchKind.Exact, PatternMatchKind.Exact, PatternMatchKind.Parameter, PatternMatchKind.Wildcard, PatternMatchKind.CatchAll]);
+        ShouldSequenceEqual(detailed.Select(match => match.RegistrationOrder), [0, 4, 3, 2, 1]);
+        ShouldBeTrue(
+            detailed[1].Specificity > detailed[0].Specificity,
+            "The deeper literal registration is structurally more specific, but the prefix node should be emitted first.");
+        ShouldBeTrue(detailed[1].Specificity > detailed[2].Specificity, "Literal should outrank parameter after the prefix node.");
+        ShouldBeTrue(detailed[2].Specificity > detailed[3].Specificity, "Parameter should outrank wildcard after the prefix node.");
+        ShouldBeTrue(detailed[3].Specificity > detailed[4].Specificity, "Wildcard should outrank catch-all after the prefix node.");
+    }
+
+    [Test]
+    public void PrefixModeAllowsTerminalCatchAllWithoutChangingTraversalOrder()
+    {
+        var index = PattrnIndex<string, string>
+            .Builder("*")
+            .AddPattern(
+                [PatternSegment<string>.Literal("files"), PatternSegment<string>.CatchAll("path")],
+                "files-catch-all")
+            .Add(["files", "public"], "files-public")
+            .Add(["files", "public", "images"], "files-public-images")
+            .Build(new MatchOptions(PrefixMatchMode.IncludePrefixPatterns, DuplicateValueMatchMode.PreserveDuplicates));
+
+        var values = index.MatchToArray(["files", "public", "images", "logo.png"]);
+        var detailed = index.MatchDetailedToArray(["files", "public", "images", "logo.png"]);
+
+        ShouldSequenceEqual(values, ["files-public", "files-public-images", "files-catch-all"]);
+        ShouldSequenceEqual(detailed.Select(match => match.Value), values);
+        ShouldSequenceEqual(
+            detailed.Select(match => match.Kind),
+            [PatternMatchKind.Exact, PatternMatchKind.Exact, PatternMatchKind.CatchAll]);
+        ShouldSequenceEqual(
+            detailed[2].Captures,
+            [
+                new PatternCapture<string>("path", "public", 1),
+                new PatternCapture<string>("path", "images", 2),
+                new PatternCapture<string>("path", "logo.png", 3)
+            ]);
     }
 
     [Test]
