@@ -6,13 +6,13 @@ The benchmark project is part of the product contract. It exists to keep perform
 
 ## Source of truth
 
-The `Benchmarks` GitHub Actions workflow is the benchmark source of truth for current commits. Each run should produce:
+The `Benchmarks` GitHub Actions workflow is the benchmark source of truth for current commits. It supports full same-run benchmark review, focused/custom investigation, and sharded group execution for coverage-oriented review as benchmark coverage grows. Each BenchmarkDotNet invocation should produce:
 
 - raw BenchmarkDotNet artifacts;
 - workflow metadata;
 - grouped benchmark summaries;
 - a GitHub job summary;
-- a downloadable `benchmark-results-<run-id>-<attempt>` artifact.
+- a downloadable `benchmark-results-<run-id>-<attempt>` artifact for single/full/custom runs, or group-specific `benchmark-results-<run-id>-<attempt>-<group>` artifacts for sharded runs.
 
 Do not treat local benchmark output or old committed benchmark reports as current product proof. Git history is sufficient for retired local reports.
 
@@ -36,6 +36,8 @@ benchmark-ci-results/
 
 The workflow remains the source of truth for current benchmark evidence. Retired local reports must not be cited as proof for current performance claims.
 
+The per-invocation `metadata.json` and grouped summaries record the selected benchmark mode, selected group, effective BenchmarkDotNet filter, and run strategy. Existing consumers should continue to read `benchmark_filter` and `benchmark_strategy`; newer consumers can also inspect `benchmark_mode` and `benchmark_group`.
+
 Rows are classified deterministically into these groups:
 
 | Group | Purpose |
@@ -58,6 +60,51 @@ The grouped summary includes guardrail statuses for protected hot paths:
 
 `Unknown` is intentionally preferred when evidence is missing or ambiguous. Treat unclassified rows and `Unknown` guardrails as follow-up items before using a run to support a performance-sensitive decision.
 
+
+## Workflow execution modes
+
+Manual benchmark workflow runs expose these modes:
+
+| Mode | Use | Effective behavior | Artifact naming |
+|---|---|---|---|
+| `full` | Same-run review where comparability across all benchmark rows matters. | Runs one BenchmarkDotNet invocation with `BENCHMARK_MODE=full`, `BENCHMARK_GROUP=full`, and `BENCHMARK_FILTER=*`. | `benchmark-results-<run-id>-<attempt>` |
+| `single` with a named group | Focused investigation for one benchmark area. | Runs one BenchmarkDotNet invocation using the selected group's mapped filter. | `benchmark-results-<run-id>-<attempt>` |
+| `single` with `group=custom` | Raw BenchmarkDotNet filtering for maintainer investigation. | Runs one BenchmarkDotNet invocation using the manual `filter` input unchanged. | `benchmark-results-<run-id>-<attempt>` |
+| `sharded` | Coverage-oriented benchmark review where groups should run as smaller parallel jobs. | Runs group shards as a workflow matrix and uploads one compatible artifact per shard plus an aggregate manifest/summary artifact. | `benchmark-results-<run-id>-<attempt>-<group>` and `benchmark-results-<run-id>-<attempt>-aggregate` |
+
+Tag-triggered benchmark runs use the safe full-run default: `mode=full`, `group=full`, `filter=*`. The workflow does not run benchmarks for ordinary pull requests.
+
+### Focused group mappings
+
+The workflow maps focused groups to BenchmarkDotNet class-name filters:
+
+| Workflow group | Effective BenchmarkDotNet filter | Notes |
+|---|---|---|
+| `custom` | Manual `filter` input | Available only for `single` mode. |
+| `full` | `*` | Runs all discovered benchmarks in one BenchmarkDotNet invocation. |
+| `core` | `*PattrnIndex*` | Includes rows that grouped summaries later classify as both `Core hot path` and `Detailed matching`. |
+| `detailed` | `*PattrnIndex*` | Current limitation: detailed matching rows share `PattrnIndexBenchmarks` with core rows, so class-name filtering cannot isolate detailed-only rows yet. |
+| `strings` | `*StringHelperBenchmarks*` | String helper benchmarks only. |
+| `routing` | `*RoutingBenchmarks*` | Routing preview benchmarks only. |
+| `builder` | `*BuilderBenchmarks*` | Builder and validation benchmarks only. |
+| `diagnostics` | `*ExplainBenchmarks*` | Matcher explanation diagnostics benchmarks only. |
+
+The sharded mode currently runs the `core`, `strings`, `routing`, `builder`, and `diagnostics` shards. The `detailed` group rides with the `core`/`PattrnIndexBenchmarks` shard until the benchmark project has an explicit category design that can isolate detailed matching without renaming methods or changing benchmark semantics.
+
+### Aggregate shard output
+
+Sharded runs upload an aggregate artifact with this layout:
+
+```text
+benchmark-ci-aggregate/
+  aggregate-metadata.json
+  aggregate-summary.md
+  shard-manifest.json
+```
+
+The aggregate manifest records the workflow run ID, run attempt, commit SHA, benchmark mode, strategy, shard groups, effective filters, row counts when grouped results are available, and shard artifact names/paths. The aggregate summary is intentionally a manifest-style report, not a merged latency table.
+
+Shards may run on different GitHub-hosted runners. Use sharded mode for coverage, grouped review, allocation sanity checks, and discovering missing or unclassified rows. Use `full` mode when same-run comparability matters, because full mode keeps all benchmark rows in one BenchmarkDotNet invocation and one runner context.
 
 ## Allocation smoke tests
 
@@ -89,7 +136,7 @@ Do not treat this matrix as benchmark-result evidence. Current performance proof
 | Routing preview | Route parsing, route splitting, and route convenience matching remain preview and are not core hot-path proof. | Not protected | Present | `RoutingBenchmarks.RoutePattern_Parse`; `RoutingBenchmarks.RoutePattern_SplitPath`; `RoutingBenchmarks.RoutePattern_SplitPathToSpan`; `RoutingBenchmarks.RouteIndex_MatchRouteToSpan`; workflow `Routing preview` grouped rows | Covered |  |
 | Builder / validation | Builder construction, diagnostic scanning, and opt-in build validation costs are build-time behavior. | Not protected | Present | `BuilderBenchmarks.Build`; `BuilderBenchmarks.GetDiagnostics`; `BuilderBenchmarks.BuildWithValidation`; workflow `Builder / validation` grouped rows | Covered |  |
 | Diagnostics | Explanation and diagnostic paths stay outside default matching hot paths. | Not protected | Present | `BuilderBenchmarks.GetDiagnostics` remains build-time evidence under `Builder / validation`; `ExplainBenchmarks.Explain_MatchingPath`; `ExplainBenchmarks.Explain_MatchingPathWithRejectedCandidates`; `ExplainBenchmarks.Explain_NoMatchWithRejectedCandidates`; `ExplainBenchmarks.Explain_CaptureHeavyPath`; workflow `Diagnostics` grouped rows for matcher explanation benchmarks | Covered |  |
-| Benchmark pipeline | Grouped summary generation classifies BenchmarkDotNet rows into documented report categories and emits workflow artifacts. | N/A | N/A | `.github/workflows/benchmarks.yml`; `tools/benchmarks/summarize_benchmarks.py` | Covered | [#31](https://github.com/SimonGelbart/pattrn/issues/31) |
+| Benchmark pipeline | Benchmark workflow supports full, custom, focused, and sharded group execution while preserving artifact layout and grouped summary generation. | N/A | N/A | `.github/workflows/benchmarks.yml`; `tools/benchmarks/summarize_benchmarks.py`; workflow `benchmark_mode` / `benchmark_group` metadata; aggregate shard manifest | Covered |  |
 | Benchmark pipeline | Baseline comparison for candidate benchmark runs. | N/A | N/A | No baseline comparison step or script was found in the benchmark workflow. | Missing | [#32](https://github.com/SimonGelbart/pattrn/issues/32) |
 
 ## Benchmark groups

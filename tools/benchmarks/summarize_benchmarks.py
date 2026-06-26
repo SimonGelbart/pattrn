@@ -171,7 +171,7 @@ def guardrails(rows: list[BenchmarkRow]) -> list[dict[str, str]]:
 def markdown(rows: list[BenchmarkRow], guards: list[dict[str, str]], metadata: dict[str, str]) -> str:
     counts = Counter(r.group for r in rows)
     lines = ["# Benchmark Summary", "", "Benchmark artifacts from this workflow run are the benchmark source of truth for this commit.", "", "## Run metadata", ""]
-    for label, key in [("Repository", "repository"), ("Ref", "ref"), ("SHA", "sha"), ("Run ID", "run_id"), ("Run attempt", "run_attempt"), ("Filter", "benchmark_filter"), ("Strategy", "benchmark_strategy")]:
+    for label, key in [("Repository", "repository"), ("Ref", "ref"), ("SHA", "sha"), ("Run ID", "run_id"), ("Run attempt", "run_attempt"), ("Mode", "benchmark_mode"), ("Group", "benchmark_group"), ("Filter", "benchmark_filter"), ("Strategy", "benchmark_strategy")]:
         if metadata.get(key):
             lines.append(f"- {label}: `{metadata[key]}`")
     lines += ["", "## Row counts by group", "", "| Group | Rows |", "|---|---:|"]
@@ -205,6 +205,8 @@ def main() -> int:
         "sha": os.environ.get("GITHUB_SHA", ""),
         "run_id": os.environ.get("GITHUB_RUN_ID", ""),
         "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT", ""),
+        "benchmark_mode": os.environ.get("BENCHMARK_MODE", ""),
+        "benchmark_group": os.environ.get("BENCHMARK_GROUP", ""),
         "benchmark_filter": os.environ.get("BENCHMARK_FILTER", ""),
         "benchmark_strategy": os.environ.get("BENCHMARK_STRATEGY", ""),
     }
