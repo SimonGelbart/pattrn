@@ -103,6 +103,17 @@ public sealed class CoreMatchingTests
     }
 
     [Test]
+    public void PatternLongerThanInputDoesNotMatchInPrefixMode()
+    {
+        var builder = PattrnIndexBuilder<string, string>.Create("*");
+        builder.Add(["NASDAQ", "MSFT", "QUOTE"], "quote");
+
+        var index = builder.Build(MatchOptions.Prefix);
+
+        ShouldSequenceEqual(index.MatchToArray(["NASDAQ", "MSFT"]), []);
+    }
+
+    [Test]
     public void EmptyPatternMatchesAnyPathWhenPrefixMatchingIsEnabled()
     {
         var builder = PattrnIndexBuilder<string, string>.Create("*");
@@ -111,6 +122,28 @@ public sealed class CoreMatchingTests
         var index = builder.Build(MatchOptions.Prefix);
 
         ShouldSequenceEqual(index.MatchToArray(["market", "NASDAQ", "MSFT"]), ["root-prefix"]);
+    }
+
+    [Test]
+    public void WildcardDoesNotMatchZeroSegments()
+    {
+        var builder = PattrnIndexBuilder<string, string>.Create("*");
+        builder.Add(["NASDAQ", "*"], "nasdaq-any");
+
+        var index = builder.Build(MatchOptions.Prefix);
+
+        ShouldSequenceEqual(index.MatchToArray(["NASDAQ"]), []);
+    }
+
+    [Test]
+    public void WildcardCanOnlyBecomePrefixAfterConsumingOneSegment()
+    {
+        var builder = PattrnIndexBuilder<string, string>.Create("*");
+        builder.Add(["NASDAQ", "*"], "nasdaq-any-prefix");
+
+        var index = builder.Build(MatchOptions.Prefix);
+
+        ShouldSequenceEqual(index.MatchToArray(["NASDAQ", "MSFT", "QUOTE"]), ["nasdaq-any-prefix"]);
     }
 
     [Test]
