@@ -32,7 +32,7 @@ Pattrn documentation is organized around the current pre-beta product state. Use
 - Tutorials: [first index](tutorials/first-index.md), [examples](tutorials/examples.md)
 - How-to: [select a best match](how-to/select-best-match.md)
 - Explanation: [package boundaries](explanation/package-boundaries.md)
-- Reference: [api](reference/api.md), [matching semantics](reference/matching-semantics.md), [ranking and specificity](reference/ranking-specificity.md), [duplicate behavior](reference/duplicate-behavior.md), [diagnostics](reference/diagnostics.md), [beta readiness](reference/beta-readiness.md)
+- Reference: [api](reference/api.md), [matching semantics](reference/matching-semantics.md), [ranking and specificity](reference/ranking-specificity.md), [matching semantics audit](reference/matching-semantics-audit.md), [duplicate behavior](reference/duplicate-behavior.md), [diagnostics](reference/diagnostics.md), [beta readiness](reference/beta-readiness.md)
 
 ## Maintainer guidance
 
