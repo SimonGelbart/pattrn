@@ -78,7 +78,7 @@ var preserving = builder.Build(
 
 The default is `DuplicateValueMatchMode.Deduplicate`.
 
-This mode compares emitted values with the builder's configured value comparer. It does not change pattern registration, it does not remove registrations from the index, and it does not add a separate priority policy. When equal values are reached by multiple matches, the first accepted value in deterministic ranking order wins.
+This mode compares emitted values with the builder's configured value comparer. It does not change pattern registration, it does not remove registrations from the index, and it does not add a separate priority policy. When equal values are reached by multiple matches, the first accepted value in deterministic ranking order wins. For detailed matching, the retained match metadata is the metadata for that accepted registration.
 
 ## Interaction examples
 
