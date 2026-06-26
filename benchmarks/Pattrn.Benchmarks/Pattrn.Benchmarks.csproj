@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Pattrn\Pattrn.csproj" />
+    <ProjectReference Include="..\..\src\Pattrn.Strings\Pattrn.Strings.csproj" />
     <ProjectReference Include="..\..\src\Pattrn.Routing\Pattrn.Routing.csproj" />
   </ItemGroup>
 

@@ -83,7 +83,7 @@ Do not treat this matrix as benchmark-result evidence. Current performance proof
 | Core hot path | `GetMatchCountUpperBound(...)` provides caller-buffer sizing for segmented paths. | Present | Present | `tests/Pattrn.Tests/PerformanceSmokeTests.cs`; `PattrnIndexBenchmarks.Trie_GetMatchCountUpperBound`; workflow `Core hot path` grouped rows | Covered |  |
 | Detailed matching | `MatchDetailed(...)` writes matches and captures into caller-provided buffers. | Present | Present | `tests/Pattrn.Tests/PerformanceSmokeTests.cs`; `PattrnIndexBenchmarks.Trie_MatchDetailedToSpans`; workflow `Detailed matching` grouped rows | Covered |  |
 | Convenience API | `MatchToArray` and materializing core APIs allocate result arrays for convenience. | Not protected | Present | `PattrnIndexBenchmarks.Trie_MatchToArray`; `PattrnIndexBenchmarks.Trie_MatchDetailedToArray`; workflow `Detailed matching` grouped rows | Covered |  |
-| String helpers | `Pattrn.Strings` splitting, normalization, and string convenience facade costs stay separate from core segmented span claims. | Not protected | Missing | String helper code and tests exist, but no `Pattrn.Strings` BenchmarkDotNet class or method was found. | Missing | [#29](https://github.com/SimonGelbart/pattrn/issues/29) |
+| String helpers | `Pattrn.Strings` splitting, normalization, and string convenience facade costs stay separate from core segmented span claims. | Not protected | Present | `StringHelperBenchmarks.String_MatchDottedToSpan`; `StringHelperBenchmarks.String_MatchSeparatedToSpan`; `StringHelperBenchmarks.String_MatchDottedToArray`; `StringHelperBenchmarks.String_MatchWithNormalizationOptions`; workflow `String helpers` grouped rows | Covered |  |
 | Routing preview | Pre-split route matching uses the core segmented matcher after route paths are already split. | Unknown; functional route span tests exist, but no current allocation smoke test was found. | Present | `tests/Pattrn.Routing.Tests/RoutePatternExtensionTests.cs`; `RoutingBenchmarks.RouteIndex_MatchPreSplitToSpan`; workflow `Routing preview` grouped rows | Partial |  |
 | Routing preview | Route parsing, route splitting, and route convenience matching remain preview and are not core hot-path proof. | Not protected | Present | `RoutingBenchmarks.RoutePattern_Parse`; `RoutingBenchmarks.RoutePattern_SplitPath`; `RoutingBenchmarks.RoutePattern_SplitPathToSpan`; `RoutingBenchmarks.RouteIndex_MatchRouteToSpan`; workflow `Routing preview` grouped rows | Covered |  |
 | Builder / validation | Builder construction, diagnostic scanning, and opt-in build validation costs are build-time behavior. | Not protected | Present | `BuilderBenchmarks.Build`; `BuilderBenchmarks.GetDiagnostics`; `BuilderBenchmarks.BuildWithValidation`; workflow `Builder / validation` grouped rows | Covered |  |
@@ -122,6 +122,17 @@ Measured APIs include:
 - `MatchDetailed` into caller-provided match/capture spans;
 - `MatchDetailedToArray`;
 - naive scan baseline.
+
+### `StringHelperBenchmarks`
+
+Covers the `Pattrn.Strings` convenience helper layer:
+
+- dotted string matching into caller-provided value spans;
+- separated string matching with non-dot separators;
+- dotted `MatchToArray` materialization;
+- explicit `StringNormalizationOptions` with trimming, ignored empty segments, and segment normalization.
+
+These benchmarks intentionally measure string splitting, parsing, normalization, and convenience materialization costs. They are separate from the generic core's already-segmented span hot-path claims, and allocations in these rows do not weaken the protected core hot-path guardrails.
 
 ### `RoutingBenchmarks`
 
