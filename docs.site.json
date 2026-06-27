@@ -114,12 +114,6 @@
       "section": "Reference"
     },
     {
-      "source": "docs/reference/public-api-review.md",
-      "route": "/reference/public-api-review/",
-      "title": "Public API review",
-      "section": "Maintainer guidance"
-    },
-    {
       "source": "docs/reference/project-profile.md",
       "route": "/reference/project-profile/",
       "title": "Project profile",
