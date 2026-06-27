@@ -30,6 +30,86 @@ var index = builder.Build();
 
 The default builder is tokenless. `AddPattern(...)` callers do not need to reserve any segment value for wildcard behavior.
 
+## Builder and index lifecycle
+
+[ADR 0014](../adr/0014-builders-single-writer-compiled-indexes-concurrent-reader-safe.md) is the source of truth for the builder/index concurrency model: builders are mutable, single-writer construction objects, and compiled indexes are immutable snapshots safe for concurrent readers after construction.
+
+### Builder ownership
+
+Create a builder for the registration phase and keep mutation owned by one writer:
+
+```csharp
+var builder = PattrnIndex<string, string>.Builder();
+```
+
+The tokenless builder is preferred for core and domain-neutral registration because explicit `PatternSegment<TSegment>` values distinguish literals, parameters, wildcards, and catch-alls without reserving a special segment value.
+
+Tokenized builders remain a convenience when reserving a wildcard token is acceptable in the segment domain:
+
+```csharp
+var builder = PattrnIndex<string, string>.Builder("*");
+```
+
+Do not mutate one builder concurrently. If registrations are discovered in parallel, collect them first, order them deterministically, and then apply them to one builder from a single writer. Deterministic application order matters because equal-specificity ties preserve registration order, duplicate structural registration behavior depends on accepted registration order, and diagnostics are easier to reason about when input order is stable.
+
+Configure builder-time policies before building and publishing the compiled index:
+
+```csharp
+builder.UseDuplicatePatternRegistrationBehavior(DuplicatePatternRegistrationBehavior.Throw);
+builder.ValidateOnBuild(PatternDiagnosticSeverity.Warning);
+```
+
+See [duplicate behavior](duplicate-behavior.md) and [diagnostics](diagnostics.md) for the policy details.
+
+### Building an immutable index
+
+Call `Build()` after registration and policy configuration are complete:
+
+```csharp
+var index = builder.Build();
+```
+
+The returned index is an immutable snapshot. Later changes to the builder do not update indexes that were already built. To change what readers observe, build a new index and publish that completed index instead of trying to mutate a live index.
+
+### Publishing indexes to readers
+
+Publish only completed compiled indexes to read paths. A common reload shape is to keep the current index reference, build a replacement from deterministic input, then swap the reference readers use:
+
+```csharp
+private sealed record Registration(
+    int Order,
+    PatternSegment<string>[] Pattern,
+    Action Handler,
+    string Id);
+
+private volatile IPattrnIndex<string, Action> _current = BuildInitialIndex();
+
+private static IPattrnIndex<string, Action> BuildInitialIndex()
+{
+    return PattrnIndex<string, Action>.Builder().Build();
+}
+
+public Action[] Match(string[] path)
+{
+    var index = _current;
+    return index.MatchToArray(path);
+}
+
+public void Reload(IEnumerable<Registration> registrations)
+{
+    var builder = PattrnIndex<string, Action>.Builder();
+
+    foreach (var registration in registrations.OrderBy(registration => registration.Order))
+    {
+        builder.AddPattern(registration.Pattern, registration.Handler, registration.Id);
+    }
+
+    _current = builder.Build();
+}
+```
+
+The compiled index read APIs are safe for concurrent callers after construction. Keep hot paths on `Match`, `TryMatch`, `MatchToArray`, `MatchDetailed`, or `TryMatchDetailed` as appropriate. Use `Explain(...)` for diagnostics and troubleshooting rather than as the hot path because it is allocation-oriented and can include extra diagnostic traversal.
+
 ## Match to an array
 
 ```csharp

@@ -203,6 +203,6 @@ See [ranking and specificity](ranking-specificity.md) for the full contract and 
 
 ## Threading
 
-The builder is mutable and not thread-safe.
+The builder is a mutable, single-writer construction object and is not safe for concurrent mutation. The compiled index returned by `Build()` is an immutable snapshot and is safe for concurrent readers after construction.
 
-The compiled index is immutable and safe for concurrent readers.
+If registrations are discovered concurrently, collect and order them deterministically before applying them to one builder. Publish completed compiled indexes to readers, and rebuild/swap a new index when registrations change. See the [API lifecycle guidance](api.md#builder-and-index-lifecycle) and [ADR 0014](../adr/0014-builders-single-writer-compiled-indexes-concurrent-reader-safe.md).
