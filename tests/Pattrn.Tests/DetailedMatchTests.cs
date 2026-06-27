@@ -34,6 +34,104 @@ public sealed class DetailedMatchTests
     }
 
     [Test]
+    public void NamedParameterCaptureIncludesNameValueAndSegmentIndex()
+    {
+        var index = PattrnIndex<string, string>
+            .Builder("*")
+            .AddPattern([PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("id")], "handler")
+            .Build();
+
+        var matches = index.MatchDetailedToArray(["orders", "42"]);
+
+        ShouldEqual(matches.Length, 1);
+        ShouldSequenceEqual(matches[0].Captures, [new PatternCapture<string>("id", "42", 1)]);
+    }
+
+    [Test]
+    public void MultipleNamedParameterCapturesAreReturnedInPathOrder()
+    {
+        var index = PattrnIndex<string, string>
+            .Builder("*")
+            .AddPattern(
+                [
+                    PatternSegment<string>.Literal("market"),
+                    PatternSegment<string>.Parameter("exchange"),
+                    PatternSegment<string>.Parameter("symbol")
+                ],
+                "handler")
+            .Build();
+
+        var matches = index.MatchDetailedToArray(["market", "NASDAQ", "MSFT"]);
+
+        ShouldEqual(matches.Length, 1);
+        ShouldSequenceEqual(
+            matches[0].Captures,
+            [
+                new PatternCapture<string>("exchange", "NASDAQ", 1),
+                new PatternCapture<string>("symbol", "MSFT", 2)
+            ]);
+    }
+
+    [Test]
+    public void MixedParameterAndCatchAllCapturesAreReturnedInPatternOrder()
+    {
+        var index = PattrnIndex<string, string>
+            .Builder("*")
+            .AddPattern(
+                [
+                    PatternSegment<string>.Literal("files"),
+                    PatternSegment<string>.Parameter("bucket"),
+                    PatternSegment<string>.CatchAll("path")
+                ],
+                "handler")
+            .Build();
+
+        var matches = index.MatchDetailedToArray(["files", "public", "a", "b.txt"]);
+
+        ShouldEqual(matches.Length, 1);
+        ShouldSequenceEqual(
+            matches[0].Captures,
+            [
+                new PatternCapture<string>("bucket", "public", 1),
+                new PatternCapture<string>("path", "a", 2),
+                new PatternCapture<string>("path", "b.txt", 3)
+            ]);
+    }
+
+    [Test]
+    public void OverlappingDetailedMatchesPreservePerRegistrationCaptureNames()
+    {
+        var index = PattrnIndex<string, string>
+            .Builder("*")
+            .UseDuplicatePatternRegistrationBehavior(DuplicatePatternRegistrationBehavior.Append)
+            .AddPattern([PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("id")], "first")
+            .AddPattern([PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("orderId")], "second")
+            .Build(MatchOptions.PreserveDuplicates);
+
+        var matches = index.MatchDetailedToArray(["orders", "42"]);
+
+        ShouldEqual(matches.Length, 2);
+        ShouldSequenceEqual(matches.Select(match => match.Value), ["first", "second"]);
+        ShouldSequenceEqual(matches[0].Captures, [new PatternCapture<string>("id", "42", 1)]);
+        ShouldSequenceEqual(matches[1].Captures, [new PatternCapture<string>("orderId", "42", 1)]);
+    }
+
+    [Test]
+    public void WildcardMatchesDoNotProduceCaptures()
+    {
+        var index = PattrnIndex<string, string>
+            .Builder("*")
+            .AddPattern([PatternSegment<string>.Literal("orders"), PatternSegment<string>.Wildcard()], "handler")
+            .Build();
+
+        var matches = index.MatchDetailedToArray(["orders", "42"]);
+
+        ShouldEqual(matches.Length, 1);
+        ShouldEqual(matches[0].Kind, PatternMatchKind.Wildcard);
+        ShouldEqual(matches[0].Captures.Count, 0);
+    }
+
+    [Test]
     public void DetailedMatchPreservesLowLevelValueSemantics()
     {
         var builder = PattrnIndex<string, string>.Builder("*");
