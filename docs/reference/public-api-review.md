@@ -13,7 +13,7 @@ The overall recommendation is to treat `Pattrn`, `Pattrn.Strings`, and `Pattrn.D
 - `Pattrn.DependencyInjection` is a stable beta candidate if it remains a thin optional startup-registration layer over immutable indexes. It should not grow framework-specific behavior beyond ordinary `Microsoft.Extensions.DependencyInjection` patterns.
 - `Pattrn.Routing` should remain preview, framework-neutral, and non-blocking for beta. Route-template parsing, expansion, route metadata preservation, and constraint validation are useful, but they must not imply ASP.NET Core endpoint routing compatibility or route precedence in the core.
 
-The main pre-beta decisions are diagnostic stability ([#39](https://github.com/SimonGelbart/pattrn/issues/39)), registration DTO posture for deterministic rebuild ([#41](https://github.com/SimonGelbart/pattrn/issues/41), [#42](https://github.com/SimonGelbart/pattrn/issues/42), [#43](https://github.com/SimonGelbart/pattrn/issues/43)), AOT/trimming posture ([#66](https://github.com/SimonGelbart/pattrn/issues/66)), and benchmark baseline comparison ([#32](https://github.com/SimonGelbart/pattrn/issues/32)). Semantic/property-test confidence ([#67](https://github.com/SimonGelbart/pattrn/issues/67)) and string zero-allocation investigation ([#68](https://github.com/SimonGelbart/pattrn/issues/68)) remain linked follow-ups rather than scope for this review.
+The main pre-beta decisions are diagnostic stability ([#39](https://github.com/SimonGelbart/pattrn/issues/39)), registration DTO posture for deterministic rebuild ([#41](https://github.com/SimonGelbart/pattrn/issues/41), [#42](https://github.com/SimonGelbart/pattrn/issues/42), [#43](https://github.com/SimonGelbart/pattrn/issues/43)), and AOT/trimming posture ([#66](https://github.com/SimonGelbart/pattrn/issues/66)). Local benchmark comparison now exists, while CI/PR benchmark comparison integration remains tracked by [#70](https://github.com/SimonGelbart/pattrn/issues/70). Semantic/property-test confidence ([#67](https://github.com/SimonGelbart/pattrn/issues/67)) and string zero-allocation investigation ([#68](https://github.com/SimonGelbart/pattrn/issues/68)) remain linked follow-ups rather than scope for this review.
 
 ## Package status table
 
@@ -46,7 +46,7 @@ The main pre-beta decisions are diagnostic stability ([#39](https://github.com/S
 - Diagnostic stability: decide which diagnostic kinds, severities, and explanation fields are stable for beta in #39.
 - Registration DTO / deterministic rebuild: decide whether DTO design is beta-blocking or deferred in #41, with #42 and #43 covering tests and documentation if accepted.
 - AOT/trimming posture for the stable packages in #66.
-- Benchmark baseline comparison in #32 before using benchmark deltas as release-gate evidence.
+- CI/PR benchmark comparison integration in #70 before using automated benchmark deltas as PR presentation or release-gate evidence.
 - Additional semantic confidence from property-based tests in #67.
 
 #### Deferred / preview / internal
@@ -144,7 +144,7 @@ The following areas should not be treated as beta-stable in this review:
 - Async matching APIs remain out of scope.
 - Thread-safe mutable builders remain out of scope.
 - String zero-allocation APIs remain deferred to #68.
-- Benchmark infrastructure and baseline comparison implementation remain out of scope for this PR and linked to #32.
+- CI/PR benchmark comparison integration remains out of scope for this PR and linked to #70; local grouped-result comparison is already covered by `tools/benchmarks/compare_benchmarks.py`.
 - Diagnostics redesign is out of scope; only the stability policy decision is linked to #39.
 
 ## Proposed API changes before beta
@@ -197,21 +197,21 @@ Risk: Discovering compatibility gaps after beta may require harder public API or
 
 Follow-up issue: [#66 Evaluate AOT and trimming compatibility for stable packages](https://github.com/SimonGelbart/pattrn/issues/66).
 
-### Proposal: Confirm benchmark baseline comparison posture
+### Proposal: Confirm CI/PR benchmark comparison posture
 
 Package: repository benchmark/CI documentation, not a public package API.
 
 Current API: Public APIs are allocation/performance-sensitive, and existing benchmark docs describe current protected paths.
 
-Problem: Before beta, performance review should be repeatable. Without candidate-vs-baseline comparison, allocation or latency changes are harder to evaluate consistently.
+Problem: Before beta, performance review should be repeatable. Local grouped-result comparison can compare existing historical artifacts, but CI/PR benchmark comparison integration is still needed for consistent artifact selection, summaries, artifact upload/download, and optional PR presentation.
 
-Recommendation: Treat #32 as pre-beta performance-evidence work outside this API-review PR. Do not implement benchmark comparison here.
+Recommendation: Treat #70 as pre-beta performance-evidence integration work outside this API-review PR. Do not implement CI/PR benchmark comparison here, and keep comparisons advisory by default unless a later policy changes that.
 
 Breaking change before beta: No public API change expected.
 
-Risk: Treating benchmark baseline comparison as post-beta may weaken beta performance claims and release-gate confidence.
+Risk: Treating CI/PR benchmark comparison integration as post-beta may weaken beta performance claims and release-gate confidence.
 
-Follow-up issue: [#32 Add benchmark baseline comparison](https://github.com/SimonGelbart/pattrn/issues/32).
+Follow-up issue: [#70 Add CI/PR benchmark comparison integration](https://github.com/SimonGelbart/pattrn/issues/70).
 
 ### Proposal: Increase semantic confidence with property-based tests
 
@@ -270,7 +270,7 @@ Body: Review `IPattrnProvider<TSegment, TValue>` and DI named-index registration
 
 ### Must decide before beta
 
-- [#32 Add benchmark baseline comparison](https://github.com/SimonGelbart/pattrn/issues/32) — establish repeatable candidate-vs-baseline performance evidence before beta claims or release gates rely on benchmark deltas.
+- [#70 Add CI/PR benchmark comparison integration](https://github.com/SimonGelbart/pattrn/issues/70) — establish repeatable CI/PR artifact comparison and presentation before beta claims or release gates rely on automated benchmark deltas.
 - [#39 Define diagnostic stability policy](https://github.com/SimonGelbart/pattrn/issues/39) — decide stable vs best-effort diagnostic contracts.
 - [#41 Design registration DTOs for deterministic rebuild](https://github.com/SimonGelbart/pattrn/issues/41) — decide whether registration DTOs are beta-blocking or deferred.
 - [#66 Evaluate AOT and trimming compatibility for stable packages](https://github.com/SimonGelbart/pattrn/issues/66) — decide whether compatibility is beta-blocking or beta polish.
@@ -300,7 +300,7 @@ Body: Review `IPattrnProvider<TSegment, TValue>` and DI named-index registration
 - No route-specific precedence in core.
 - No domain-specific semantics in core.
 - No string zero-allocation API implementation.
-- No benchmark infrastructure implementation.
+- No CI/PR benchmark comparison integration.
 - No DTO implementation or JSON roundtrip implementation.
 - No diagnostics redesign.
 - No runtime behavior changes.
@@ -311,7 +311,7 @@ Body: Review `IPattrnProvider<TSegment, TValue>` and DI named-index registration
 - Confirm `Pattrn.Strings` is a stable beta candidate with explicit allocation caveats and #68 deferred.
 - Confirm `Pattrn.DependencyInjection` is a stable beta candidate if it remains thin.
 - Confirm `Pattrn.Routing` remains preview and non-blocking for beta.
-- Decide whether #32 benchmark baseline comparison is beta-blocking or required before beta performance claims.
+- Decide whether #70 CI/PR benchmark comparison integration is beta-blocking or required before beta performance claims.
 - Decide whether #39 diagnostic stability is beta-blocking.
 - Decide whether #41 registration DTO design is beta-blocking, beta polish, or post-beta.
 - Decide whether #66 AOT/trimming evaluation is beta-blocking or beta polish.

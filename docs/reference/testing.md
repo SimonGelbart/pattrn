@@ -1,34 +1,36 @@
 # Testing
 
-The test project uses TUnit on top of Microsoft.Testing.Platform. CI is the authoritative verification path; local commands in this page are optional maintainer preflight helpers. See [validation](../reference/validation.md).
+The test projects use TUnit on top of Microsoft.Testing.Platform. CI is the authoritative verification path; local commands in this page are optional maintainer preflight helpers. See [validation](../reference/validation.md).
 
-.NET 10 requires the test runner to be selected in `global.json`; this repository opts into:
+.NET 10 SDK selection and the Microsoft.Testing.Platform runner are configured in `global.json`. This repository currently opts into:
 
 ```json
 {
+  "sdk": {
+    "version": "10.0.301",
+    "rollForward": "latestFeature"
+  },
   "test": {
     "runner": "Microsoft.Testing.Platform"
   }
 }
 ```
 
-## Legacy local offline restore
+The `sdk` section selects the compatible .NET 10 SDK feature band for local and CI restore/build/test commands. The `test` section selects Microsoft.Testing.Platform as the .NET test runner.
 
-This section documents the older local/offline workflow. Use it only when you need to reproduce local validation outside CI. Unzip the provided NuGet bundle next to the repository as:
+## Local preflight
 
-```text
-../offline-nuget-bundle/packages
-```
-
-Then run:
+Use ordinary restore, build, and test commands for supported local validation:
 
 ```bash
-export NUGET_CERT_REVOCATION_MODE=offline
-dotnet restore Pattrn.sln /p:NuGetAudit=false /p:Platform="Any CPU"
-dotnet test Pattrn.sln -c Release --no-restore /p:NuGetAudit=false /p:Platform="Any CPU"
+dotnet restore Pattrn.sln
+dotnet build Pattrn.sln --configuration Release --no-restore
+dotnet test Pattrn.sln --configuration Release --no-build
 ```
 
-The explicit platform property avoids environment-specific `Platform=linux/amd64` values being interpreted as a Visual Studio solution platform.
+The explicit Release configuration matches CI build output. Use `dotnet --version` or `dotnet --info` if you need to verify which SDK `global.json` selected.
+
+Legacy offline NuGet bundle paths and special restore flags are not the supported default workflow. If offline restore is required for maintainer recovery, configure an appropriate local NuGet package source and run the same direct `dotnet` commands rather than relying on repository-specific bundle paths.
 
 ## Current coverage
 
@@ -60,12 +62,20 @@ The test suite covers:
 - randomized equivalence against a deliberately naive matcher;
 - randomized equivalence with custom segment and value comparers.
 
-## Benchmarks
+## Benchmark tool tests
 
-The benchmark project is intentionally separate from the test suite. Local benchmark commands are transitional preflight helpers; benchmark proof should move to CI-owned workflow artifacts. If you still need a local inspection run, use:
+The Python benchmark helper tests are part of the normal validation set because the CI workflow runs them before .NET test assemblies:
 
 ```bash
-dotnet run -c Release --project benchmarks/Pattrn.Benchmarks /p:Platform="Any CPU" -- --filter '*' --job short
+python -m unittest discover tools/benchmarks/tests
+```
+
+## Benchmarks
+
+The benchmark project is intentionally separate from the test suite. Local benchmark commands are optional maintainer preflight helpers; current benchmark proof comes from workflow artifacts and summaries. If you still need a local inspection run, use:
+
+```bash
+dotnet run -c Release --project benchmarks/Pattrn.Benchmarks -- --filter '*' --job short
 ```
 
 See [benchmarks](benchmarks.md).

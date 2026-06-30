@@ -330,7 +330,7 @@ Scope:
 - add `TryMatch` benchmark coverage;
 - add `Pattrn.Strings` benchmark coverage or remove claimed string benchmark coverage;
 - add a benchmark coverage matrix;
-- add baseline comparison for full and focused benchmark runs;
+- add CI/PR benchmark comparison integration for full and focused benchmark artifacts (tracked by #70);
 - document which results are official performance evidence.
 
 Protected hot paths:
