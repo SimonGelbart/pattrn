@@ -13,13 +13,13 @@ The overall recommendation is to treat `Pattrn`, `Pattrn.Strings`, and `Pattrn.D
 - `Pattrn.DependencyInjection` is a stable beta candidate if it remains a thin optional startup-registration layer over immutable indexes. It should not grow framework-specific behavior beyond ordinary `Microsoft.Extensions.DependencyInjection` patterns.
 - `Pattrn.Routing` should remain preview, framework-neutral, and non-blocking for beta. Route-template parsing, expansion, route metadata preservation, and constraint validation are useful, but they must not imply ASP.NET Core endpoint routing compatibility or route precedence in the core.
 
-The main pre-beta decisions are diagnostic stability ([#39](https://github.com/SimonGelbart/pattrn/issues/39)), registration DTO posture for deterministic rebuild ([#41](https://github.com/SimonGelbart/pattrn/issues/41), [#42](https://github.com/SimonGelbart/pattrn/issues/42), [#43](https://github.com/SimonGelbart/pattrn/issues/43)), and AOT/trimming posture ([#66](https://github.com/SimonGelbart/pattrn/issues/66)). Local benchmark comparison now exists, while CI/PR benchmark comparison integration remains tracked by [#70](https://github.com/SimonGelbart/pattrn/issues/70). Semantic/property-test confidence ([#67](https://github.com/SimonGelbart/pattrn/issues/67)) and string zero-allocation investigation ([#68](https://github.com/SimonGelbart/pattrn/issues/68)) remain linked follow-ups rather than scope for this review.
+The remaining main pre-beta decisions are registration DTO posture for deterministic rebuild ([#41](https://github.com/SimonGelbart/pattrn/issues/41), [#42](https://github.com/SimonGelbart/pattrn/issues/42), [#43](https://github.com/SimonGelbart/pattrn/issues/43)) and AOT/trimming posture ([#66](https://github.com/SimonGelbart/pattrn/issues/66)). Diagnostic stability has been documented by [#39](https://github.com/SimonGelbart/pattrn/issues/39), and strong-typed rejected-candidate reasons have been resolved by [#72](https://github.com/SimonGelbart/pattrn/issues/72); richer structured overlap metadata remains tracked by [#71](https://github.com/SimonGelbart/pattrn/issues/71) before 1.0 if needed. Local benchmark comparison now exists, while CI/PR benchmark comparison integration remains tracked by [#70](https://github.com/SimonGelbart/pattrn/issues/70). Semantic/property-test confidence ([#67](https://github.com/SimonGelbart/pattrn/issues/67)) and string zero-allocation investigation ([#68](https://github.com/SimonGelbart/pattrn/issues/68)) remain linked follow-ups rather than scope for this review.
 
 ## Package status table
 
 | Package | Recommendation | Beta status | Notes |
 |---|---|---|---|
-| `Pattrn` | Stable candidate with targeted follow-ups | Stable candidate | Core public APIs match the domain-neutral segmented model, synchronous matching, immutable compiled index lifecycle, fixed ranking, and documented duplicate/capture semantics. Diagnostics need a stability decision in #39. |
+| `Pattrn` | Stable candidate with targeted follow-ups | Stable candidate | Core public APIs match the domain-neutral segmented model, synchronous matching, immutable compiled index lifecycle, fixed ranking, and documented duplicate/capture semantics. Diagnostic stability is documented; richer overlap metadata remains tracked by #71 before 1.0 if needed. |
 | `Pattrn.Strings` | Stable candidate with allocation caveats | Stable candidate | String splitting, separators, trimming, empty-segment behavior, case sensitivity, and normalization are correctly isolated from the core. Zero-allocation string APIs remain deferred to #68. |
 | `Pattrn.DependencyInjection` | Stable candidate if kept thin | Stable candidate | Service registration APIs support startup construction and immutable singleton index use without adding DI concepts to the core. Keep named provider semantics small and documented. |
 | `Pattrn.Routing` | Keep preview | Preview / non-blocking | Route parsing and validation remain useful but should not be treated as beta-stable or as ASP.NET endpoint-routing semantics. Routing remains outside initial stable scope by ADR 0005. |
@@ -38,16 +38,16 @@ The main pre-beta decisions are diagnostic stability ([#39](https://github.com/S
 - `DuplicatePatternRegistrationBehavior` for build-time duplicate registration policy.
 - Span-based matching APIs: `GetMatchCountUpperBound`, `Match`, `TryMatch`, `GetCaptureCountUpperBound`, `MatchDetailed`, and `TryMatchDetailed`.
 - Materializing convenience APIs: `MatchToArray`, `MatchDetailed`, and `MatchDetailedToArray`, with allocations understood as convenience behavior.
-- Optional diagnostics and explanation APIs: `PatternDiagnostic<TSegment>`, `PatternDiagnosticKind`, `PatternDiagnosticSeverity`, `PatternMatchExplanation<TSegment, TValue>`, `PatternRejectedCandidate`, and `PatternExplanationOptions`, subject to #39.
+- Optional diagnostics and explanation APIs: `PatternDiagnostic<TSegment>`, `PatternDiagnosticKind`, `PatternDiagnosticSeverity`, `PatternMatchExplanation<TSegment, TValue>`, `PatternRejectedCandidate`, and `PatternExplanationOptions`, with stability documented in the diagnostics reference.
 - Interface extension helpers in `PattrnIndexExtensions` for `IPattrnIndex<TSegment, TValue>` consumers.
 
 #### Needs follow-up decision
 
-- Diagnostic stability: decide which diagnostic kinds, severities, and explanation fields are stable for beta in #39.
 - Registration DTO / deterministic rebuild: decide whether DTO design is beta-blocking or deferred in #41, with #42 and #43 covering tests and documentation if accepted.
 - AOT/trimming posture for the stable packages in #66.
 - CI/PR benchmark comparison integration in #70 before using automated benchmark deltas as PR presentation or release-gate evidence.
 - Additional semantic confidence from property-based tests in #67.
+- Structured overlap diagnostic metadata remains tracked by #71 before 1.0 and is not beta-blocking by default.
 
 #### Deferred / preview / internal
 
@@ -145,11 +145,11 @@ The following areas should not be treated as beta-stable in this review:
 - Thread-safe mutable builders remain out of scope.
 - String zero-allocation APIs remain deferred to #68.
 - CI/PR benchmark comparison integration remains out of scope for this PR and linked to #70; local grouped-result comparison is already covered by `tools/benchmarks/compare_benchmarks.py`.
-- Diagnostics redesign is out of scope; only the stability policy decision is linked to #39.
+- Diagnostics redesign is out of scope; richer structured overlap metadata remains linked to #71 before 1.0 if needed.
 
 ## Proposed API changes before beta
 
-### Proposal: Define diagnostic stability policy
+### Outcome: Diagnostic stability policy resolved
 
 Package: `Pattrn`
 
@@ -157,13 +157,13 @@ Current API: `PatternDiagnostic<TSegment>`, `PatternDiagnosticKind`, `PatternDia
 
 Problem: Diagnostics are optional and not hot-path, but consumers may still depend on diagnostic kinds, severities, and explanation fields after beta.
 
-Recommendation: Use #39 to decide which diagnostics are stable, which are best-effort, and how additions or message changes are versioned. Keep this PR as documentation only.
+Outcome: #39 documented stable, best-effort, and preview diagnostic surfaces. #72 added a stable typed rejected-candidate reason signal while keeping human-readable reason text best-effort. Richer structured overlap metadata remains a separate #71 follow-up before 1.0 if user need or maintainer policy requires it.
 
-Breaking change before beta: Possible, depending on #39.
+Breaking change before beta: No immediate break expected from the completed diagnostic stability policy. Future structured overlap metadata, if accepted, should be additive unless a separate design says otherwise.
 
-Risk: Stabilizing too much diagnostic detail could make future implementation improvements expensive; stabilizing too little could make diagnostics hard to rely on.
+Risk: Overlap diagnostics still expose only limited relationship metadata; if consumers need richer machine-readable overlap relationships before 1.0, #71 should define that shape explicitly.
 
-Follow-up issue: [#39 Define diagnostic stability policy](https://github.com/SimonGelbart/pattrn/issues/39).
+Follow-up issue: [#71 Design structured overlap diagnostic metadata](https://github.com/SimonGelbart/pattrn/issues/71).
 
 ### Proposal: Decide registration DTO beta posture
 
@@ -271,7 +271,6 @@ Body: Review `IPattrnProvider<TSegment, TValue>` and DI named-index registration
 ### Must decide before beta
 
 - [#70 Add CI/PR benchmark comparison integration](https://github.com/SimonGelbart/pattrn/issues/70) — establish repeatable CI/PR artifact comparison and presentation before beta claims or release gates rely on automated benchmark deltas.
-- [#39 Define diagnostic stability policy](https://github.com/SimonGelbart/pattrn/issues/39) — decide stable vs best-effort diagnostic contracts.
 - [#41 Design registration DTOs for deterministic rebuild](https://github.com/SimonGelbart/pattrn/issues/41) — decide whether registration DTOs are beta-blocking or deferred.
 - [#66 Evaluate AOT and trimming compatibility for stable packages](https://github.com/SimonGelbart/pattrn/issues/66) — decide whether compatibility is beta-blocking or beta polish.
 - Ready-to-create issue if maintainer wants it: confirm `Pattrn.DependencyInjection` named-index provider contract before beta.
@@ -286,6 +285,7 @@ Body: Review `IPattrnProvider<TSegment, TValue>` and DI named-index registration
 ### Post-beta / 1.0
 
 - [#68 Investigate zero-allocation matching for Pattrn.Strings](https://github.com/SimonGelbart/pattrn/issues/68) — keep outside beta API review unless the maintainer changes priority.
+- [#71 Design structured overlap diagnostic metadata](https://github.com/SimonGelbart/pattrn/issues/71) — define richer overlap relationship metadata before 1.0 if needed.
 - Routing stabilization follow-up should be created only when the maintainer decides to move `Pattrn.Routing` out of preview.
 
 ## Non-goals confirmed
@@ -312,7 +312,6 @@ Body: Review `IPattrnProvider<TSegment, TValue>` and DI named-index registration
 - Confirm `Pattrn.DependencyInjection` is a stable beta candidate if it remains thin.
 - Confirm `Pattrn.Routing` remains preview and non-blocking for beta.
 - Decide whether #70 CI/PR benchmark comparison integration is beta-blocking or required before beta performance claims.
-- Decide whether #39 diagnostic stability is beta-blocking.
 - Decide whether #41 registration DTO design is beta-blocking, beta polish, or post-beta.
 - Decide whether #66 AOT/trimming evaluation is beta-blocking or beta polish.
 - Decide whether the DI named-provider contract needs a new focused issue before beta.
