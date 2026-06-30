@@ -4,7 +4,7 @@
 
 Diagnostics are intentionally generic and do not change matching behavior. They help callers decide whether a pattern set should be accepted, warned about, or rejected by a higher-level package or application policy.
 
-Runtime explanation is separate from builder diagnostics. Use `index.Explain(path)` when you need a troubleshooting result for a specific input path. Rejected-candidate hints are disabled by default and can be requested with `PatternExplanationOptions.IncludeRejections`.
+Runtime explanation is separate from builder diagnostics. Use `index.Explain(path)` when you need a troubleshooting result for a specific input path. Rejected-candidate hints are disabled by default and can be requested with `PatternExplanationOptions.IncludeRejections`. Rejected-candidate reason kinds provide stable machine-consumable categories when those opt-in hints are collected; human-readable reason text remains best-effort debugging information.
 
 ## Stability classifications
 
@@ -67,7 +67,7 @@ This reports an `OverlappingWildcard` diagnostic for `orders/*`. The registratio
 
 ## Runtime explanation stability
 
-Runtime explanation has mixed stability. The API exists for debugging, validation, and tooling, but rejected-candidate reason details are still being designed.
+Runtime explanation has mixed stability. The API exists for debugging, validation, and tooling while keeping rejected-candidate collection opt-in.
 
 | Surface | Stability | Notes |
 |---|---|---|
@@ -84,12 +84,23 @@ Runtime explanation has mixed stability. The API exists for debugging, validatio
 | `PatternMatchExplanation<TSegment, TValue>.HasMatches` | Stable | Indicates whether accepted matches were produced. |
 | `PatternMatchExplanation<TSegment, TValue>.MatchCount` | Stable | Count of accepted detailed matches. |
 | `PatternRejectedCandidate.PathDepth` | Stable | Zero-based input depth where the rejected branch stopped matching. |
-| Rejected-candidate reason taxonomy | Preview | The set of reason categories is not yet stable. |
-| `PatternRejectedCandidate.Reason` semantics | Preview | Human-readable reason text is useful for debugging, but should not be the only durable machine-consumable signal for tooling. |
+| `PatternRejectedCandidate.ReasonKind` | Stable | Machine-consumable rejected-candidate reason kind. Enum names and numeric values are compatibility-significant for beta. |
+| `PatternRejectedCandidateReasonKind` taxonomy | Stable | Domain-neutral reason categories currently emitted by runtime explanation. New values may be added compatibly when new rejection categories are introduced. |
+| `PatternRejectedCandidate.Reason` semantics | Best-effort | Human-readable debugging text remains populated where available, but exact wording is not stable. |
+| Exact `PatternRejectedCandidate.Reason` text | Best-effort | Wording, punctuation, and phrasing are non-contractual and should not be parsed by tooling. |
 
-`PatternRejectedCandidate.Reason` may remain useful human-readable text, but consumers should not rely on its exact text or current taxonomy as the only durable machine-consumable signal when rejected candidates are intended for tooling. [Issue #72](https://github.com/SimonGelbart/pattrn/issues/72) is the beta-blocking follow-up for strong-typed rejected-candidate reasons.
+`PatternRejectedCandidateReasonKind` is the stable machine-consumable contract for rejected-candidate explanations. Its current beta-stable values are:
 
-Rejected hints are branch-level diagnostics, not domain validation failures. Route constraints, authorization decisions, filesystem policies, and other domain-specific rejections still belong above the generic core.
+| Kind | Numeric value | Meaning |
+|---|---:|---|
+| `None` | 0 | No typed reason was supplied. This exists for default or uninitialized enum values and is not emitted by current rejected-candidate collection. |
+| `LiteralMismatch` | 1 | The current input segment did not match any literal branch considered at this depth. |
+| `PathTooShort` | 5 | The input ended before a considered branch reached a terminal registration. |
+| `BranchNotMatched` | 7 | No compiled branch considered at this depth matched the current input segment. |
+
+Use `PatternRejectedCandidate.ReasonKind` for durable tooling decisions. `PatternRejectedCandidate.Reason` remains useful human-readable text for troubleshooting, but consumers should not rely on exact text or parse it as a machine contract.
+
+Rejected hints are branch-level diagnostics, not domain validation failures. Route constraints, authorization decisions, filesystem policies, and other domain-specific rejections still belong above the generic core. Rejected-candidate collection remains opt-in through `PatternExplanationOptions.IncludeRejections` or `PatternExplanationOptions.IncludeRejectedCandidates`; default explanation options do not collect rejected candidates.
 
 ## Policy belongs above the core
 

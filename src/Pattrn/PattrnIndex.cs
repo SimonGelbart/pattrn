@@ -681,6 +681,7 @@ public sealed class PattrnIndex<TSegment, TValue> : IPattrnIndex<TSegment, TValu
                     {
                         rejectedCandidates.Add(new PatternRejectedCandidate(
                             frame.Depth,
+                            PatternRejectedCandidateReasonKind.PathTooShort,
                             "The input ended before this branch reached a terminal registration."));
                     }
 
@@ -711,6 +712,7 @@ public sealed class PattrnIndex<TSegment, TValue> : IPattrnIndex<TSegment, TValu
                 {
                     rejectedCandidates.Add(new PatternRejectedCandidate(
                         frame.Depth,
+                        PatternRejectedCandidateReasonKind.BranchNotMatched,
                         "No literal, wildcard, or catch-all branch matched this input segment."));
                 }
             }
@@ -735,6 +737,7 @@ public sealed class PattrnIndex<TSegment, TValue> : IPattrnIndex<TSegment, TValu
             {
                 rejectedCandidates.Add(new PatternRejectedCandidate(
                     depth,
+                    PatternRejectedCandidateReasonKind.LiteralMismatch,
                     "No literal branch matched this input segment."));
                 return;
             }
@@ -746,6 +749,7 @@ public sealed class PattrnIndex<TSegment, TValue> : IPattrnIndex<TSegment, TValu
         {
             rejectedCandidates.Add(new PatternRejectedCandidate(
                 path.Length,
+                PatternRejectedCandidateReasonKind.PathTooShort,
                 "The input ended at a compiled node that has no terminal registration."));
         }
     }
