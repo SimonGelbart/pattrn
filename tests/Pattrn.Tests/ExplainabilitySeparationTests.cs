@@ -56,7 +56,8 @@ public sealed class ExplainabilitySeparationTests
         ShouldBeTrue(explanation.ExplanationOptions.IncludeRejectedCandidates, "Explanation should record the requested diagnostic option.");
         ShouldEqual(explanation.RejectedCandidates.Count, 1);
         ShouldEqual(explanation.RejectedCandidates[0].PathDepth, 0);
-        ShouldEqual(explanation.RejectedCandidates[0].Reason, "No literal branch matched this input segment.");
+        ShouldEqual(explanation.RejectedCandidates[0].ReasonKind, PatternRejectedCandidateReasonKind.LiteralMismatch);
+        ShouldBeFalse(string.IsNullOrWhiteSpace(explanation.RejectedCandidates[0].Reason), "Human-readable reason text should remain populated.");
     }
 
     [Test]
@@ -72,6 +73,33 @@ public sealed class ExplainabilitySeparationTests
         ShouldBeFalse(explanation.HasMatches, "The shorter path should not match in exact mode.");
         ShouldEqual(explanation.RejectedCandidates.Count, 1);
         ShouldEqual(explanation.RejectedCandidates[0].PathDepth, 1);
-        ShouldEqual(explanation.RejectedCandidates[0].Reason, "The input ended at a compiled node that has no terminal registration.");
+        ShouldEqual(explanation.RejectedCandidates[0].ReasonKind, PatternRejectedCandidateReasonKind.PathTooShort);
+        ShouldBeFalse(string.IsNullOrWhiteSpace(explanation.RejectedCandidates[0].Reason), "Human-readable reason text should remain populated.");
+    }
+
+    [Test]
+    public void ExplainReportsBranchMismatchReasonKindForWildcardIndexes()
+    {
+        var index = PattrnIndex<string, string>
+            .Builder()
+            .AddPattern([PatternSegment<string>.Literal("orders"), PatternSegment<string>.Wildcard()], "handler")
+            .Build();
+
+        var explanation = index.Explain(["customers", "42"], PatternExplanationOptions.IncludeRejections);
+
+        ShouldBeFalse(explanation.HasMatches, "The path should not match.");
+        ShouldEqual(explanation.RejectedCandidates.Count, 1);
+        ShouldEqual(explanation.RejectedCandidates[0].PathDepth, 0);
+        ShouldEqual(explanation.RejectedCandidates[0].ReasonKind, PatternRejectedCandidateReasonKind.BranchNotMatched);
+        ShouldBeFalse(string.IsNullOrWhiteSpace(explanation.RejectedCandidates[0].Reason), "Human-readable reason text should remain populated.");
+    }
+
+    [Test]
+    public void RejectedCandidateReasonKindNumericValuesAreStable()
+    {
+        ShouldEqual((int)PatternRejectedCandidateReasonKind.None, 0);
+        ShouldEqual((int)PatternRejectedCandidateReasonKind.LiteralMismatch, 1);
+        ShouldEqual((int)PatternRejectedCandidateReasonKind.PathTooShort, 5);
+        ShouldEqual((int)PatternRejectedCandidateReasonKind.BranchNotMatched, 7);
     }
 }

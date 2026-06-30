@@ -9,7 +9,7 @@ namespace Pattrn;
 /// </remarks>
 public sealed class PatternRejectedCandidate
 {
-    internal PatternRejectedCandidate(int pathDepth, string reason)
+    internal PatternRejectedCandidate(int pathDepth, PatternRejectedCandidateReasonKind reasonKind, string reason)
     {
         if (pathDepth < 0)
         {
@@ -19,6 +19,7 @@ public sealed class PatternRejectedCandidate
         ArgumentException.ThrowIfNullOrWhiteSpace(reason);
 
         PathDepth = pathDepth;
+        ReasonKind = reasonKind;
         Reason = reason;
     }
 
@@ -31,7 +32,15 @@ public sealed class PatternRejectedCandidate
     public int PathDepth { get; }
 
     /// <summary>
-    /// Gets a domain-neutral reason explaining why the branch did not produce an accepted match.
+    /// Gets the stable, machine-consumable reason kind explaining why the branch did not produce an accepted match.
     /// </summary>
+    public PatternRejectedCandidateReasonKind ReasonKind { get; }
+
+    /// <summary>
+    /// Gets best-effort human-readable text explaining why the branch did not produce an accepted match.
+    /// </summary>
+    /// <remarks>
+    /// Exact wording is intended for debugging and is not a compatibility contract. Use <see cref="ReasonKind"/> for machine-consumable decisions.
+    /// </remarks>
     public string Reason { get; }
 }

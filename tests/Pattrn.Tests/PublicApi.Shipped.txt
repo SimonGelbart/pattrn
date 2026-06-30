@@ -96,6 +96,8 @@ struct Pattrn.PatternMatch<TValue>
 class Pattrn.PatternRejectedCandidate
   int PathDepth { get; }
   string Reason { get; }
+  Pattrn.PatternRejectedCandidateReasonKind ReasonKind { get; }
+struct Pattrn.PatternRejectedCandidateReasonKind
 struct Pattrn.PatternSegmentKind
 struct Pattrn.PatternSegment<TSegment>
   bool IsCatchAll { get; }
