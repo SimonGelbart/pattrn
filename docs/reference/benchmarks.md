@@ -60,6 +60,47 @@ The grouped summary includes guardrail statuses for protected hot paths:
 
 `Unknown` is intentionally preferred when evidence is missing or ambiguous. Treat unclassified rows and `Unknown` guardrails as follow-up items before using a run to support a performance-sensitive decision.
 
+## Local grouped-result comparison
+
+Use the local benchmark comparison tool when you need to compare two existing workflow-produced `summaries/grouped-results.json` files from historical artifacts. This is a historical artifact comparison only. It does not replace BenchmarkDotNet same-run baseline comparisons, does not parse raw BenchmarkDotNet JSON directly, and must not be used to claim formal statistical significance.
+
+Expected inputs are normalized grouped benchmark result files that already use the benchmark artifact layout described above:
+
+```text
+benchmark-ci-results/
+  summaries/
+    grouped-results.json
+```
+
+Run the comparator with named inputs and an output directory:
+
+```bash
+python tools/benchmarks/compare_benchmarks.py \
+  --baseline path/to/baseline/summaries/grouped-results.json \
+  --candidate path/to/candidate/summaries/grouped-results.json \
+  --output benchmark-comparison
+```
+
+The output directory contains both human-readable and machine-readable reports:
+
+```text
+benchmark-comparison/
+  benchmark-comparison.md
+  benchmark-comparison.json
+```
+
+The Markdown report is intended for local review. The JSON report contains the same comparison data in a structured form for tools that need to inspect row identities, latency deltas, allocation deltas, row-presence changes, and protected hot-path allocation callouts. Rows are matched by `group`, `benchmark_type`, `method`, and `scenario`; `job` and `runtime` are carried as metadata rather than identity.
+
+Comparison statuses mean:
+
+| Status | Meaning | Exit behavior |
+|---|---|---|
+| `Pass` | The comparison completed and no review-triggering differences were found. | Exits `0`. |
+| `Review` | The comparison completed and human review is recommended, such as for missing/new rows or protected hot-path allocation changes. This is a human signal, not an automatic blocking failure. | Exits `0`. |
+| `Failed` | The comparison could not be completed because of structural or tooling input problems, such as missing files, malformed JSON, an unrecognized grouped-result shape, duplicate row identities, or required numeric values that cannot be interpreted. | Exits nonzero. |
+
+Latency output reports baseline mean, candidate mean, absolute delta, percentage delta, and uncertainty fields such as error and standard deviation when the grouped results provide them. Allocation output reports baseline and candidate allocated bytes, absolute delta, percentage delta when meaningful, zero-allocation transitions (`0B -> nonzero`, `nonzero -> 0B`), unchanged zero-allocation rows, and protected hot-path allocation changes separately.
+
 
 ## Workflow execution modes
 

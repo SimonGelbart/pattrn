@@ -39,6 +39,9 @@ jobs:
       - name: Build
         run: dotnet build Pattrn.sln --configuration Release --no-restore
 
+      - name: Test benchmark tools
+        run: python -m unittest discover tools/benchmarks/tests
+
       - name: Test TUnit projects
         run: >-
           dotnet test
