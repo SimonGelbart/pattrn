@@ -56,7 +56,7 @@ Both scripts attempt these validations for the required RIDs `linux-x64` and `wi
 - Native AOT publish;
 - runtime smoke execution when the host can execute the produced binary.
 
-The scripts write deterministic local outputs under `tests/Pattrn.AotCompatibility/artifacts/`. Generated publish outputs and logs must not be committed.
+The scripts write deterministic local outputs under `artifacts/Pattrn.AotCompatibility/`. Generated publish outputs and logs must not be committed.
 
 ## Warning policy
 
