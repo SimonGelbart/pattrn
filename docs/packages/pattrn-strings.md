@@ -102,6 +102,10 @@ var detailed = index.MatchDetailedToArray("market.NASDAQ.MSFT.QUOTE");
 
 Use this path when wildcard, parameter, or catch-all intent should be explicit instead of encoded with a reserved token.
 
+## Trimming and Native AOT
+
+`Pattrn.Strings` is supported for trimming and Native AOT when validated with the repository AOT compatibility harness. The package uses explicit string splitting and normalization before delegating to the core matcher. Consuming applications remain responsible for validating their own custom normalization delegates and surrounding dependencies. See [trimming and Native AOT compatibility](../reference/aot-trimming.md) for validation scope, commands, warning policy, and limits.
+
 ## Boundary with the core package
 
 `StringNormalizationOptions` lives in `Pattrn.Strings`. The core package remains generic and only sees already-split `string` segments plus the comparer configured on the builder.

@@ -96,6 +96,12 @@
       "section": "Reference"
     },
     {
+      "source": "docs/reference/aot-trimming.md",
+      "route": "/reference/aot-trimming/",
+      "title": "Trimming and Native AOT compatibility",
+      "section": "Reference"
+    },
+    {
       "source": "docs/reference/duplicate-behavior.md",
       "route": "/reference/duplicate-behavior/",
       "title": "Duplicate behavior",

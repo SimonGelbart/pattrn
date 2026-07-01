@@ -19,3 +19,6 @@ Thumbs.db
 
 # Local generated restore config
 eng/NuGet.local.config
+
+# AOT compatibility local publish outputs
+tests/Pattrn.AotCompatibility/artifacts/
