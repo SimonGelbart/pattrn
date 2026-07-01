@@ -54,6 +54,20 @@ Run `dotnet --version` or `dotnet --info` when you need to verify the active SDK
 
 Benchmark work should prefer the dedicated benchmark workflow. Local benchmark commands documented in `docs/reference/benchmarks.md` are optional investigation helpers, not current product proof.
 
+## Trimming and Native AOT compatibility
+
+Stable package trimming and Native AOT posture is validated by the local harness under `tests/Pattrn.AotCompatibility/`. Run these scripts from the repository root when evaluating compatibility for `Pattrn`, `Pattrn.Strings`, and `Pattrn.DependencyInjection`:
+
+```bash
+tests/Pattrn.AotCompatibility/validate-aot.sh
+```
+
+```powershell
+tests/Pattrn.AotCompatibility/validate-aot.ps1
+```
+
+The scripts attempt trimmed and Native AOT publishes for `linux-x64` and `win-x64`, run the produced smoke executable when the host can execute it, fail on unexplained stable-package trim/AOT warnings, and report attempted, passed, failed, and skipped checks with reasons. `Pattrn.Routing` is preview and intentionally excluded. See [trimming and Native AOT compatibility](aot-trimming.md) for support posture, caveats, and limits. CI automation for this validation is tracked separately by issue #73.
+
 ## Offline restore
 
 The supported default path is online restore through ordinary `dotnet restore`, followed by ordinary build and test commands. Offline restore is non-default maintainer recovery work only: if a maintainer needs it, use a local NuGet configuration or package source with the same direct `dotnet restore`, `dotnet build`, `dotnet test`, and `dotnet pack` commands that fit the change.

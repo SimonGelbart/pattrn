@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pattrn.Routing", "src\Pattr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pattrn.Routing.Tests", "tests\Pattrn.Routing.Tests\Pattrn.Routing.Tests.csproj", "{C964549E-C719-4662-B955-726B1F00BB92}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pattrn.AotCompatibility", "tests\Pattrn.AotCompatibility\Pattrn.AotCompatibility.csproj", "{5440DEA7-5F25-4A0E-911F-D1189CA7F96D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -175,6 +177,18 @@ Global
 		{C964549E-C719-4662-B955-726B1F00BB92}.Release|x64.Build.0 = Release|Any CPU
 		{C964549E-C719-4662-B955-726B1F00BB92}.Release|x86.ActiveCfg = Release|Any CPU
 		{C964549E-C719-4662-B955-726B1F00BB92}.Release|x86.Build.0 = Release|Any CPU
+		{5440DEA7-5F25-4A0E-911F-D1189CA7F96D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5440DEA7-5F25-4A0E-911F-D1189CA7F96D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5440DEA7-5F25-4A0E-911F-D1189CA7F96D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5440DEA7-5F25-4A0E-911F-D1189CA7F96D}.Debug|x64.Build.0 = Debug|Any CPU
+		{5440DEA7-5F25-4A0E-911F-D1189CA7F96D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5440DEA7-5F25-4A0E-911F-D1189CA7F96D}.Debug|x86.Build.0 = Debug|Any CPU
+		{5440DEA7-5F25-4A0E-911F-D1189CA7F96D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5440DEA7-5F25-4A0E-911F-D1189CA7F96D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5440DEA7-5F25-4A0E-911F-D1189CA7F96D}.Release|x64.ActiveCfg = Release|Any CPU
+		{5440DEA7-5F25-4A0E-911F-D1189CA7F96D}.Release|x64.Build.0 = Release|Any CPU
+		{5440DEA7-5F25-4A0E-911F-D1189CA7F96D}.Release|x86.ActiveCfg = Release|Any CPU
+		{5440DEA7-5F25-4A0E-911F-D1189CA7F96D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -190,5 +204,6 @@ Global
 		{6303FEBE-BD67-4947-9517-A1C2090E9F19} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{ABBA9652-2A21-4D74-A8D6-05D201F5A9C7} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{C964549E-C719-4662-B955-726B1F00BB92} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{5440DEA7-5F25-4A0E-911F-D1189CA7F96D} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal

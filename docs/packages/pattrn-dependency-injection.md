@@ -100,6 +100,12 @@ public sealed class OrderRoutes : IPattrnRegistrationSource<string, Handler>
 }
 ```
 
+## Trimming and Native AOT
+
+`Pattrn.DependencyInjection` is supported for trimming and Native AOT when validated with the repository AOT compatibility harness. The package uses `Microsoft.Extensions.DependencyInjection` registrations and keyed-service resolution without reflection scanning or dynamic-code generation in Pattrn itself.
+
+DI caveat: Pattrn's package posture does not guarantee that every consuming container graph is trim/AOT safe. Applications must validate their own services, registration-source implementations, registration callbacks, comparers, value types, and other dependencies under their deployment settings. See [trimming and Native AOT compatibility](../reference/aot-trimming.md) for validation scope, commands, warning policy, and limits.
+
 ## Maturity notes
 
 Stable-candidate:

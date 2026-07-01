@@ -124,6 +124,10 @@ builder.AddPattern(
 
 Named catch-alls return one `PatternCapture<TSegment>` per captured segment. String joining, URL decoding, optional route syntax, and constraint parsing belong in companion packages.
 
+## Trimming and Native AOT
+
+`Pattrn` is supported for trimming and Native AOT when validated with the repository AOT compatibility harness. The core package is dependency-light and does not use reflection, dynamic code generation, or linker-sensitive APIs in its matching implementation. See [trimming and Native AOT compatibility](../reference/aot-trimming.md) for validation scope, commands, warning policy, and limits.
+
 ## Companion packages
 
 ### Strings
