@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -44,7 +45,7 @@ public static class PattrnServiceCollectionExtensions
     /// <summary>
     /// Registers a singleton registration source that contributes pattern/value registrations during index construction.
     /// </summary>
-    public static IServiceCollection AddPathPatternRegistrationSource<TSegment, TValue, TSource>(
+    public static IServiceCollection AddPathPatternRegistrationSource<TSegment, TValue, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TSource>(
         this IServiceCollection services)
         where TSegment : notnull
         where TSource : class, IPattrnRegistrationSource<TSegment, TValue>
