@@ -58,11 +58,19 @@ Both scripts attempt these validations for the required RIDs `linux-x64` and `wi
 
 The scripts write deterministic local outputs under `artifacts/Pattrn.AotCompatibility/`. Generated publish outputs and logs must not be committed.
 
+## CI validation
+
+The dedicated `AOT and trimming validation` GitHub Actions workflow runs on pull requests targeting `main`, pushes to `main`, and manual `workflow_dispatch` runs. It is intended to be part of required pre-merge evidence once branch protection is configured for the workflow. The workflow runs on Linux, invokes `tests/Pattrn.AotCompatibility/validate-aot.sh`, keeps the script-owned `linux-x64` and `win-x64` publish coverage, and only executes smoke binaries that the Linux host can run.
+
+The workflow uploads `aot-trimming-validation.log` and the generated `artifacts/Pattrn.AotCompatibility/**` tree as the `aot-trimming-validation` artifact. The job summary includes the script summary with attempted, passed, failed, and skipped validations.
+
+Skips are capability-aware and must represent explicit missing prerequisites or unsupported host/target execution, such as an unavailable package source, a clearly missing native compiler/linker executable, a clearly unavailable RID prerequisite, or a smoke executable for a RID the current host cannot run. Generic `Exit code 1`, broad `Native AOT` text, broad `linker` text, ambiguous compiler/linker failures, and trim/AOT warnings are not skip reasons by themselves. When the required toolchain is available, real publish failures, runtime smoke failures, and trim/AOT warnings fail the workflow.
+
 ## Warning policy
 
 Trim and Native AOT warnings from stable Pattrn packages are treated as compatibility failures unless they are explicitly justified and documented. The expected beta support posture requires zero unexplained trim/AOT warnings for `Pattrn`, `Pattrn.Strings`, and `Pattrn.DependencyInjection`.
 
-Accepted warnings must remain visible in documentation or linked follow-up issues with a clear support caveat. CI automation for this validation is tracked separately by issue #73.
+Accepted warnings must remain visible in documentation or linked follow-up issues with a clear support caveat.
 
 ## What this proves
 

@@ -10,6 +10,20 @@ $Passed = [System.Collections.Generic.List[string]]::new()
 $Failed = [System.Collections.Generic.List[string]]::new()
 $Skipped = [System.Collections.Generic.List[string]]::new()
 
+function Test-RestorePrerequisiteFailure([string]$Text) {
+    return $Text -match '(?i)NU1301|NU1101|NU1801|proxy|Unable to load the service index|Failed to retrieve information|No such host is known|Name or service not known|Temporary failure in name resolution'
+}
+
+function Test-AotPrerequisiteFailure([string]$Text) {
+    $missingTool = $Text -match '(?i)(clang|gcc|ld|lld|link\.exe|objcopy|ar)([^A-Za-z0-9_.-]+.*)?(was not found|could not be found|not found|No such file or directory|is required)'
+    $missingNamedToolchain = $Text -match '(?i)(Platform linker|C compiler|native compiler|native linker|linker executable|linker command)([^A-Za-z0-9_.-]+.*)?(was not found|could not be found|not found|No such file or directory|is required)'
+    $unavailableRid = $Text -match '(?i)(NETSDK1083|RuntimeIdentifier).*(linux-x64|win-x64).*(not recognized|not supported|unavailable)'
+    $unsupportedCrossCompilation = $Text -match '(?i)(Cross-OS native compilation|cross compilation).*(not supported|unsupported|requires)'
+    $unsupportedTarget = $Text -match '(?i)(target.*(linux-x64|win-x64)|(linux-x64|win-x64).*target).*(not supported|unsupported|unavailable)'
+
+    return $missingTool -or $missingNamedToolchain -or $unavailableRid -or $unsupportedCrossCompilation -or $unsupportedTarget
+}
+
 function Can-ExecuteRid([string]$Rid) {
     return ($Rid -eq 'win-x64' -and $IsWindows) -or ($Rid -eq 'linux-x64' -and $IsLinux -and [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture -eq 'X64')
 }
@@ -30,11 +44,11 @@ function Invoke-Publish([string]$Rid, [string]$Mode, [string[]]$Properties) {
     & $Dotnet publish $Project -c Release -r $Rid -o $output @Properties *> $log
     if ($LASTEXITCODE -ne 0) {
         $text = Get-Content $log -Raw -ErrorAction SilentlyContinue
-        if ($text -match '(?i)NU1301|NU1101|NU1801|proxy|Unable to load the service index|Failed to retrieve information') {
+        if (Test-RestorePrerequisiteFailure $text) {
             $Skipped.Add("$label`: package source or restore prerequisite unavailable; see $log")
             return
         }
-        if ($Mode -eq 'aot' -and $text -match '(?i)native aot|clang|linker|was not found|is required|Platform linker|Exit code 1') {
+        if ($Mode -eq 'aot' -and (Test-AotPrerequisiteFailure $text)) {
             $Skipped.Add("$label`: Native AOT toolchain or RID prerequisite unavailable; see $log")
             return
         }

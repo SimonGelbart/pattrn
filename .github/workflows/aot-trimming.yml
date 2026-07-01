@@ -1,0 +1,59 @@
+name: AOT and trimming validation
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  aot-trimming:
+    name: AOT and trimming validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: 'true'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Run AOT and trimming validation
+        run: |
+          set -o pipefail
+          set +e
+          tests/Pattrn.AotCompatibility/validate-aot.sh 2>&1 | tee aot-trimming-validation.log
+          status=${PIPESTATUS[0]}
+          set -e
+          {
+            echo '## AOT and trimming validation'
+            echo
+            awk '/^AOT compatibility validation summary/{found=1} found{print}' aot-trimming-validation.log
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
+
+      - name: Upload AOT validation artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aot-trimming-validation
+          path: |
+            aot-trimming-validation.log
+            artifacts/Pattrn.AotCompatibility/**
+          if-no-files-found: ignore
