@@ -19,6 +19,23 @@ record_pass() { passed+=("$1"); }
 record_fail() { failed+=("$1: $2"); }
 record_skip() { skipped+=("$1: $2"); }
 
+is_restore_prerequisite_failure() {
+  local log="$1"
+  grep -Eiq 'NU1301|NU1101|NU1801|proxy|Unable to load the service index|Failed to retrieve information|No such host is known|Name or service not known|Temporary failure in name resolution' "$log"
+}
+
+is_aot_prerequisite_failure() {
+  local log="$1"
+
+  grep -Eiq '(clang|gcc|ld|lld|link\.exe|objcopy|ar)([^[:alnum:]_.-]+.*)?(was not found|could not be found|not found|No such file or directory|is required)' "$log" && return 0
+  grep -Eiq '(Platform linker|C compiler|native compiler|native linker|linker executable|linker command)([^[:alnum:]_.-]+.*)?(was not found|could not be found|not found|No such file or directory|is required)' "$log" && return 0
+  grep -Eiq '(NETSDK1083|RuntimeIdentifier).*(linux-x64|win-x64).*(not recognized|not supported|unavailable)' "$log" && return 0
+  grep -Eiq '(Cross-OS native compilation|cross compilation).*(not supported|unsupported|requires)' "$log" && return 0
+  grep -Eiq '(target.*(linux-x64|win-x64)|(linux-x64|win-x64).*target).*(not supported|unsupported|unavailable)' "$log" && return 0
+
+  return 1
+}
+
 can_execute_rid() {
   local rid="$1"
   case "$HOST_OS:$HOST_ARCH:$rid" in
@@ -53,11 +70,11 @@ run_publish() {
   set -e
 
   if [[ $code -ne 0 ]]; then
-    if grep -Eiq 'NU1301|NU1101|NU1801|proxy|Unable to load the service index|Failed to retrieve information' "$log"; then
+    if is_restore_prerequisite_failure "$log"; then
       record_skip "$label" "package source or restore prerequisite unavailable; see $log"
       return 0
     fi
-    if [[ "$mode" == "aot" ]] && grep -Eiq 'native aot|clang|linker|was not found|is required|Platform linker|Exit code 1' "$log"; then
+    if [[ "$mode" == "aot" ]] && is_aot_prerequisite_failure "$log"; then
       record_skip "$label" "Native AOT toolchain or RID prerequisite unavailable; see $log"
       return 0
     fi
