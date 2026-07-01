@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepoRoot = Resolve-Path (Join-Path $ScriptDir '../..')
 $Project = Join-Path $ScriptDir 'Pattrn.AotCompatibility.csproj'
-$Artifacts = Join-Path $ScriptDir 'artifacts'
+$Artifacts = Join-Path $RepoRoot 'artifacts/Pattrn.AotCompatibility'
 $Dotnet = if ($env:DOTNET_CMD) { $env:DOTNET_CMD } else { 'dotnet' }
 $Attempted = [System.Collections.Generic.List[string]]::new()
 $Passed = [System.Collections.Generic.List[string]]::new()
@@ -23,7 +23,7 @@ function Invoke-Publish([string]$Rid, [string]$Mode, [string[]]$Properties) {
     $label = "$Mode publish $Rid"
     $Attempted.Add($label)
     $output = Join-Path $Artifacts (Join-Path $Rid $Mode)
-    $log = Join-Path $output 'publish.log'
+    $log = Join-Path $output 'publish.txt'
     Remove-Item $output -Recurse -Force -ErrorAction SilentlyContinue
     New-Item -ItemType Directory -Path $output -Force | Out-Null
 

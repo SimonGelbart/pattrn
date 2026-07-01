@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 PROJECT="$SCRIPT_DIR/Pattrn.AotCompatibility.csproj"
-ARTIFACTS="$SCRIPT_DIR/artifacts"
+ARTIFACTS="$REPO_ROOT/artifacts/Pattrn.AotCompatibility"
 HOST_OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
 HOST_ARCH="$(uname -m)"
 DOTNET_CMD="${DOTNET_CMD:-dotnet}"
@@ -42,7 +42,7 @@ run_publish() {
   shift 2
   local label="$mode publish $rid"
   local output="$ARTIFACTS/$rid/$mode"
-  local log="$output/publish.log"
+  local log="$output/publish.txt"
   record_attempt "$label"
   rm -rf "$output"
   mkdir -p "$output"
