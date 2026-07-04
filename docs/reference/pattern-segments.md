@@ -24,7 +24,7 @@ The core package does **not** parse route strings such as `/orders/{id}`. Route-
 | `Literal` | Matches one exact segment value. |
 | `Wildcard` | Matches any single input segment without assigning a name. |
 | `Parameter` | Matches any single input segment and carries a logical name for detailed match APIs. |
-| `CatchAll` | Matches zero or more remaining segments and must be terminal. |
+| `CatchAll` | Matches zero or more remaining segments. It is representable anywhere in the public model, but the current compiler supports it only as the terminal segment. |
 
 The default value of `PatternSegment<TSegment>` is an anonymous wildcard. This keeps default struct values safe.
 
@@ -54,7 +54,19 @@ For input `"*"`, both registrations can match. For any other single segment, onl
 - `Wildcard` and `Parameter` still match one segment.
 - `CatchAll` matches the remaining suffix (including an empty suffix).
 
-Named catch-all captures are exposed through detailed match APIs, with one capture per matched remaining segment.
+Named catch-all captures are exposed through detailed match APIs, with one capture per matched remaining segment. Unnamed catch-alls produce no capture. A non-terminal catch-all is rejected by the current compiler with wording that describes the construct as unsupported in this version rather than permanently impossible in the model.
+
+## Capture names
+
+`Parameter(name)` and `CatchAll(name)` validate capture names in the `PatternSegment<TSegment>` factories. Capture names use simple identifier rules:
+
+- the name must not be `null`;
+- the name must not be empty or whitespace;
+- the first character must be a Unicode letter or `_`;
+- subsequent characters must be Unicode letters, decimal digits, or `_`;
+- names are case-sensitive and are not normalized.
+
+Duplicate capture names within one pattern are rejected during pattern registration. The duplicate check uses ordinal, case-sensitive comparison, so `id` and `ID` are distinct names. Reusing the same capture name in different patterns is allowed.
 
 ## Detailed captures
 

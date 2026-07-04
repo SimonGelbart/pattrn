@@ -46,6 +46,20 @@ public sealed class CatchAllPatternTests
     }
 
     [Test]
+    public void UnnamedCatchAllProducesNoCapture()
+    {
+        var index = PattrnIndex<string, string>.Builder()
+            .AddPattern([PatternSegment<string>.Literal("files"), PatternSegment<string>.CatchAll()], "handler")
+            .Build();
+
+        var matches = index.MatchDetailedToArray(["files", "a", "b.txt"]);
+
+        ShouldEqual(matches.Length, 1);
+        ShouldEqual(matches[0].Value, "handler");
+        ShouldEqual(matches[0].Captures.Count, 0);
+    }
+
+    [Test]
     public void NamedCatchAllCanMatchEmptyRemainder()
     {
         var builder = PattrnIndex<string, string>.Builder("*");
@@ -84,17 +98,79 @@ public sealed class CatchAllPatternTests
     }
 
     [Test]
-    public void CatchAllMustBeTerminal()
+    public void NonTerminalCatchAllIsRejectedWithCurrentCompilerUnsupportedWording()
     {
         var builder = PattrnIndex<string, string>.Builder("*");
 
-        ShouldThrow<ArgumentException>(() => builder.AddPattern(
+        var exception = ShouldThrow<ArgumentException>(() => builder.AddPattern(
             [
                 PatternSegment<string>.Literal("files"),
                 PatternSegment<string>.CatchAll("path"),
                 PatternSegment<string>.Literal("tail")
             ],
             "handler"));
+
+        ShouldBeTrue(
+            exception.Message.Contains("not supported by this version", StringComparison.Ordinal),
+            "The non-terminal catch-all error should describe current compiler support rather than permanent conceptual invalidity.");
+    }
+
+    [Test]
+    public void DuplicateCaptureNamesWithinOnePatternAreRejected()
+    {
+        var builder = PattrnIndex<string, string>.Builder();
+
+        ShouldThrow<ArgumentException>(() => builder.AddPattern(
+            [
+                PatternSegment<string>.Literal("orders"),
+                PatternSegment<string>.Parameter("id"),
+                PatternSegment<string>.Parameter("id")
+            ],
+            "handler"));
+    }
+
+    [Test]
+    public void ParameterAndCatchAllWithSameNameWithinOnePatternAreRejected()
+    {
+        var builder = PattrnIndex<string, string>.Builder();
+
+        ShouldThrow<ArgumentException>(() => builder.AddPattern(
+            [
+                PatternSegment<string>.Literal("files"),
+                PatternSegment<string>.Parameter("path"),
+                PatternSegment<string>.CatchAll("path")
+            ],
+            "handler"));
+    }
+
+    [Test]
+    public void SameCaptureNameMayBeReusedInDifferentPatterns()
+    {
+        var index = PattrnIndex<string, string>.Builder()
+            .AddPattern([PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("id")], "orders")
+            .AddPattern([PatternSegment<string>.Literal("customers"), PatternSegment<string>.Parameter("id")], "customers")
+            .Build();
+
+        ShouldSequenceEqual(index.MatchToArray(["orders", "123"]), ["orders"]);
+        ShouldSequenceEqual(index.MatchToArray(["customers", "123"]), ["customers"]);
+    }
+
+    [Test]
+    public void CaptureNameDuplicatesAreCaseSensitive()
+    {
+        var index = PattrnIndex<string, string>.Builder()
+            .AddPattern(
+                [
+                    PatternSegment<string>.Literal("orders"),
+                    PatternSegment<string>.Parameter("id"),
+                    PatternSegment<string>.Parameter("ID")
+                ],
+                "handler")
+            .Build();
+
+        var match = index.MatchDetailedToArray(["orders", "123", "456"]).Single();
+
+        ShouldSequenceEqual(match.Captures.Select(capture => capture.Name), ["id", "ID"]);
     }
 
     [Test]

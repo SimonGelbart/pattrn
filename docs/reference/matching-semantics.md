@@ -38,7 +38,7 @@ builder.AddPattern(
     "order-handler");
 ```
 
-`Literal` matches exact values, including values equal to the configured wildcard token. `Wildcard` and `Parameter` match exactly one input segment. `CatchAll` matches zero or more remaining input segments and must be terminal. Parameter and named catch-all names are returned by detailed match APIs as `PatternCapture<TSegment>` values.
+`Literal` matches exact values, including values equal to the configured wildcard token. `Wildcard` and `Parameter` match exactly one input segment. `CatchAll` matches zero or more remaining input segments. The public model can represent a catch-all before the end of a pattern, but the current compiler rejects non-terminal catch-alls as unsupported in this version. Parameter and named catch-all names are returned by detailed match APIs as `PatternCapture<TSegment>` values.
 
 ## Exact-length matching by default
 
@@ -101,7 +101,7 @@ path:    files.a.b.c
 result:  match
 ```
 
-Named catch-alls are exposed as one capture per remaining input segment. The core does not join segments into strings, decode paths, or parse route-template syntax; companion packages can add those domain-specific behaviors.
+Named catch-alls are exposed as one capture per remaining input segment. Unnamed catch-alls produce no captures. The core does not join segments into strings, decode paths, or parse route-template syntax; companion packages can add those domain-specific behaviors.
 
 ## Single-segment wildcard
 
@@ -150,6 +150,12 @@ result:  match when prefix matching is enabled
 ```
 
 The dotted string helpers deliberately reject empty strings. Use the core segmented APIs when an empty pattern or empty path is intentional.
+
+## Capture names
+
+Named parameters and named catch-alls use simple identifier capture names. A valid capture name is non-null, non-empty, and non-whitespace; starts with a Unicode letter or `_`; and then contains only Unicode letters, decimal digits, or `_`. Capture names are case-sensitive and are not normalized.
+
+Within one registered pattern, duplicate capture names are rejected with ordinal, case-sensitive comparison. This applies across named parameters and named catch-alls. Reusing the same name in separate patterns is allowed.
 
 ## Overlapping patterns
 
