@@ -62,15 +62,28 @@ public sealed class PatternSegmentTests
     }
 
     [Test]
+    public void FactoriesAcceptValidSimpleIdentifierCaptureNames()
+    {
+        ShouldEqual(PatternSegment<string>.Parameter("_id").ParameterName, "_id");
+        ShouldEqual(PatternSegment<string>.Parameter("Δelta9").ParameterName, "Δelta9");
+        ShouldEqual(PatternSegment<string>.CatchAll("path_2").ParameterName, "path_2");
+    }
+
+    [Test]
     public void FactoriesRejectInvalidArguments()
     {
         ShouldThrow<ArgumentNullException>(() => PatternSegment<string>.Literal(null!));
         ShouldThrow<ArgumentNullException>(() => PatternSegment<string>.Parameter(null!));
         ShouldThrow<ArgumentException>(() => PatternSegment<string>.Parameter(""));
         ShouldThrow<ArgumentException>(() => PatternSegment<string>.Parameter("   "));
+        ShouldThrow<ArgumentException>(() => PatternSegment<string>.Parameter("9id"));
+        ShouldThrow<ArgumentException>(() => PatternSegment<string>.Parameter("order-id"));
+        ShouldThrow<ArgumentException>(() => PatternSegment<string>.Parameter("id.name"));
         ShouldThrow<ArgumentNullException>(() => PatternSegment<string>.CatchAll(null!));
         ShouldThrow<ArgumentException>(() => PatternSegment<string>.CatchAll(""));
         ShouldThrow<ArgumentException>(() => PatternSegment<string>.CatchAll("   "));
+        ShouldThrow<ArgumentException>(() => PatternSegment<string>.CatchAll("9path"));
+        ShouldThrow<ArgumentException>(() => PatternSegment<string>.CatchAll("path/*"));
     }
 
     [Test]
@@ -80,6 +93,7 @@ public sealed class PatternSegmentTests
         ShouldBeFalse(PatternSegment<string>.Literal("orders") == PatternSegment<string>.Literal("customers"), "Different literals should not be equal.");
         ShouldBeTrue(PatternSegment<string>.Parameter("id") == PatternSegment<string>.Parameter("id"), "Same parameter names should be equal.");
         ShouldBeFalse(PatternSegment<string>.Parameter("id") == PatternSegment<string>.Parameter("name"), "Different parameter names should not be equal.");
+        ShouldBeFalse(PatternSegment<string>.Parameter("id") == PatternSegment<string>.Parameter("ID"), "Parameter names should be case-sensitive.");
         ShouldBeTrue(PatternSegment<string>.Wildcard() == default(PatternSegment<string>), "Anonymous wildcard should equal default wildcard.");
         ShouldBeTrue(PatternSegment<string>.CatchAll("path") == PatternSegment<string>.CatchAll("path"), "Same catch-all names should be equal.");
         ShouldBeFalse(PatternSegment<string>.CatchAll("path") == PatternSegment<string>.CatchAll("other"), "Different catch-all names should not be equal.");

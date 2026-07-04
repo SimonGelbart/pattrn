@@ -99,11 +99,11 @@ public readonly struct PatternSegment<TSegment> : IEquatable<PatternSegment<TSeg
     /// </summary>
     /// <param name="name">The logical parameter name.</param>
     /// <returns>A named parameter pattern segment.</returns>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="name"/> is empty or whitespace.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="name"/> is not a simple identifier.</exception>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="name"/> is <see langword="null"/>.</exception>
     public static PatternSegment<TSegment> Parameter(string name)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ValidateCaptureName(name);
         return new PatternSegment<TSegment>(PatternSegmentKind.Parameter, default!, name);
     }
 
@@ -118,13 +118,40 @@ public readonly struct PatternSegment<TSegment> : IEquatable<PatternSegment<TSeg
     /// </summary>
     /// <param name="name">The logical catch-all parameter name.</param>
     /// <returns>A named catch-all pattern segment.</returns>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="name"/> is empty or whitespace.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="name"/> is not a simple identifier.</exception>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="name"/> is <see langword="null"/>.</exception>
     public static PatternSegment<TSegment> CatchAll(string name)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ValidateCaptureName(name);
         return new PatternSegment<TSegment>(PatternSegmentKind.CatchAll, default!, name);
     }
+
+    private static void ValidateCaptureName(string name)
+    {
+        ArgumentNullException.ThrowIfNull(name);
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Capture names must not be empty or whitespace.", nameof(name));
+        }
+
+        if (!IsIdentifierStart(name[0]))
+        {
+            throw new ArgumentException("Capture names must start with a Unicode letter or underscore.", nameof(name));
+        }
+
+        for (var i = 1; i < name.Length; i++)
+        {
+            if (!IsIdentifierPart(name[i]))
+            {
+                throw new ArgumentException("Capture names may contain only Unicode letters, decimal digits, or underscores after the first character.", nameof(name));
+            }
+        }
+    }
+
+    private static bool IsIdentifierStart(char character) => character == '_' || char.IsLetter(character);
+
+    private static bool IsIdentifierPart(char character) => character == '_' || char.IsLetter(character) || char.IsDigit(character);
 
     /// <summary>
     /// Deconstructs the segment into its kind, literal value, and parameter name.

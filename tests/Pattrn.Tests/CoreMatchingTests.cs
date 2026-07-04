@@ -136,6 +136,17 @@ public sealed class CoreMatchingTests
     }
 
     [Test]
+    public void WildcardDoesNotConsumeMultipleSegmentsUnderExactMatching()
+    {
+        var builder = PattrnIndexBuilder<string, string>.Create("*");
+        builder.Add(["NASDAQ", "*"], "nasdaq-any");
+
+        var index = builder.Build();
+
+        ShouldSequenceEqual(index.MatchToArray(["NASDAQ", "MSFT", "QUOTE"]), []);
+    }
+
+    [Test]
     public void WildcardCanOnlyBecomePrefixAfterConsumingOneSegment()
     {
         var builder = PattrnIndexBuilder<string, string>.Create("*");

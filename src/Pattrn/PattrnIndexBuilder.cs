@@ -241,6 +241,7 @@ public sealed class PattrnIndexBuilder<TSegment, TValue>
     {
         var node = _root;
         var captures = new List<CaptureDescriptor>();
+        HashSet<string>? captureNames = null;
         var hasParameter = false;
         var hasWildcard = false;
         var hasCatchAll = false;
@@ -259,7 +260,7 @@ public sealed class PattrnIndexBuilder<TSegment, TValue>
                 case PatternSegmentKind.Parameter:
                     node.WildcardChild ??= new BuilderNode<TSegment, TValue>(SegmentComparer);
                     node = node.WildcardChild;
-                    captures.Add(new CaptureDescriptor(segment.ParameterName!, i));
+                    AddCapture(captures, ref captureNames, segment.ParameterName!, i, isCatchAll: false, nameof(pattern));
                     hasParameter = true;
                     score += 50;
                     break;
@@ -274,14 +275,14 @@ public sealed class PattrnIndexBuilder<TSegment, TValue>
                 case PatternSegmentKind.CatchAll:
                     if (i != pattern.Length - 1)
                     {
-                        throw new ArgumentException("Catch-all pattern segments must be terminal.", nameof(pattern));
+                        throw new ArgumentException("Non-terminal catch-all segments are not supported by this version of the compiler.", nameof(pattern));
                     }
 
                     node.CatchAllChild ??= new BuilderNode<TSegment, TValue>(SegmentComparer);
                     node = node.CatchAllChild;
                     if (segment.ParameterName is not null)
                     {
-                        captures.Add(new CaptureDescriptor(segment.ParameterName, i, isCatchAll: true));
+                        AddCapture(captures, ref captureNames, segment.ParameterName, i, isCatchAll: true, nameof(pattern));
                     }
 
                     hasCatchAll = true;
@@ -296,6 +297,23 @@ public sealed class PattrnIndexBuilder<TSegment, TValue>
         var kind = GetMatchKind(hasParameter, hasWildcard, hasCatchAll);
         AddRegistration(node, value, new BuilderRegistrationMetadata([.. captures], kind, score, patternId));
         return this;
+    }
+
+    private static void AddCapture(
+        List<CaptureDescriptor> captures,
+        ref HashSet<string>? captureNames,
+        string name,
+        int segmentIndex,
+        bool isCatchAll,
+        string parameterName)
+    {
+        captureNames ??= new HashSet<string>(StringComparer.Ordinal);
+        if (!captureNames.Add(name))
+        {
+            throw new ArgumentException("Duplicate capture names within one pattern are not supported.", parameterName);
+        }
+
+        captures.Add(new CaptureDescriptor(name, segmentIndex, isCatchAll));
     }
 
     /// <summary>
