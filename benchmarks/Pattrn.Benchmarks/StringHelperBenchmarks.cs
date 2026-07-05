@@ -5,8 +5,8 @@ namespace Pattrn.Benchmarks;
 [MemoryDiagnoser]
 public class StringHelperBenchmarks
 {
-    private IPattrnIndex<string, int> _index = null!;
-    private IPattrnIndex<string, int> _normalizedIndex = null!;
+    private PattrnIndex<string, int> _index = null!;
+    private PattrnIndex<string, int> _normalizedIndex = null!;
     private string _dottedPath = string.Empty;
     private string _separatedPath = string.Empty;
     private string _normalizedPath = string.Empty;
