@@ -288,6 +288,13 @@
       "title": "ADR 0014: Builders are single-writer and compiled indexes are concurrent-reader safe",
       "section": "ADRs",
       "status": "Accepted"
+    },
+    {
+      "source": "docs/adr/0015-remove-public-compiled-index-interface.md",
+      "route": "/adr/0015-remove-public-compiled-index-interface/",
+      "title": "ADR 0015: Remove public compiled-index interface",
+      "section": "ADRs",
+      "status": "Accepted"
     }
   ],
   "exclude": [
