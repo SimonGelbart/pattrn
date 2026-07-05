@@ -6,7 +6,7 @@ namespace Pattrn.DependencyInjection.Tests;
 public sealed class DependencyInjectionTests
 {
     [Test]
-    public async Task RegistersInterfaceAndConcreteAsSameSingleton()
+    public async Task RegistersConcreteAsSingleton()
     {
         var services = new ServiceCollection();
 
@@ -16,12 +16,12 @@ public sealed class DependencyInjectionTests
 
         using var provider = services.BuildServiceProvider();
 
-        var concrete = provider.GetRequiredService<PattrnIndex<string, string>>();
-        var abstraction = provider.GetRequiredService<IPattrnIndex<string, string>>();
-        var secondAbstraction = provider.GetRequiredService<IPattrnIndex<string, string>>();
+        var first = provider.GetRequiredService<PattrnIndex<string, string>>();
+        var second = provider.GetRequiredService<PattrnIndex<string, string>>();
 
-        await Assert.That(ReferenceEquals(concrete, abstraction)).IsTrue();
-        await Assert.That(ReferenceEquals(abstraction, secondAbstraction)).IsTrue();
+        await Assert.That(ReferenceEquals(first, second)).IsTrue();
+        await Assert.That(services.Any(static descriptor =>
+            descriptor.ServiceType.FullName?.Contains("IPattrnIndex", StringComparison.Ordinal) == true)).IsFalse();
     }
 
     [Test]
@@ -37,7 +37,7 @@ public sealed class DependencyInjectionTests
 
         using var provider = services.BuildServiceProvider();
 
-        var index = provider.GetRequiredService<IPattrnIndex<string, string>>();
+        var index = provider.GetRequiredService<PattrnIndex<string, string>>();
         var matches = index.MatchToArray(["market", "NASDAQ", "MSFT"]);
 
         await Assert.That(matches).IsEquivalentTo(["client-a", "client-b"]);
@@ -59,7 +59,7 @@ public sealed class DependencyInjectionTests
 
         using var provider = services.BuildServiceProvider();
 
-        var index = provider.GetRequiredService<IPattrnIndex<string, string>>();
+        var index = provider.GetRequiredService<PattrnIndex<string, string>>();
         var matches = index.MatchToArray(["MARKET", "NASDAQ", "MSFT"]);
 
         await Assert.That(index.Options).IsEqualTo(MatchOptions.Prefix);
@@ -78,7 +78,7 @@ public sealed class DependencyInjectionTests
         using var provider = services.BuildServiceProvider();
 
         var namedProviderIndex = provider.GetRequiredService<IPattrnProvider<string, string>>().GetRequired("market-data");
-        var keyedIndex = provider.GetRequiredKeyedService<IPattrnIndex<string, string>>("market-data");
+        var keyedIndex = provider.GetRequiredKeyedService<PattrnIndex<string, string>>("market-data");
 
         await Assert.That(ReferenceEquals(namedProviderIndex, keyedIndex)).IsTrue();
         await Assert.That(namedProviderIndex.MatchToArray(["market", "NASDAQ", "MSFT"])).IsEquivalentTo(["client-a"]);
@@ -98,7 +98,7 @@ public sealed class DependencyInjectionTests
 
         using var provider = services.BuildServiceProvider();
 
-        var index = provider.GetRequiredService<IPattrnIndex<string, string>>();
+        var index = provider.GetRequiredService<PattrnIndex<string, string>>();
         var matches = index.MatchToArray(["market", "NASDAQ", "MSFT"]);
 
         await Assert.That(matches).IsEquivalentTo(["client-a"]);
@@ -172,7 +172,7 @@ public sealed class DependencyInjectionTests
                     "explicit-wildcard")));
 
         using var provider = services.BuildServiceProvider();
-        var index = provider.GetRequiredService<IPattrnIndex<string, string>>();
+        var index = provider.GetRequiredService<PattrnIndex<string, string>>();
 
         await Assert.That(index.MatchToArray(["market", "MSFT"])).IsEquivalentTo(["explicit-wildcard"]);
         await Assert.That(index.MatchToArray(["market", "*"])).IsEquivalentTo(["literal-star", "explicit-wildcard"]);
@@ -188,7 +188,7 @@ public sealed class DependencyInjectionTests
             .AddPattrnIndex<string, string>(registration => registration.FromRegisteredSources());
 
         using var provider = services.BuildServiceProvider();
-        var index = provider.GetRequiredService<IPattrnIndex<string, string>>();
+        var index = provider.GetRequiredService<PattrnIndex<string, string>>();
 
         await Assert.That(index.MatchDetailedToArray(["orders", "123"]).Single().Captures.Single().Value).IsEqualTo("123");
     }
