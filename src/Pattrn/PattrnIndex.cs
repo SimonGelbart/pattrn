@@ -20,7 +20,7 @@ namespace Pattrn;
 /// var matches = index.MatchToArray(["market", "NASDAQ", "MSFT"]);
 /// </code>
 /// </example>
-public sealed class PattrnIndex<TSegment, TValue> : IPattrnIndex<TSegment, TValue>
+public sealed class PattrnIndex<TSegment, TValue>
     where TSegment : notnull
 {
     private readonly CompiledNode[] _nodes;
