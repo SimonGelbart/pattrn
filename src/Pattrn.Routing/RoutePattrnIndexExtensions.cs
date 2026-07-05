@@ -13,7 +13,7 @@ public static class RoutePattrnIndexExtensions
     /// Gets a route-path-specific upper bound for value-only matches.
     /// </summary>
     public static int GetRouteMatchCountUpperBound<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path)
     {
         ArgumentNullException.ThrowIfNull(index);
@@ -32,7 +32,7 @@ public static class RoutePattrnIndexExtensions
     /// Gets a route-path-specific upper bound for detailed-match captures.
     /// </summary>
     public static int GetRouteCaptureCountUpperBound<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path)
     {
         ArgumentNullException.ThrowIfNull(index);
@@ -51,7 +51,7 @@ public static class RoutePattrnIndexExtensions
     /// Matches a route-like runtime path and writes values into a destination span.
     /// </summary>
     public static int MatchRoute<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path,
         Span<TValue> destination)
     {
@@ -71,7 +71,7 @@ public static class RoutePattrnIndexExtensions
     /// Tries to match a route-like runtime path and writes values into a destination span.
     /// </summary>
     public static bool TryMatchRoute<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path,
         Span<TValue> destination,
         out int written)
@@ -92,7 +92,7 @@ public static class RoutePattrnIndexExtensions
     /// Matches a route-like runtime path and returns values in a new array.
     /// </summary>
     public static TValue[] MatchRouteToArray<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path)
     {
         ArgumentNullException.ThrowIfNull(index);
@@ -111,7 +111,7 @@ public static class RoutePattrnIndexExtensions
     /// Matches a route-like runtime path and writes detailed match metadata into destination spans.
     /// </summary>
     public static int MatchRouteDetailed<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path,
         Span<PatternMatch<TValue>> matches,
         Span<PatternCapture<string>> captures,
@@ -133,7 +133,7 @@ public static class RoutePattrnIndexExtensions
     /// Tries to match a route-like runtime path and writes detailed match metadata into destination spans.
     /// </summary>
     public static bool TryMatchRouteDetailed<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path,
         Span<PatternMatch<TValue>> matches,
         Span<PatternCapture<string>> captures,
@@ -156,7 +156,7 @@ public static class RoutePattrnIndexExtensions
     /// Matches a route-like runtime path and returns detailed matches in a new array.
     /// </summary>
     public static PatternMatchResult<string, TValue>[] MatchRouteDetailed<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path)
     {
         ArgumentNullException.ThrowIfNull(index);
@@ -175,7 +175,7 @@ public static class RoutePattrnIndexExtensions
     /// Matches a route-like runtime path and returns detailed matches in a new array.
     /// </summary>
     public static PatternMatchResult<string, TValue>[] MatchRouteDetailedToArray<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path)
     {
         ArgumentNullException.ThrowIfNull(index);
