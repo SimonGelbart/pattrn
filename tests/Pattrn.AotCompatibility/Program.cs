@@ -67,10 +67,10 @@ static void RunDependencyInjectionSmoke()
 
     using var provider = services.BuildServiceProvider(validateScopes: true);
 
-    var defaultIndex = provider.GetRequiredService<IPattrnIndex<string, string>>();
+    var defaultIndex = provider.GetRequiredService<PattrnIndex<string, string>>();
     RequireContains(defaultIndex.MatchToArray(["di", "service"]), "default-di", "default DI match");
 
-    var namedIndex = provider.GetRequiredKeyedService<IPattrnIndex<string, string>>("named");
+    var namedIndex = provider.GetRequiredKeyedService<PattrnIndex<string, string>>("named");
     RequireContains(namedIndex.MatchToArray(["named", "service"]), "named-di", "keyed DI match");
 
     var pattrnProvider = provider.GetRequiredService<IPattrnProvider<string, string>>();
