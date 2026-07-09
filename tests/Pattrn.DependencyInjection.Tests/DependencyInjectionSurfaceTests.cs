@@ -18,7 +18,7 @@ public sealed class DependencyInjectionSurfaceTests
 
         using var provider = services.BuildServiceProvider();
 
-        var index = provider.GetRequiredService<IPattrnIndex<string, string>>();
+        var index = provider.GetRequiredService<PattrnIndex<string, string>>();
         var matches = index.MatchDetailed(["orders", "123"]);
 
         await Assert.That(matches).Count().IsEqualTo(1);

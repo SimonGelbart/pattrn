@@ -22,6 +22,7 @@ ADRs capture durable product, architecture, package-boundary, compatibility, and
 | [0012](0012-simplify-pre-beta-versioning-and-roadmap-milestones.md) | Simplify pre-beta versioning and roadmap milestones | Accepted | versioning, roadmap | Public |
 | [0013](0013-use-fixed-ranking-with-consumer-side-sorting.md) | Use fixed ranking with consumer-side sorting | Accepted | ranking, matching-semantics | Public |
 | [0014](0014-builders-single-writer-compiled-indexes-concurrent-reader-safe.md) | Builders are single-writer and compiled indexes are concurrent-reader safe | Accepted | concurrency, api-shape | Public |
+| [0015](0015-use-concrete-compiled-index-contract.md) | Use concrete compiled index contract | Accepted | api-shape, compatibility | Public |
 | [0000 template](0000-adr-template.md) | ADR template | Proposed | process, authoring | Maintainer-only authoring aid |
 
 ## Task-based read order
@@ -49,7 +50,8 @@ ADRs capture durable product, architecture, package-boundary, compatibility, and
 
 1. [0011](0011-diagnostics-are-optional-not-hot-path.md)
 2. [0009](0009-compiled-index-internals-are-private.md)
-3. [0002](0002-target-dotnet-10-only.md)
+3. [0015](0015-use-concrete-compiled-index-contract.md)
+4. [0002](0002-target-dotnet-10-only.md)
 
 ## Status values
 

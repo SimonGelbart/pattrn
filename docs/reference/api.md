@@ -82,9 +82,9 @@ private sealed record Registration(
     Action Handler,
     string Id);
 
-private volatile IPattrnIndex<string, Action> _current = BuildInitialIndex();
+private volatile PattrnIndex<string, Action> _current = BuildInitialIndex();
 
-private static IPattrnIndex<string, Action> BuildInitialIndex()
+private static PattrnIndex<string, Action> BuildInitialIndex()
 {
     return PattrnIndex<string, Action>.Builder().Build();
 }
@@ -124,9 +124,9 @@ var destination = new string[index.GetMatchCountUpperBound(path)];
 var written = index.Match(path, destination);
 ```
 
-## Interface surface
+## Compiled index surface
 
-`IPattrnIndex<TSegment, TValue>` keeps hot matching explicit and exposes explanation matching as a separate diagnostics-oriented operation:
+`PattrnIndex<TSegment, TValue>` keeps hot matching explicit and exposes explanation matching as a separate diagnostics-oriented operation:
 
 ```csharp
 int GetMatchCountUpperBound(ReadOnlySpan<TSegment> path);
@@ -178,7 +178,7 @@ var index = options.CreateStringBuilder<string>()
 var matches = index.MatchToArray("//api//USERS/");
 ```
 
-The facade is convenience-oriented: `StringPattrnIndexBuilder<TValue>` wraps `PattrnIndexBuilder<string, TValue>`, and `StringPattrnIndex<TValue>` wraps `IPattrnIndex<string, TValue>`. Advanced callers can still use `CoreBuilder`, `CoreIndex`, or the older `AddSeparated` / `MatchSeparatedToArray` extension methods directly.
+The facade is convenience-oriented: `StringPattrnIndexBuilder<TValue>` wraps `PattrnIndexBuilder<string, TValue>`, and `StringPattrnIndex<TValue>` wraps `PattrnIndex<string, TValue>`. Advanced callers can still use `CoreBuilder`, `CoreIndex`, or the older `AddSeparated` / `MatchSeparatedToArray` extension methods directly.
 
 This boundary keeps URL decoding, filesystem rules, route semantics, glob syntax, and application-specific normalization out of the generic core and the generic string layer.
 

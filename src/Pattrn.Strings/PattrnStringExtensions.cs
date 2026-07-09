@@ -140,7 +140,7 @@ public static class PattrnStringExtensions
     /// Gets a path-specific upper bound for a dotted string path against a string-segment index.
     /// </summary>
     public static int GetDottedMatchCountUpperBound<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path,
         char separator = '.')
     {
@@ -151,7 +151,7 @@ public static class PattrnStringExtensions
     /// Gets a path-specific upper bound for a separated string path against a string-segment index.
     /// </summary>
     public static int GetSeparatedMatchCountUpperBound<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path,
         char separator)
     {
@@ -162,7 +162,7 @@ public static class PattrnStringExtensions
     /// Gets a path-specific upper bound for a separated string path against a string-segment index using explicit normalization options.
     /// </summary>
     public static int GetSeparatedMatchCountUpperBound<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path,
         StringNormalizationOptions options)
     {
@@ -175,7 +175,7 @@ public static class PattrnStringExtensions
     /// Matches a dotted string path against a string-segment index and returns matching values as an array.
     /// </summary>
     public static TValue[] MatchDottedToArray<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path,
         char separator = '.')
     {
@@ -186,7 +186,7 @@ public static class PattrnStringExtensions
     /// Matches a separated string path against a string-segment index and returns matching values as an array.
     /// </summary>
     public static TValue[] MatchSeparatedToArray<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path,
         char separator)
     {
@@ -197,7 +197,7 @@ public static class PattrnStringExtensions
     /// Matches a separated string path against a string-segment index and returns matching values as an array using explicit normalization options.
     /// </summary>
     public static TValue[] MatchSeparatedToArray<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path,
         StringNormalizationOptions options)
     {
@@ -210,7 +210,7 @@ public static class PattrnStringExtensions
     /// Matches a dotted string path and writes matching values into the caller-provided destination span.
     /// </summary>
     public static int MatchDotted<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path,
         Span<TValue> destination,
         char separator = '.')
@@ -222,7 +222,7 @@ public static class PattrnStringExtensions
     /// Matches a separated string path and writes matching values into the caller-provided destination span.
     /// </summary>
     public static int MatchSeparated<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path,
         Span<TValue> destination,
         char separator)
@@ -234,7 +234,7 @@ public static class PattrnStringExtensions
     /// Matches a separated string path and writes matching values into the caller-provided destination span using explicit normalization options.
     /// </summary>
     public static int MatchSeparated<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path,
         Span<TValue> destination,
         StringNormalizationOptions options)
@@ -248,7 +248,7 @@ public static class PattrnStringExtensions
     /// Attempts to match a dotted string path and write values into the caller-provided destination span.
     /// </summary>
     public static bool TryMatchDotted<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path,
         Span<TValue> destination,
         out int written,
@@ -261,7 +261,7 @@ public static class PattrnStringExtensions
     /// Attempts to match a separated string path and write values into the caller-provided destination span.
     /// </summary>
     public static bool TryMatchSeparated<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path,
         Span<TValue> destination,
         out int written,
@@ -274,7 +274,7 @@ public static class PattrnStringExtensions
     /// Attempts to match a separated string path and write values into the caller-provided destination span using explicit normalization options.
     /// </summary>
     public static bool TryMatchSeparated<TValue>(
-        this IPattrnIndex<string, TValue> index,
+        this PattrnIndex<string, TValue> index,
         string path,
         Span<TValue> destination,
         out int written,

@@ -1,6 +1,6 @@
 interface Pattrn.DependencyInjection.IPattrnProvider<TSegment, TValue>
-  Pattrn.IPattrnIndex<TSegment, TValue> GetRequired(string name)
-  bool TryGet(string name, out Pattrn.IPattrnIndex<TSegment, TValue> index)
+  Pattrn.PattrnIndex<TSegment, TValue> GetRequired(string name)
+  bool TryGet(string name, out Pattrn.PattrnIndex<TSegment, TValue> index)
 interface Pattrn.DependencyInjection.IPattrnRegistrationSource<TSegment, TValue>
   void AddRegistrations(Pattrn.DependencyInjection.PattrnRegistrationContext<TSegment, TValue> context)
 class Pattrn.DependencyInjection.PattrnRegistrationBuilder<TSegment, TValue>

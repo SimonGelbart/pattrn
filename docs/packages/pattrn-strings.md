@@ -39,7 +39,7 @@ var index = StringPattrnIndexBuilder
 var matches = index.MatchToArray("market/NASDAQ/MSFT");
 ```
 
-The older extension methods remain available when callers want to work directly with `PattrnIndexBuilder<string, TValue>` and `IPattrnIndex<string, TValue>`:
+The older extension methods remain available when callers want to work directly with `PattrnIndexBuilder<string, TValue>` and `PattrnIndex<string, TValue>`:
 
 ```csharp
 var coreIndex = PattrnIndex<string, string>

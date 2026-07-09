@@ -73,15 +73,15 @@ class Pattrn.Routing.RoutePattrnIndexBuilderExtensions
   static int RemoveAllRoute<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, Pattrn.Routing.RouteTemplate template)
   static int RemoveAllRoute<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern)
 class Pattrn.Routing.RoutePattrnIndexExtensions
-  static Pattrn.PatternMatchResult<string, TValue>[] MatchRouteDetailed<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path)
-  static Pattrn.PatternMatchResult<string, TValue>[] MatchRouteDetailedToArray<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path)
-  static TValue[] MatchRouteToArray<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path)
-  static bool TryMatchRoute<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, out int written)
-  static bool TryMatchRouteDetailed<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<string>> captures, out int matchesWritten, out int capturesWritten)
-  static int GetRouteCaptureCountUpperBound<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path)
-  static int GetRouteMatchCountUpperBound<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path)
-  static int MatchRoute<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<TValue> destination)
-  static int MatchRouteDetailed<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<string>> captures, out int capturesWritten)
+  static Pattrn.PatternMatchResult<string, TValue>[] MatchRouteDetailed<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path)
+  static Pattrn.PatternMatchResult<string, TValue>[] MatchRouteDetailedToArray<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path)
+  static TValue[] MatchRouteToArray<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path)
+  static bool TryMatchRoute<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, out int written)
+  static bool TryMatchRouteDetailed<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<string>> captures, out int matchesWritten, out int capturesWritten)
+  static int GetRouteCaptureCountUpperBound<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path)
+  static int GetRouteMatchCountUpperBound<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path)
+  static int MatchRoute<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path, System.Span<TValue> destination)
+  static int MatchRouteDetailed<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<string>> captures, out int capturesWritten)
 class Pattrn.Routing.RouteSegment
   Pattrn.Routing.RouteSegmentKind Kind { get; }
   string Literal { get; }

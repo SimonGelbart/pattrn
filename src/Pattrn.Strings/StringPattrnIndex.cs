@@ -16,7 +16,7 @@ public sealed class StringPattrnIndex<TValue>
     /// <param name="coreIndex">The underlying immutable string-segment index.</param>
     /// <param name="options">The string normalization options used by this wrapper.</param>
     public StringPattrnIndex(
-        IPattrnIndex<string, TValue> coreIndex,
+        PattrnIndex<string, TValue> coreIndex,
         StringNormalizationOptions options)
     {
         ArgumentNullException.ThrowIfNull(coreIndex);
@@ -29,7 +29,7 @@ public sealed class StringPattrnIndex<TValue>
     /// <summary>
     /// Gets the underlying generic string-segment index.
     /// </summary>
-    public IPattrnIndex<string, TValue> CoreIndex { get; }
+    public PattrnIndex<string, TValue> CoreIndex { get; }
 
     /// <summary>
     /// Gets the string normalization options applied before matching string paths.

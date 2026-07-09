@@ -30,7 +30,7 @@ The remaining main pre-beta decisions are registration DTO posture for determini
 
 #### Stable candidate
 
-- `PattrnIndex<TSegment, TValue>` and `IPattrnIndex<TSegment, TValue>` as immutable, concurrent-reader-safe compiled indexes.
+- `PattrnIndex<TSegment, TValue>` as the immutable, concurrent-reader-safe compiled index contract.
 - `PattrnIndexBuilder<TSegment, TValue>` as the single-writer mutable construction API.
 - `PatternSegment<TSegment>` and `PatternSegmentKind` for explicit literal, parameter, wildcard, and terminal catch-all segments.
 - `PatternCapture<TSegment>`, `PatternMatch<TValue>`, `PatternMatchResult<TSegment, TValue>`, `PatternMatchKind`, `Specificity`, `PatternId`, and `RegistrationOrder` metadata for detailed matches and consumer-side sorting.
@@ -39,7 +39,7 @@ The remaining main pre-beta decisions are registration DTO posture for determini
 - Span-based matching APIs: `GetMatchCountUpperBound`, `Match`, `TryMatch`, `GetCaptureCountUpperBound`, `MatchDetailed`, and `TryMatchDetailed`.
 - Materializing convenience APIs: `MatchToArray`, `MatchDetailed`, and `MatchDetailedToArray`, with allocations understood as convenience behavior.
 - Optional diagnostics and explanation APIs: `PatternDiagnostic<TSegment>`, `PatternDiagnosticKind`, `PatternDiagnosticSeverity`, `PatternMatchExplanation<TSegment, TValue>`, `PatternRejectedCandidate`, and `PatternExplanationOptions`, with stability documented in the diagnostics reference.
-- Interface extension helpers in `PattrnIndexExtensions` for `IPattrnIndex<TSegment, TValue>` consumers.
+- Extension helpers in `PattrnIndexExtensions` for `PattrnIndex<TSegment, TValue>` consumers.
 
 #### Needs follow-up decision
 
@@ -65,7 +65,7 @@ The remaining main pre-beta decisions are registration DTO posture for determini
 - `StringCaseSensitivity`, `StringEmptySegmentBehavior`, and `StringSegmentTrimBehavior` as explicit string-policy enums.
 - `StringPattrnIndexBuilder<TValue>` and `StringPattrnIndex<TValue>` as string-path builder/index facades over the core.
 - Static factory helpers on `StringPattrnIndexBuilder` and `StringNormalizationOptions` for dotted, slash, custom-separated, and tokenized builders.
-- `PattrnStringExtensions` for convenience registration and matching against `PattrnIndexBuilder<string, TValue>` and `IPattrnIndex<string, TValue>`.
+- `PattrnStringExtensions` for convenience registration and matching against `PattrnIndexBuilder<string, TValue>` and `PattrnIndex<string, TValue>`.
 
 #### Needs follow-up decision
 
