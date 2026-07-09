@@ -43,7 +43,8 @@ internal ref struct DetailedMatchWriter<TSegment, TValue>
     internal void Add(
         ReadOnlySpan<TValue> values,
         ReadOnlySpan<CompiledValueDetail> details,
-        ReadOnlySpan<CaptureDescriptor> captureDescriptors)
+        ReadOnlySpan<CaptureDescriptor> captureDescriptors,
+        int consumedSegmentCount)
     {
         if (values.IsEmpty || !_succeeded)
         {
@@ -80,7 +81,8 @@ internal ref struct DetailedMatchWriter<TSegment, TValue>
                 captureStart,
                 actualCaptureCount,
                 detail.PatternId,
-                detail.RegistrationOrder);
+                detail.RegistrationOrder,
+                consumedSegmentCount);
             _matchCount++;
         }
     }
