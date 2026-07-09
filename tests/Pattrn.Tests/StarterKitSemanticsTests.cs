@@ -15,7 +15,7 @@ public sealed class StarterKitSemanticsTests
         var prefixIndex = builder.Build(MatchOptions.Prefix);
 
         ShouldSequenceEqual(exactLengthIndex.MatchToArray(["NASDAQ", "MSFT"]), ["instrument-subscriber"]);
-        ShouldSetEqual(prefixIndex.MatchToArray(["NASDAQ", "MSFT"]), ["market-subscriber", "instrument-subscriber"]);
+        ShouldSetEqual(prefixIndex.MatchPrefixToArray(["NASDAQ", "MSFT"]), ["market-subscriber", "instrument-subscriber"]);
     }
 
     [Test]
@@ -27,9 +27,9 @@ public sealed class StarterKitSemanticsTests
 
         var index = builder.Build();
 
-        ShouldSetEqual(index.MatchToArray(["NASDAQ", "MSFT"]), ["any-market-msft", "nasdaq-msft"]);
-        ShouldSequenceEqual(index.MatchToArray(["NYSE", "MSFT"]), ["any-market-msft"]);
-        ShouldEqual(index.MatchToArray(["NYSE", "AAPL"]).Length, 0);
+        ShouldSetEqual(index.MatchPrefixToArray(["NASDAQ", "MSFT"]), ["any-market-msft", "nasdaq-msft"]);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["NYSE", "MSFT"]), ["any-market-msft"]);
+        ShouldEqual(index.MatchPrefixToArray(["NYSE", "AAPL"]).Length, 0);
     }
 
     [Test]
@@ -41,9 +41,9 @@ public sealed class StarterKitSemanticsTests
 
         var index = builder.Build();
 
-        ShouldSequenceEqual(index.MatchToArray(["NASDAQ", "MSFT"]), ["nasdaq-any-instrument"]);
-        ShouldSequenceEqual(index.MatchToArray(["NYSE", "IBM"]), ["nyse-any-instrument"]);
-        ShouldEqual(index.MatchToArray(["EURONEXT", "AIR"]).Length, 0);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["NASDAQ", "MSFT"]), ["nasdaq-any-instrument"]);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["NYSE", "IBM"]), ["nyse-any-instrument"]);
+        ShouldEqual(index.MatchPrefixToArray(["EURONEXT", "AIR"]).Length, 0);
     }
 
     [Test]
@@ -58,7 +58,7 @@ public sealed class StarterKitSemanticsTests
         var index = builder.Build(MatchOptions.Prefix);
 
         ShouldSetEqual(
-            index.MatchToArray(["NASDAQ", "MSFT"]),
+            index.MatchPrefixToArray(["NASDAQ", "MSFT"]),
             ["client-market", "client-any-nasdaq-symbol", "client-any-market-msft", "client-exact"]);
     }
 
@@ -71,8 +71,8 @@ public sealed class StarterKitSemanticsTests
 
         var index = builder.Build(MatchOptions.Prefix);
 
-        ShouldEqual(index.MatchToArray(["NASDAQ"]).Length, 0);
-        ShouldSequenceEqual(index.MatchToArray(["NASDAQ", "MSFT"]), ["two-segments"]);
+        ShouldEqual(index.MatchPrefixToArray(["NASDAQ"]).Length, 0);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["NASDAQ", "MSFT"]), ["two-segments"]);
     }
 
     [Test]
@@ -85,7 +85,7 @@ public sealed class StarterKitSemanticsTests
         var prefixIndex = builder.Build(MatchOptions.Prefix);
 
         ShouldEqual(exactLengthIndex.MatchToArray(["NASDAQ"]).Length, 0);
-        ShouldEqual(prefixIndex.MatchToArray(["NASDAQ"]).Length, 0);
+        ShouldEqual(prefixIndex.MatchPrefixToArray(["NASDAQ"]).Length, 0);
     }
 
     [Test]
@@ -96,7 +96,7 @@ public sealed class StarterKitSemanticsTests
 
         var index = builder.Build(MatchOptions.Prefix);
 
-        ShouldSequenceEqual(index.MatchToArray(["NASDAQ", "MSFT", "QUOTE"]), ["nasdaq-any-symbol-prefix"]);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["NASDAQ", "MSFT", "QUOTE"]), ["nasdaq-any-symbol-prefix"]);
     }
 
     [Test]
@@ -110,7 +110,7 @@ public sealed class StarterKitSemanticsTests
 
         ShouldSequenceEqual(exactLengthIndex.MatchToArray([]), ["root-subscription"]);
         ShouldEqual(exactLengthIndex.MatchToArray(["NASDAQ"]).Length, 0);
-        ShouldSequenceEqual(prefixIndex.MatchToArray(["NASDAQ", "MSFT"]), ["root-subscription"]);
+        ShouldSequenceEqual(prefixIndex.MatchPrefixToArray(["NASDAQ", "MSFT"]), ["root-subscription"]);
     }
 
     [Test]
@@ -123,7 +123,7 @@ public sealed class StarterKitSemanticsTests
 
         var index = builder.Build(MatchOptions.Prefix);
 
-        ShouldSequenceEqual(index.MatchToArray(["NASDAQ", "MSFT"]), ["same-client"]);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["NASDAQ", "MSFT"]), ["same-client"]);
     }
 
     [Test]
@@ -137,7 +137,7 @@ public sealed class StarterKitSemanticsTests
         var index = builder.Build(new MatchOptions(PrefixMatchMode.IncludePrefixPatterns, DuplicateValueMatchMode.PreserveDuplicates));
 
         ShouldSequenceEqual(
-            index.MatchToArray(["NASDAQ", "MSFT"]).Order(),
+            index.MatchPrefixToArray(["NASDAQ", "MSFT"]).Order(),
             ["same-client", "same-client", "same-client"]);
     }
 
@@ -152,7 +152,7 @@ public sealed class StarterKitSemanticsTests
         var index = builder.Build(MatchOptions.Prefix);
 
         ShouldSetEqual(
-            index.MatchToArray(["NASDAQ", "MSFT"]),
+            index.MatchPrefixToArray(["NASDAQ", "MSFT"]),
             ["market-subscriber", "any-nasdaq-symbol", "exact-msft"]);
     }
 }

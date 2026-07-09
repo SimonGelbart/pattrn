@@ -17,9 +17,9 @@ public sealed class CatchAllPatternTests
 
         var index = builder.Build();
 
-        ShouldSequenceEqual(index.MatchToArray(["files"]), ["handler"]);
-        ShouldSequenceEqual(index.MatchToArray(["files", "a", "b", "c.txt"]), ["handler"]);
-        ShouldSequenceEqual(index.MatchToArray(["other", "a"]), []);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["files"]), ["handler"]);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["files", "a", "b", "c.txt"]), ["handler"]);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["other", "a"]), []);
     }
 
     [Test]
@@ -151,8 +151,8 @@ public sealed class CatchAllPatternTests
             .AddPattern([PatternSegment<string>.Literal("customers"), PatternSegment<string>.Parameter("id")], "customers")
             .Build();
 
-        ShouldSequenceEqual(index.MatchToArray(["orders", "123"]), ["orders"]);
-        ShouldSequenceEqual(index.MatchToArray(["customers", "123"]), ["customers"]);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["orders", "123"]), ["orders"]);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["customers", "123"]), ["customers"]);
     }
 
     [Test]
@@ -199,6 +199,6 @@ public sealed class CatchAllPatternTests
 
         var index = builder.Build(MatchOptions.Prefix);
 
-        ShouldSetEqual(index.MatchToArray(["files"]), ["files", "catch-all"]);
+        ShouldSetEqual(index.MatchPrefixToArray(["files"]), ["files", "catch-all"]);
     }
 }

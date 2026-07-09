@@ -13,7 +13,7 @@ public sealed class ExactOnlyFastPathTests
             .Add(["root", "a", "b", "d"], 2)
             .Build();
 
-        ShouldSequenceEqual(index.MatchToArray(["root", "a", "b", "c"]), [1]);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["root", "a", "b", "c"]), [1]);
         ShouldEqual(index.GetMatchCountUpperBound(["root", "a", "b", "c"]), 1);
     }
 
@@ -26,7 +26,7 @@ public sealed class ExactOnlyFastPathTests
             .Build();
         var destination = new[] { 42 };
 
-        var succeeded = index.TryMatch(["root", "missing"], destination, out var written);
+        var succeeded = index.TryMatchPrefix(["root", "missing"], destination, out var written);
 
         ShouldEqual(written, 0);
         ShouldSequenceEqual(destination, [42]);
@@ -43,9 +43,9 @@ public sealed class ExactOnlyFastPathTests
             .Add(["root", "a", "b"], 3)
             .Add(["root", "x"], 4)
             .Build(MatchOptions.Prefix);
-        Span<int> destination = stackalloc int[index.GetMatchCountUpperBound(["root", "a", "b", "c"] )];
+        Span<int> destination = stackalloc int[index.MatchPrefixToArray(["root", "a", "b", "c"]).Length];
 
-        var succeeded = index.TryMatch(["root", "a", "b", "c"], destination, out var written);
+        var succeeded = index.TryMatchPrefix(["root", "a", "b", "c"], destination, out var written);
 
         ShouldEqual(written, 3);
         ShouldSequenceEqual(destination[..written].ToArray(), [1, 2, 3]);
@@ -60,7 +60,7 @@ public sealed class ExactOnlyFastPathTests
             .Add(["root", "a"], 2)
             .Build(MatchOptions.Prefix);
 
-        ShouldEqual(index.GetMatchCountUpperBound(["root", "a", "missing"]), 2);
-        ShouldSequenceEqual(index.MatchToArray(["root", "a", "missing"]), [1, 2]);
+        ShouldEqual(index.MatchPrefixToArray(["root", "a", "missing"]).Length, 2);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["root", "a", "missing"]), [1, 2]);
     }
 }

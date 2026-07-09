@@ -32,7 +32,7 @@ public sealed class NaiveEquivalenceTests
             for (var attempt = 0; attempt < 5; attempt++)
             {
                 var path = CreateRandomPath(random, alphabet, maxLength: 6);
-                var optimized = index.MatchToArray(path).Order().ToArray();
+                var optimized = (includePrefixMatches ? index.MatchPrefixToArray(path) : index.MatchToArray(path)).Order().ToArray();
                 var naive = MatchNaively(
                     registrations,
                     path,
@@ -85,7 +85,7 @@ public sealed class NaiveEquivalenceTests
             for (var attempt = 0; attempt < 5; attempt++)
             {
                 var path = CreateRandomPath(random, alphabet, maxLength: 5);
-                var optimized = index.MatchToArray(path);
+                var optimized = includePrefixMatches ? index.MatchPrefixToArray(path) : index.MatchToArray(path);
                 var naive = MatchNaively(
                     registrations,
                     path,

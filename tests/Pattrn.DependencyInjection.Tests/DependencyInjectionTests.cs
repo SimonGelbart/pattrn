@@ -58,7 +58,7 @@ public sealed class DependencyInjectionTests
         using var provider = services.BuildServiceProvider();
 
         var index = provider.GetRequiredService<PattrnIndex<string, string>>();
-        var matches = index.MatchToArray(["MARKET", "NASDAQ", "MSFT"]);
+        var matches = index.MatchPrefixToArray(["MARKET", "NASDAQ", "MSFT"]);
 
         await Assert.That(index.Options).IsEqualTo(MatchOptions.Prefix);
         await Assert.That(matches).IsEquivalentTo(["CLIENT-A"]);
