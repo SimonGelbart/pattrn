@@ -121,7 +121,7 @@ var matches = index.MatchToArray(["market", "NASDAQ", "MSFT"]);
 ```csharp
 var path = new[] { "market", "NASDAQ", "MSFT" };
 var destination = new string[index.GetMatchCountUpperBound(path)];
-var written = index.Match(path, destination);
+var matched = index.TryMatch(path, destination, out var written);
 ```
 
 ## Compiled index surface
@@ -130,7 +130,6 @@ var written = index.Match(path, destination);
 
 ```csharp
 int GetMatchCountUpperBound(ReadOnlySpan<TSegment> path);
-int Match(ReadOnlySpan<TSegment> path, Span<TValue> destination);
 bool TryMatch(ReadOnlySpan<TSegment> path, Span<TValue> destination, out int written);
 TValue[] MatchToArray(ReadOnlySpan<TSegment> path);
 

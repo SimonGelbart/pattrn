@@ -132,7 +132,7 @@ public class PattrnIndexBenchmarks
     [Benchmark]
     public int Trie_MatchToSpan()
     {
-        return _index.Match(_path, _valueDestination);
+        return _index.TryMatch(_path, _valueDestination, out var written) ? written : -1;
     }
 
     [Benchmark]

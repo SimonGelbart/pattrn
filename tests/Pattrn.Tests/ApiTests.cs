@@ -52,7 +52,7 @@ public sealed class ApiTests
         ReadOnlyMemory<string> path = new[] { "market", "NASDAQ", "MSFT" };
         Span<int> destination = stackalloc int[2];
 
-        var written = index.Match(path, destination);
+        var succeeded = index.TryMatch(path, destination, out var written);
 
         ShouldEqual(written, 2);
         ShouldSetEqual(destination[..written].ToArray(), [1, 2]);

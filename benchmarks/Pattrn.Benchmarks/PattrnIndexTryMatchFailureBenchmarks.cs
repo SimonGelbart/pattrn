@@ -95,7 +95,10 @@ public class PattrnIndexTryMatchFailureBenchmarks
         _valueDestination = new int[Math.Max(1, _index.GetMatchCountUpperBound(_path))];
         _insufficientValueDestination = [];
 
-        var expectedCount = _index.Match(_path, _valueDestination);
+        if (!_index.TryMatch(_path, _valueDestination, out var expectedCount))
+        {
+            throw new InvalidOperationException("Expected benchmark destination to hold all matches.");
+        }
         if (expectedCount <= _insufficientValueDestination.Length)
         {
             throw new InvalidOperationException("TryMatch failure benchmark scenario must produce more matches than the insufficient destination can hold.");

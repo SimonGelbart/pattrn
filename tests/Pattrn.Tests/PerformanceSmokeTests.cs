@@ -9,10 +9,11 @@ public sealed class PerformanceSmokeTests
     {
         var state = CreateValueMatchState();
 
-        var written = state.Index.Match(state.Path, state.Values);
+        var succeeded = state.Index.TryMatch(state.Path, state.Values, out var written);
+        ShouldBeTrue(succeeded, "Expected TryMatch to succeed when the destination is large enough.");
         ShouldEqual(written, 4);
 
-        var measured = GetAllocatedBytes(static state => state.Index.Match(state.Path, state.Values), state);
+        var measured = GetAllocatedBytes(static state => state.Index.TryMatch(state.Path, state.Values, out var written) ? written : -1, state);
 
         ShouldEqual(measured.Result, 4);
         ShouldEqual(measured.Allocated, 0L);

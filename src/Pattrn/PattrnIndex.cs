@@ -120,7 +120,7 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// Gets a path-specific upper bound for the number of values that matching this path can emit.
     /// </summary>
     /// <param name="path">The segmented input path to inspect.</param>
-    /// <returns>A safe upper bound for a destination span used with <see cref="Match(ReadOnlySpan{TSegment}, Span{TValue})"/> or <see cref="TryMatch(ReadOnlySpan{TSegment}, Span{TValue}, out int)"/>.</returns>
+    /// <returns>A safe upper bound for a destination span used with <see cref="TryMatch(ReadOnlySpan{TSegment}, Span{TValue}, out int)"/>.</returns>
     /// <remarks>
     /// This method traverses only the branches that can match <paramref name="path"/>. When deduplication is enabled, the returned value can be larger than the final emitted value count because overlapping patterns may reach the same value.
     /// </remarks>
@@ -136,25 +136,6 @@ public sealed class PattrnIndex<TSegment, TValue>
         return _includePrefixMatches
             ? CountPrefix(path)
             : CountExact(path);
-    }
-
-    /// <summary>
-    /// Matches the specified segmented path and writes matching values into the caller-provided destination span.
-    /// </summary>
-    /// <param name="path">The segmented input path to match.</param>
-    /// <param name="destination">The destination span that receives matching values.</param>
-    /// <returns>The number of values written to <paramref name="destination"/>.</returns>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="destination"/> is too small.</exception>
-    public int Match(ReadOnlySpan<TSegment> path, Span<TValue> destination)
-    {
-        if (!_hasWildcardBranches && !_includePrefixMatches)
-        {
-            return MatchExactOnlyDirect(path, destination);
-        }
-
-        var writer = new SpanMatchWriter<TValue>(destination, _deduplicateValues, _valueComparer);
-        CollectValues(path, ref writer);
-        return writer.Count;
     }
 
     /// <summary>
@@ -243,24 +224,6 @@ public sealed class PattrnIndex<TSegment, TValue>
         values.CopyTo(destination);
         written = values.Length;
         return true;
-    }
-
-    private int MatchExactOnlyDirect(ReadOnlySpan<TSegment> path, Span<TValue> destination)
-    {
-        var nodeIndex = TryDescendExactOnly(path);
-        if (nodeIndex == CompiledNode.NoNode)
-        {
-            return 0;
-        }
-
-        var values = GetValues(nodeIndex);
-        if (values.Length > destination.Length)
-        {
-            throw new ArgumentException("The destination span is too small to hold all matched values.", nameof(destination));
-        }
-
-        values.CopyTo(destination);
-        return values.Length;
     }
 
     private int MatchDetailedExactOnlyDirect(ReadOnlySpan<TSegment> path, Span<PatternMatch<TValue>> matches)
@@ -631,8 +594,7 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// <param name="options">Options controlling optional diagnostic work.</param>
     /// <returns>An explanation containing accepted detailed matches and optional rejected-candidate diagnostics.</returns>
     /// <remarks>
-    /// This method intentionally composes detailed matching and optional diagnostics. Use <see cref="Match(ReadOnlySpan{TSegment}, Span{TValue})"/>,
-    /// <see cref="TryMatch(ReadOnlySpan{TSegment}, Span{TValue}, out int)"/>, or <see cref="MatchToArray(ReadOnlySpan{TSegment})"/> for hot paths.
+    /// This method intentionally composes detailed matching and optional diagnostics. Use <see cref="TryMatch(ReadOnlySpan{TSegment}, Span{TValue}, out int)"/>, or <see cref="MatchToArray(ReadOnlySpan{TSegment})"/> for hot paths.
     /// </remarks>
     public PatternMatchExplanation<TSegment, TValue> Explain(
         ReadOnlySpan<TSegment> path,

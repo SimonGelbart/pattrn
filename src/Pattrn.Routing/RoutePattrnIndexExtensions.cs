@@ -59,7 +59,12 @@ public static class RoutePattrnIndexExtensions
         var segments = RoutePattern.RentSplitPath(path, out var count);
         try
         {
-            return index.Match(segments.AsSpan(0, count), destination);
+            if (index.TryMatch(segments.AsSpan(0, count), destination, out var written))
+            {
+                return written;
+            }
+
+            throw new ArgumentException("The destination span is too small to hold all matched values.", nameof(destination));
         }
         finally
         {

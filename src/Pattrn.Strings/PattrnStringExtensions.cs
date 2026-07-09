@@ -241,7 +241,12 @@ public static class PattrnStringExtensions
     {
         ArgumentNullException.ThrowIfNull(index);
         ArgumentNullException.ThrowIfNull(options);
-        return index.Match(options.Split(path, nameof(path)), destination);
+        if (index.TryMatch(options.Split(path, nameof(path)), destination, out var written))
+        {
+            return written;
+        }
+
+        throw new ArgumentException("The destination span is too small to hold all matched values.", nameof(destination));
     }
 
     /// <summary>

@@ -68,7 +68,7 @@ For hot paths, prefer caller-provided buffers:
 ```csharp
 var path = new[] { "market", "NASDAQ", "MSFT" };
 var buffer = new string[index.GetMatchCountUpperBound(path)];
-var written = index.Match(path, buffer);
+var matched = index.TryMatch(path, buffer, out var written);
 ```
 
 ## Generic pattern segments
