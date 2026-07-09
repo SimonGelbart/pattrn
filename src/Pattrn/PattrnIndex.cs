@@ -288,7 +288,8 @@ public sealed class PattrnIndex<TSegment, TValue>
                 captureStart: 0,
                 captureCount: 0,
                 detail.PatternId,
-                detail.RegistrationOrder);
+                detail.RegistrationOrder,
+                consumedSegmentCount: path.Length);
         }
 
         return values.Length;
@@ -584,7 +585,8 @@ public sealed class PattrnIndex<TSegment, TValue>
                 captureStart: 0,
                 captureCount: 0,
                 detail.PatternId,
-                detail.RegistrationOrder);
+                detail.RegistrationOrder,
+                consumedSegmentCount: path.Length);
         }
 
         matchesWritten = values.Length;
@@ -832,9 +834,12 @@ public sealed class PattrnIndex<TSegment, TValue>
         }
     }
 
-    private void AddDetailedValuesIncludingTerminalCatchAll(int nodeIndex, ref DetailedMatchWriter<TSegment, TValue> writer)
+    private void AddDetailedValuesIncludingTerminalCatchAll(
+        int nodeIndex,
+        ref DetailedMatchWriter<TSegment, TValue> writer,
+        int consumedSegmentCount)
     {
-        AddDetailedValues(nodeIndex, ref writer);
+        AddDetailedValues(nodeIndex, ref writer, consumedSegmentCount);
         if (!writer.Succeeded)
         {
             return;
@@ -843,7 +848,7 @@ public sealed class PattrnIndex<TSegment, TValue>
         ref readonly var node = ref _nodes[nodeIndex];
         if (node.CatchAllChild != CompiledNode.NoNode)
         {
-            AddDetailedValues(node.CatchAllChild, ref writer);
+            AddDetailedValues(node.CatchAllChild, ref writer, consumedSegmentCount);
         }
     }
 
@@ -1116,9 +1121,9 @@ public sealed class PattrnIndex<TSegment, TValue>
         }
     }
 
-    private void AddDetailedValues(int nodeIndex, ref DetailedMatchWriter<TSegment, TValue> writer)
+    private void AddDetailedValues(int nodeIndex, ref DetailedMatchWriter<TSegment, TValue> writer, int consumedSegmentCount)
     {
-        writer.Add(GetValues(nodeIndex), GetValueDetails(nodeIndex), _captureDescriptors);
+        writer.Add(GetValues(nodeIndex), GetValueDetails(nodeIndex), _captureDescriptors, consumedSegmentCount);
     }
 
     private void CollectDetailedExactOnly(ReadOnlySpan<TSegment> path, ref DetailedMatchWriter<TSegment, TValue> writer)
@@ -1126,14 +1131,14 @@ public sealed class PattrnIndex<TSegment, TValue>
         var nodeIndex = TryDescendExactOnly(path);
         if (nodeIndex != CompiledNode.NoNode)
         {
-            AddDetailedValues(nodeIndex, ref writer);
+            AddDetailedValues(nodeIndex, ref writer, path.Length);
         }
     }
 
     private void CollectPrefixDetailedExactOnly(ReadOnlySpan<TSegment> path, ref DetailedMatchWriter<TSegment, TValue> writer)
     {
         var nodeIndex = 0;
-        AddDetailedValues(nodeIndex, ref writer);
+        AddDetailedValues(nodeIndex, ref writer, 0);
         if (!writer.Succeeded)
         {
             return;
@@ -1147,7 +1152,7 @@ public sealed class PattrnIndex<TSegment, TValue>
             }
 
             nodeIndex = childNodeIndex;
-            AddDetailedValues(nodeIndex, ref writer);
+            AddDetailedValues(nodeIndex, ref writer, depth + 1);
             if (!writer.Succeeded)
             {
                 return;
@@ -1169,7 +1174,7 @@ public sealed class PattrnIndex<TSegment, TValue>
 
                 if (frame.Depth == path.Length)
                 {
-                    AddDetailedValuesIncludingTerminalCatchAll(frame.NodeIndex, ref writer);
+                    AddDetailedValuesIncludingTerminalCatchAll(frame.NodeIndex, ref writer, path.Length);
                     if (!writer.Succeeded)
                     {
                         return;
@@ -1200,7 +1205,7 @@ public sealed class PattrnIndex<TSegment, TValue>
                 var frame = stack.Pop();
                 if (frame.Depth == path.Length)
                 {
-                    AddDetailedValuesIncludingTerminalCatchAll(frame.NodeIndex, ref writer);
+                    AddDetailedValuesIncludingTerminalCatchAll(frame.NodeIndex, ref writer, path.Length);
                     if (!writer.Succeeded)
                     {
                         return;
@@ -1209,7 +1214,7 @@ public sealed class PattrnIndex<TSegment, TValue>
                     continue;
                 }
 
-                AddDetailedValues(frame.NodeIndex, ref writer);
+                AddDetailedValues(frame.NodeIndex, ref writer, frame.Depth);
                 if (!writer.Succeeded)
                 {
                     return;
