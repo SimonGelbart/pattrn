@@ -391,8 +391,8 @@ Breaking CUPID cleanup focused on a smaller, more composable product surface.
 
 ### Changed
 
-- Slimmed `IPattrnIndex<TSegment, TValue>` to hot segmented-path operations only.
-- Removed `ReadOnlyMemory<TSegment>` and `IEnumerable<TSegment>` members from the core interface and concrete index.
+- Slimmed `PattrnIndex<TSegment, TValue>` to hot segmented-path operations only.
+- Removed `ReadOnlyMemory<TSegment>` and `IEnumerable<TSegment>` members from the compiled index surface.
 - Added core extension methods for `ReadOnlyMemory<TSegment>` and `IEnumerable<TSegment>` convenience matching.
 - Moved dotted/separated string helpers out of the core package into the new `Pattrn.Strings` package.
 - Simplified `Pattrn.DependencyInjection` around the fluent registration builder.

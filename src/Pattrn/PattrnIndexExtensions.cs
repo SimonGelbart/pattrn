@@ -9,7 +9,7 @@ public static class PattrnIndexExtensions
     /// Gets a path-specific upper bound for a memory-backed path.
     /// </summary>
     public static int GetMatchCountUpperBound<TSegment, TValue>(
-        this IPattrnIndex<TSegment, TValue> index,
+        this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path)
         where TSegment : notnull
     {
@@ -21,7 +21,7 @@ public static class PattrnIndexExtensions
     /// Matches a memory-backed path and writes matching values into the caller-provided destination span.
     /// </summary>
     public static int Match<TSegment, TValue>(
-        this IPattrnIndex<TSegment, TValue> index,
+        this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path,
         Span<TValue> destination)
         where TSegment : notnull
@@ -34,7 +34,7 @@ public static class PattrnIndexExtensions
     /// Attempts to match a memory-backed path and write matching values into the caller-provided destination span.
     /// </summary>
     public static bool TryMatch<TSegment, TValue>(
-        this IPattrnIndex<TSegment, TValue> index,
+        this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path,
         Span<TValue> destination,
         out int written)
@@ -48,7 +48,7 @@ public static class PattrnIndexExtensions
     /// Gets a path-specific capture upper bound for a memory-backed path.
     /// </summary>
     public static int GetCaptureCountUpperBound<TSegment, TValue>(
-        this IPattrnIndex<TSegment, TValue> index,
+        this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path)
         where TSegment : notnull
     {
@@ -60,7 +60,7 @@ public static class PattrnIndexExtensions
     /// Matches a memory-backed path and writes detailed matches and captures into caller-provided destination spans.
     /// </summary>
     public static int MatchDetailed<TSegment, TValue>(
-        this IPattrnIndex<TSegment, TValue> index,
+        this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path,
         Span<PatternMatch<TValue>> matches,
         Span<PatternCapture<TSegment>> captures,
@@ -75,7 +75,7 @@ public static class PattrnIndexExtensions
     /// Attempts to match a memory-backed path and write detailed matches and captures into caller-provided destination spans.
     /// </summary>
     public static bool TryMatchDetailed<TSegment, TValue>(
-        this IPattrnIndex<TSegment, TValue> index,
+        this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path,
         Span<PatternMatch<TValue>> matches,
         Span<PatternCapture<TSegment>> captures,
@@ -91,7 +91,7 @@ public static class PattrnIndexExtensions
     /// Explains matching behavior for a memory-backed path using diagnostics-oriented allocation-friendly results.
     /// </summary>
     public static PatternMatchExplanation<TSegment, TValue> Explain<TSegment, TValue>(
-        this IPattrnIndex<TSegment, TValue> index,
+        this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path,
         PatternExplanationOptions options = default)
         where TSegment : notnull
@@ -104,7 +104,7 @@ public static class PattrnIndexExtensions
     /// Explains matching behavior for an enumerable path using diagnostics-oriented allocation-friendly results.
     /// </summary>
     public static PatternMatchExplanation<TSegment, TValue> Explain<TSegment, TValue>(
-        this IPattrnIndex<TSegment, TValue> index,
+        this PattrnIndex<TSegment, TValue> index,
         IEnumerable<TSegment> path,
         PatternExplanationOptions options = default)
         where TSegment : notnull
@@ -124,7 +124,7 @@ public static class PattrnIndexExtensions
     /// Matches a memory-backed path and returns detailed matches as a new array.
     /// </summary>
     public static PatternMatchResult<TSegment, TValue>[] MatchDetailed<TSegment, TValue>(
-        this IPattrnIndex<TSegment, TValue> index,
+        this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path)
         where TSegment : notnull
     {
@@ -136,7 +136,7 @@ public static class PattrnIndexExtensions
     /// Matches a memory-backed path and returns detailed matches as a new array.
     /// </summary>
     public static PatternMatchResult<TSegment, TValue>[] MatchDetailedToArray<TSegment, TValue>(
-        this IPattrnIndex<TSegment, TValue> index,
+        this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path)
         where TSegment : notnull
     {
@@ -148,7 +148,7 @@ public static class PattrnIndexExtensions
     /// Matches an enumerable path and returns detailed matches as a new array.
     /// </summary>
     public static PatternMatchResult<TSegment, TValue>[] MatchDetailed<TSegment, TValue>(
-        this IPattrnIndex<TSegment, TValue> index,
+        this PattrnIndex<TSegment, TValue> index,
         IEnumerable<TSegment> path)
         where TSegment : notnull
     {
@@ -167,7 +167,7 @@ public static class PattrnIndexExtensions
     /// Matches an enumerable path and returns detailed matches as a new array.
     /// </summary>
     public static PatternMatchResult<TSegment, TValue>[] MatchDetailedToArray<TSegment, TValue>(
-        this IPattrnIndex<TSegment, TValue> index,
+        this PattrnIndex<TSegment, TValue> index,
         IEnumerable<TSegment> path)
         where TSegment : notnull
     {
@@ -186,7 +186,7 @@ public static class PattrnIndexExtensions
     /// Matches a memory-backed path and returns matching values as a new array.
     /// </summary>
     public static TValue[] MatchToArray<TSegment, TValue>(
-        this IPattrnIndex<TSegment, TValue> index,
+        this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path)
         where TSegment : notnull
     {
@@ -198,7 +198,7 @@ public static class PattrnIndexExtensions
     /// Matches an enumerable path and returns matching values as a new array.
     /// </summary>
     public static TValue[] MatchToArray<TSegment, TValue>(
-        this IPattrnIndex<TSegment, TValue> index,
+        this PattrnIndex<TSegment, TValue> index,
         IEnumerable<TSegment> path)
         where TSegment : notnull
     {

@@ -156,7 +156,7 @@ services.AddPattrnIndex<string, string>(registration => registration
     .UseWildcard("*")
     .Configure(builder => builder.Add(["market", "NASDAQ", "*"], "client-a")));
 
-var index = provider.GetRequiredService<IPattrnIndex<string, string>>();
+var index = provider.GetRequiredService<PattrnIndex<string, string>>();
 ```
 
 ### Routing

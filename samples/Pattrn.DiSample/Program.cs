@@ -32,7 +32,7 @@ services
 
 using var provider = services.BuildServiceProvider();
 
-var defaultIndex = provider.GetRequiredService<IPattrnIndex<string, string>>();
+var defaultIndex = provider.GetRequiredService<PattrnIndex<string, string>>();
 var defaultMatches = defaultIndex.MatchToArray(["market", "NASDAQ", "MSFT"]);
 
 var indexProvider = provider.GetRequiredService<IPattrnProvider<string, string>>();

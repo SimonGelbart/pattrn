@@ -2,23 +2,23 @@ class Pattrn.PattrnStringExtensions
   static Pattrn.PattrnIndexBuilder<string, TValue> AddDotted<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, TValue value, char separator = '.', string patternId = null)
   static Pattrn.PattrnIndexBuilder<string, TValue> AddSeparated<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, TValue value, Pattrn.StringNormalizationOptions options, string patternId = null)
   static Pattrn.PattrnIndexBuilder<string, TValue> AddSeparated<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, TValue value, char separator, string patternId = null)
-  static TValue[] MatchDottedToArray<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, char separator = '.')
-  static TValue[] MatchSeparatedToArray<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, Pattrn.StringNormalizationOptions options)
-  static TValue[] MatchSeparatedToArray<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, char separator)
+  static TValue[] MatchDottedToArray<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path, char separator = '.')
+  static TValue[] MatchSeparatedToArray<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path, Pattrn.StringNormalizationOptions options)
+  static TValue[] MatchSeparatedToArray<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path, char separator)
   static bool ContainsSeparated<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, Pattrn.StringNormalizationOptions options)
   static bool ContainsSeparated<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, char separator)
   static bool RemoveDotted<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, TValue value, char separator = '.')
   static bool RemoveSeparated<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, TValue value, Pattrn.StringNormalizationOptions options)
   static bool RemoveSeparated<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, TValue value, char separator)
-  static bool TryMatchDotted<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, out int written, char separator = '.')
-  static bool TryMatchSeparated<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, out int written, Pattrn.StringNormalizationOptions options)
-  static bool TryMatchSeparated<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, out int written, char separator)
-  static int GetDottedMatchCountUpperBound<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, char separator = '.')
-  static int GetSeparatedMatchCountUpperBound<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, Pattrn.StringNormalizationOptions options)
-  static int GetSeparatedMatchCountUpperBound<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, char separator)
-  static int MatchDotted<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, char separator = '.')
-  static int MatchSeparated<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, Pattrn.StringNormalizationOptions options)
-  static int MatchSeparated<TValue>(Pattrn.IPattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, char separator)
+  static bool TryMatchDotted<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, out int written, char separator = '.')
+  static bool TryMatchSeparated<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, out int written, Pattrn.StringNormalizationOptions options)
+  static bool TryMatchSeparated<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, out int written, char separator)
+  static int GetDottedMatchCountUpperBound<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path, char separator = '.')
+  static int GetSeparatedMatchCountUpperBound<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path, Pattrn.StringNormalizationOptions options)
+  static int GetSeparatedMatchCountUpperBound<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path, char separator)
+  static int MatchDotted<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, char separator = '.')
+  static int MatchSeparated<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, Pattrn.StringNormalizationOptions options)
+  static int MatchSeparated<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, char separator)
   static int RemoveAllSeparated<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, Pattrn.StringNormalizationOptions options)
   static int RemoveAllSeparated<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern, char separator)
 struct Pattrn.StringCaseSensitivity
@@ -68,8 +68,8 @@ class Pattrn.StringPattrnIndexBuilder<TValue>
   static Pattrn.StringPattrnIndexBuilder<TValue> CreateTokenized(char separator, string wildcardSegment, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
   static Pattrn.StringPattrnIndexBuilder<TValue> CreateTokenized(string wildcardSegment, Pattrn.StringNormalizationOptions options = null, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
 class Pattrn.StringPattrnIndex<TValue>
-  .ctor(Pattrn.IPattrnIndex<string, TValue> coreIndex, Pattrn.StringNormalizationOptions options)
-  Pattrn.IPattrnIndex<string, TValue> CoreIndex { get; }
+  .ctor(Pattrn.PattrnIndex<string, TValue> coreIndex, Pattrn.StringNormalizationOptions options)
+  Pattrn.PattrnIndex<string, TValue> CoreIndex { get; }
   int MatchCountUpperBound { get; }
   Pattrn.MatchOptions MatchOptions { get; }
   Pattrn.StringNormalizationOptions Options { get; }

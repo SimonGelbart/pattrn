@@ -6,16 +6,16 @@ internal sealed class PattrnProvider<TSegment, TValue>(IServiceProvider serviceP
     : IPattrnProvider<TSegment, TValue>
     where TSegment : notnull
 {
-    public IPattrnIndex<TSegment, TValue> GetRequired(string name)
+    public PattrnIndex<TSegment, TValue> GetRequired(string name)
     {
         ThrowIfInvalidName(name);
-        return serviceProvider.GetRequiredKeyedService<IPattrnIndex<TSegment, TValue>>(name);
+        return serviceProvider.GetRequiredKeyedService<PattrnIndex<TSegment, TValue>>(name);
     }
 
-    public bool TryGet(string name, out IPattrnIndex<TSegment, TValue>? index)
+    public bool TryGet(string name, out PattrnIndex<TSegment, TValue>? index)
     {
         ThrowIfInvalidName(name);
-        index = serviceProvider.GetKeyedService<IPattrnIndex<TSegment, TValue>>(name);
+        index = serviceProvider.GetKeyedService<PattrnIndex<TSegment, TValue>>(name);
         return index is not null;
     }
 

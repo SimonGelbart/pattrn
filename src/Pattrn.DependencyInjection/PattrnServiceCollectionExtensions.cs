@@ -77,9 +77,6 @@ public static class PattrnServiceCollectionExtensions
         services.AddSingleton<PattrnIndex<TSegment, TValue>>(serviceProvider =>
             BuildIndex(serviceProvider, registration));
 
-        services.AddSingleton<IPattrnIndex<TSegment, TValue>>(
-            static serviceProvider => serviceProvider.GetRequiredService<PattrnIndex<TSegment, TValue>>());
-
         return services;
     }
 
@@ -96,9 +93,6 @@ public static class PattrnServiceCollectionExtensions
 
         services.AddKeyedSingleton<PattrnIndex<TSegment, TValue>>(name, (serviceProvider, _) =>
             BuildIndex(serviceProvider, registration));
-
-        services.AddKeyedSingleton<IPattrnIndex<TSegment, TValue>>(name, static (serviceProvider, key) =>
-            serviceProvider.GetRequiredKeyedService<PattrnIndex<TSegment, TValue>>(key));
 
         return services;
     }
@@ -118,8 +112,7 @@ public static class PattrnServiceCollectionExtensions
     {
         if (services.Any(static descriptor =>
             !descriptor.IsKeyedService &&
-            (descriptor.ServiceType == typeof(PattrnIndex<TSegment, TValue>) ||
-             descriptor.ServiceType == typeof(IPattrnIndex<TSegment, TValue>))))
+            (descriptor.ServiceType == typeof(PattrnIndex<TSegment, TValue>))))
         {
             throw new InvalidOperationException(
                 $"A default path pattern index for segment type '{typeof(TSegment).FullName}' and value type '{typeof(TValue).FullName}' is already registered.");
@@ -132,8 +125,7 @@ public static class PattrnServiceCollectionExtensions
         if (services.Any(descriptor =>
             descriptor.IsKeyedService &&
             Equals(descriptor.ServiceKey, name) &&
-            (descriptor.ServiceType == typeof(PattrnIndex<TSegment, TValue>) ||
-             descriptor.ServiceType == typeof(IPattrnIndex<TSegment, TValue>))))
+            (descriptor.ServiceType == typeof(PattrnIndex<TSegment, TValue>))))
         {
             throw new InvalidOperationException(
                 $"A named path pattern index called '{name}' for segment type '{typeof(TSegment).FullName}' and value type '{typeof(TValue).FullName}' is already registered.");

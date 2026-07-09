@@ -20,11 +20,10 @@ services.AddPattrnIndex<string, string>(registration => registration
     .Configure(builder => builder.Add(["market", "NASDAQ"], "client-a")));
 ```
 
-The compiled index is registered as a singleton for both:
+The compiled index is registered as a singleton concrete `PattrnIndex<TSegment, TValue>`:
 
 ```csharp
 PattrnIndex<TSegment, TValue>
-IPattrnIndex<TSegment, TValue>
 ```
 
 ## Named indexes
@@ -39,7 +38,7 @@ services.AddPattrnIndex<string, string>("market-data", registration => registrat
 Named indexes are registered through .NET keyed services:
 
 ```csharp
-var index = provider.GetRequiredKeyedService<IPattrnIndex<string, string>>("market-data");
+var index = provider.GetRequiredKeyedService<PattrnIndex<string, string>>("market-data");
 ```
 
 The package also provides a preview convenience provider:
