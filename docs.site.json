@@ -288,6 +288,13 @@
       "title": "ADR 0014: Builders are single-writer and compiled indexes are concurrent-reader safe",
       "section": "ADRs",
       "status": "Accepted"
+    },
+    {
+      "source": "docs/adr/0015-use-concrete-compiled-index-contract.md",
+      "route": "/adr/0015-use-concrete-compiled-index-contract/",
+      "title": "ADR 0015: Use concrete compiled index contract",
+      "section": "ADRs",
+      "status": "Accepted"
     }
   ],
   "exclude": [
