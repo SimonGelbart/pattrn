@@ -12,7 +12,7 @@ public sealed class CoreMatchingTests
 
         var index = builder.Build();
 
-        ShouldSequenceEqual(index.MatchToArray(["market", "NASDAQ", "MSFT"]), ["exact-msft"]);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["market", "NASDAQ", "MSFT"]), ["exact-msft"]);
     }
 
     [Test]
@@ -36,7 +36,7 @@ public sealed class CoreMatchingTests
 
         var index = builder.Build();
 
-        ShouldSetEqual(index.MatchToArray(["market", "NASDAQ", "MSFT"]), ["first", "middle", "last"]);
+        ShouldSetEqual(index.MatchPrefixToArray(["market", "NASDAQ", "MSFT"]), ["first", "middle", "last"]);
     }
 
     [Test]
@@ -50,7 +50,7 @@ public sealed class CoreMatchingTests
         var index = builder.Build();
 
         ShouldSetEqual(
-            index.MatchToArray(["market", "NASDAQ", "MSFT"]),
+            index.MatchPrefixToArray(["market", "NASDAQ", "MSFT"]),
             ["market-any-any", "any-nasdaq-any", "any-any-msft"]);
     }
 
@@ -64,7 +64,7 @@ public sealed class CoreMatchingTests
 
         var index = builder.Build();
 
-        ShouldSetEqual(index.MatchToArray(["market", "NASDAQ", "MSFT"]), ["exact", "any-nasdaq", "any-market-msft"]);
+        ShouldSetEqual(index.MatchPrefixToArray(["market", "NASDAQ", "MSFT"]), ["exact", "any-nasdaq", "any-market-msft"]);
     }
 
     [Test]
@@ -99,7 +99,7 @@ public sealed class CoreMatchingTests
 
         var index = builder.Build(MatchOptions.Prefix);
 
-        ShouldSetEqual(index.MatchToArray(["NASDAQ", "MSFT"]), ["nasdaq-prefix", "exact-msft"]);
+        ShouldSetEqual(index.MatchPrefixToArray(["NASDAQ", "MSFT"]), ["nasdaq-prefix", "exact-msft"]);
     }
 
     [Test]
@@ -110,7 +110,7 @@ public sealed class CoreMatchingTests
 
         var index = builder.Build(MatchOptions.Prefix);
 
-        ShouldSequenceEqual(index.MatchToArray(["NASDAQ", "MSFT"]), []);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["NASDAQ", "MSFT"]), []);
     }
 
     [Test]
@@ -121,7 +121,7 @@ public sealed class CoreMatchingTests
 
         var index = builder.Build(MatchOptions.Prefix);
 
-        ShouldSequenceEqual(index.MatchToArray(["market", "NASDAQ", "MSFT"]), ["root-prefix"]);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["market", "NASDAQ", "MSFT"]), ["root-prefix"]);
     }
 
     [Test]
@@ -132,7 +132,7 @@ public sealed class CoreMatchingTests
 
         var index = builder.Build(MatchOptions.Prefix);
 
-        ShouldSequenceEqual(index.MatchToArray(["NASDAQ"]), []);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["NASDAQ"]), []);
     }
 
     [Test]
@@ -154,7 +154,7 @@ public sealed class CoreMatchingTests
 
         var index = builder.Build(MatchOptions.Prefix);
 
-        ShouldSequenceEqual(index.MatchToArray(["NASDAQ", "MSFT", "QUOTE"]), ["nasdaq-any-prefix"]);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["NASDAQ", "MSFT", "QUOTE"]), ["nasdaq-any-prefix"]);
     }
 
     [Test]
@@ -166,7 +166,7 @@ public sealed class CoreMatchingTests
 
         var index = builder.Build();
 
-        ShouldSequenceEqual(index.MatchToArray(["market", "NASDAQ", "MSFT"]), ["same-consumer"]);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["market", "NASDAQ", "MSFT"]), ["same-consumer"]);
     }
 
     [Test]
@@ -178,7 +178,7 @@ public sealed class CoreMatchingTests
 
         var index = builder.Build(MatchOptions.PreserveDuplicates);
 
-        ShouldSequenceEqual(index.MatchToArray(["market", "NASDAQ", "MSFT"]).Order(), ["same-consumer", "same-consumer"]);
+        ShouldSequenceEqual(index.MatchPrefixToArray(["market", "NASDAQ", "MSFT"]).Order(), ["same-consumer", "same-consumer"]);
     }
 
     [Test]
@@ -191,7 +191,7 @@ public sealed class CoreMatchingTests
         var index = builder.Build();
         Span<int> destination = stackalloc int[2];
 
-        var succeeded = index.TryMatch(["market", "NASDAQ", "MSFT"], destination, out var written);
+        var succeeded = index.TryMatchPrefix(["market", "NASDAQ", "MSFT"], destination, out var written);
 
         ShouldEqual(written, 2);
         ShouldSetEqual(destination[..written].ToArray(), [1, 2]);
@@ -207,7 +207,7 @@ public sealed class CoreMatchingTests
         var index = builder.Build();
         var destination = new string[1];
 
-        var succeeded = index.TryMatch(["market", "NASDAQ", "MSFT"], destination, out var written);
+        var succeeded = index.TryMatchPrefix(["market", "NASDAQ", "MSFT"], destination, out var written);
 
         ShouldBeFalse(succeeded, "Expected TryMatch to fail instead of throwing.");
         ShouldEqual(written, 0);
@@ -226,7 +226,7 @@ public sealed class AllocationSensitiveMatchingTests
         var index = builder.Build(MatchOptions.Prefix);
         var destination = new string[1];
 
-        var succeeded = index.TryMatch(["NASDAQ", "MSFT"], destination, out var written);
+        var succeeded = index.TryMatchPrefix(["NASDAQ", "MSFT"], destination, out var written);
 
         ShouldEqual(written, 1);
         ShouldSequenceEqual(destination[..written].ToArray(), ["same-client"]);
@@ -242,7 +242,7 @@ public sealed class AllocationSensitiveMatchingTests
         var index = builder.Build(new MatchOptions(PrefixMatchMode.IncludePrefixPatterns, DuplicateValueMatchMode.PreserveDuplicates));
         var destination = new string[1];
 
-        var succeeded = index.TryMatch(["NASDAQ", "MSFT"], destination, out var written);
+        var succeeded = index.TryMatchPrefix(["NASDAQ", "MSFT"], destination, out var written);
 
         ShouldBeFalse(succeeded, "Expected TryMatch to fail when duplicate-preserving results exceed destination capacity.");
         ShouldEqual(written, 0);
@@ -278,7 +278,7 @@ public sealed class MatchCapacityTests
         var index = builder.Build(new MatchOptions(PrefixMatchMode.IncludePrefixPatterns, DuplicateValueMatchMode.PreserveDuplicates));
         var destination = new string[index.MatchCountUpperBound];
 
-        var succeeded = index.TryMatch(["market", "NASDAQ", "MSFT"], destination, out var written);
+        var succeeded = index.TryMatchPrefix(["market", "NASDAQ", "MSFT"], destination, out var written);
 
         ShouldEqual(written, index.MatchCountUpperBound);
         ShouldSetEqual(

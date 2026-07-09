@@ -32,6 +32,20 @@ public static class PattrnIndexExtensions
     }
 
     /// <summary>
+    /// Attempts to match prefix registrations for a memory-backed path and write matching values into the caller-provided destination span.
+    /// </summary>
+    public static bool TryMatchPrefix<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        ReadOnlyMemory<TSegment> path,
+        Span<TValue> destination,
+        out int written)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        return index.TryMatchPrefix(path.Span, destination, out written);
+    }
+
+    /// <summary>
     /// Gets a path-specific capture upper bound for a memory-backed path.
     /// </summary>
     public static int GetCaptureCountUpperBound<TSegment, TValue>(
@@ -179,6 +193,18 @@ public static class PattrnIndexExtensions
     {
         ArgumentNullException.ThrowIfNull(index);
         return index.MatchToArray(path.Span);
+    }
+
+    /// <summary>
+    /// Matches prefix registrations for a memory-backed path and returns matching values as a new array.
+    /// </summary>
+    public static TValue[] MatchPrefixToArray<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        ReadOnlyMemory<TSegment> path)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        return index.MatchPrefixToArray(path.Span);
     }
 
     /// <summary>

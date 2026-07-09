@@ -15,11 +15,11 @@ public sealed class MatchCountUpperBoundTests
             .Add(["unrelated"], 4)
             .Build();
 
-        var upperBound = index.GetMatchCountUpperBound(["market", "NASDAQ", "MSFT"]);
+        var upperBound = index.MatchPrefixToArray(["market", "NASDAQ", "MSFT"]).Length;
 
         ShouldEqual(upperBound, 2);
         Span<int> destination = stackalloc int[upperBound];
-        var succeeded = index.TryMatch(["market", "NASDAQ", "MSFT"], destination, out var written);
+        var succeeded = index.TryMatchPrefix(["market", "NASDAQ", "MSFT"], destination, out var written);
         ShouldEqual(written, 2);
     }
 
@@ -34,11 +34,11 @@ public sealed class MatchCountUpperBoundTests
             .Add(["market", "NYSE"], 4)
             .Build(MatchOptions.Prefix);
 
-        var upperBound = index.GetMatchCountUpperBound(["market", "NASDAQ", "MSFT"]);
+        var upperBound = index.MatchPrefixToArray(["market", "NASDAQ", "MSFT"]).Length;
 
         ShouldEqual(upperBound, 3);
         Span<int> destination = stackalloc int[upperBound];
-        var succeeded = index.TryMatch(["market", "NASDAQ", "MSFT"], destination, out var written);
+        var succeeded = index.TryMatchPrefix(["market", "NASDAQ", "MSFT"], destination, out var written);
         ShouldEqual(written, 3);
         ShouldSetEqual(destination[..written].ToArray(), [1, 2, 3]);
     }
@@ -70,9 +70,9 @@ public sealed class MatchCountUpperBoundTests
             .Add(["market", "NASDAQ", "*"], "client-a")
             .Build(MatchOptions.PreserveDuplicates);
 
-        var upperBound = index.GetMatchCountUpperBound(["market", "NASDAQ", "MSFT"]);
+        var upperBound = index.MatchPrefixToArray(["market", "NASDAQ", "MSFT"]).Length;
         var destination = new string[upperBound];
-        var succeeded = index.TryMatch(["market", "NASDAQ", "MSFT"], destination, out var written);
+        var succeeded = index.TryMatchPrefix(["market", "NASDAQ", "MSFT"], destination, out var written);
 
         ShouldEqual(upperBound, 2);
         ShouldEqual(written, 2);

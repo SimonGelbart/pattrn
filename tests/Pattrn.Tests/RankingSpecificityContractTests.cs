@@ -15,7 +15,7 @@ public sealed class RankingSpecificityContractTests
             .Add(["orders", "new"], "literal")
             .Build(MatchOptions.PreserveDuplicates);
 
-        var values = index.MatchToArray(["orders", "new"]);
+        var values = index.MatchPrefixToArray(["orders", "new"]);
         var detailed = index.MatchDetailedToArray(["orders", "new"]);
 
         ShouldSequenceEqual(values, ["literal", "parameter", "wildcard", "catch-all"]);
@@ -55,7 +55,7 @@ public sealed class RankingSpecificityContractTests
             .Add(["orders", "new"], "second", patternId: "second")
             .Build(MatchOptions.PreserveDuplicates);
 
-        var values = index.MatchToArray(["orders", "new"]);
+        var values = index.MatchPrefixToArray(["orders", "new"]);
         var matches = index.MatchDetailedToArray(["orders", "new"]);
 
         ShouldSequenceEqual(values, ["first", "second"]);
@@ -77,7 +77,7 @@ public sealed class RankingSpecificityContractTests
             .Add(["orders", "*"], "second", patternId: "second-wildcard")
             .Build(MatchOptions.PreserveDuplicates);
 
-        var values = index.MatchToArray(["orders", "42"]);
+        var values = index.MatchPrefixToArray(["orders", "42"]);
         var matches = index.MatchDetailedToArray(["orders", "42"]);
 
         ShouldSequenceEqual(values, ["first", "second"]);
@@ -103,7 +103,7 @@ public sealed class RankingSpecificityContractTests
                 patternId: "second-parameter")
             .Build(MatchOptions.PreserveDuplicates);
 
-        var values = index.MatchToArray(["orders", "42"]);
+        var values = index.MatchPrefixToArray(["orders", "42"]);
         var matches = index.MatchDetailedToArray(["orders", "42"]);
 
         ShouldSequenceEqual(values, ["first", "second"]);
@@ -143,7 +143,7 @@ public sealed class RankingSpecificityContractTests
             .Add(["api", "orders", "new"], "orders-new")
             .Build(new MatchOptions(PrefixMatchMode.IncludePrefixPatterns, DuplicateValueMatchMode.PreserveDuplicates));
 
-        var values = index.MatchToArray(["api", "orders", "new"]);
+        var values = index.MatchPrefixToArray(["api", "orders", "new"]);
         var detailed = index.MatchDetailedToArray(["api", "orders", "new"]);
 
         ShouldSequenceEqual(values, ["api-prefix", "orders-prefix", "orders-new"]);
@@ -160,7 +160,7 @@ public sealed class RankingSpecificityContractTests
             .Add(["api", "orders", "new"], "orders-new-literal", patternId: "orders-new-literal")
             .Build(new MatchOptions(PrefixMatchMode.IncludePrefixPatterns, DuplicateValueMatchMode.PreserveDuplicates));
 
-        var values = index.MatchToArray(["api", "orders", "new"]);
+        var values = index.MatchPrefixToArray(["api", "orders", "new"]);
         var detailed = index.MatchDetailedToArray(["api", "orders", "new"]);
 
         ShouldSequenceEqual(values, ["api-prefix", "orders-new-literal"]);
@@ -206,7 +206,7 @@ public sealed class RankingSpecificityContractTests
             .Add(["api", "orders", "new"], "literal")
             .Build(new MatchOptions(PrefixMatchMode.IncludePrefixPatterns, DuplicateValueMatchMode.PreserveDuplicates));
 
-        var values = index.MatchToArray(["api", "orders", "new"]);
+        var values = index.MatchPrefixToArray(["api", "orders", "new"]);
         var detailed = index.MatchDetailedToArray(["api", "orders", "new"]);
 
         ShouldSequenceEqual(values, ["literal", "parameter", "wildcard", "catch-all"]);
@@ -236,7 +236,7 @@ public sealed class RankingSpecificityContractTests
             .Add(["api", "orders", "new"], "literal")
             .Build(new MatchOptions(PrefixMatchMode.IncludePrefixPatterns, DuplicateValueMatchMode.PreserveDuplicates));
 
-        var values = index.MatchToArray(["api", "orders", "new"]);
+        var values = index.MatchPrefixToArray(["api", "orders", "new"]);
         var detailed = index.MatchDetailedToArray(["api", "orders", "new"]);
 
         ShouldSequenceEqual(values, ["orders-prefix", "literal", "parameter", "wildcard", "catch-all"]);
@@ -265,7 +265,7 @@ public sealed class RankingSpecificityContractTests
             .Add(["files", "public", "images"], "files-public-images")
             .Build(new MatchOptions(PrefixMatchMode.IncludePrefixPatterns, DuplicateValueMatchMode.PreserveDuplicates));
 
-        var values = index.MatchToArray(["files", "public", "images", "logo.png"]);
+        var values = index.MatchPrefixToArray(["files", "public", "images", "logo.png"]);
         var detailed = index.MatchDetailedToArray(["files", "public", "images", "logo.png"]);
 
         ShouldSequenceEqual(values, ["files-public", "files-public-images", "files-catch-all"]);
@@ -309,7 +309,7 @@ public sealed class RankingSpecificityContractTests
             .AddPattern([PatternSegment<string>.Literal("files"), PatternSegment<string>.CatchAll("secondPath")], "second")
             .Build(MatchOptions.PreserveDuplicates);
 
-        var values = index.MatchToArray(["files", "a", "b.txt"]);
+        var values = index.MatchPrefixToArray(["files", "a", "b.txt"]);
         var matches = index.MatchDetailedToArray(["files", "a", "b.txt"]);
 
         ShouldSequenceEqual(values, ["first", "second"]);
