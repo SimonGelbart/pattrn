@@ -34,6 +34,50 @@ public sealed class DetailedMatchTests
     }
 
     [Test]
+    public void ExactOnlyDetailedMatchReportsConsumedSegmentCount()
+    {
+        var index = PattrnIndex<string, string>
+            .Builder()
+            .AddPattern(
+                [
+                    PatternSegment<string>.Literal("orders"),
+                    PatternSegment<string>.Literal("new")
+                ],
+                "handler")
+            .Build();
+
+        var matches = new PatternMatch<string>[index.GetMatchCountUpperBound(["orders", "new"])];
+        var matchCount = index.MatchDetailed(["orders", "new"], matches, [], out var captureCount);
+
+        ShouldEqual(matchCount, 1);
+        ShouldEqual(captureCount, 0);
+        ShouldEqual(matches[0].Value, "handler");
+        ShouldEqual(matches[0].ConsumedSegmentCount, 2);
+    }
+
+    [Test]
+    public void ExactWildcardDetailedMatchesReportInputSegmentCount()
+    {
+        var index = PattrnIndex<string, string>
+            .Builder("*")
+            .Add(["orders", "new"], "literal")
+            .AddPattern([PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("id")], "parameter")
+            .Build(MatchOptions.PreserveDuplicates);
+
+        var matches = new PatternMatch<string>[index.GetMatchCountUpperBound(["orders", "new"])];
+        var captures = new PatternCapture<string>[index.GetCaptureCountUpperBound(["orders", "new"])];
+
+        var matchCount = index.MatchDetailed(["orders", "new"], matches, captures, out var captureCount);
+
+        ShouldEqual(matchCount, 2);
+        ShouldEqual(captureCount, 1);
+        ShouldSetEqual(matches[..matchCount].Select(match => match.Value), ["literal", "parameter"]);
+        ShouldBeTrue(
+            matches[..matchCount].All(match => match.ConsumedSegmentCount == 2),
+            "Exact detailed matches should consume the full input path.");
+    }
+
+    [Test]
     public void NamedParameterCaptureIncludesNameValueAndSegmentIndex()
     {
         var index = PattrnIndex<string, string>

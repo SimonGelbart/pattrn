@@ -64,9 +64,10 @@ class Pattrn.PatternMatchResult<TSegment, TValue>
   int Specificity { get; }
   TValue Value { get; }
 struct Pattrn.PatternMatch<TValue>
-  .ctor(TValue value, Pattrn.PatternMatchKind kind, int specificity, int captureStart, int captureCount, string patternId = null, int registrationOrder = -1)
+  .ctor(TValue value, Pattrn.PatternMatchKind kind, int specificity, int captureStart, int captureCount, string patternId = null, int registrationOrder = -1, int consumedSegmentCount = 0)
   int CaptureCount { get; }
   int CaptureStart { get; }
+  int ConsumedSegmentCount { get; }
   Pattrn.PatternMatchKind Kind { get; }
   string PatternId { get; }
   int RegistrationOrder { get; }
