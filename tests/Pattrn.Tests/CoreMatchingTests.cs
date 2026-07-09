@@ -191,14 +191,14 @@ public sealed class CoreMatchingTests
         var index = builder.Build();
         Span<int> destination = stackalloc int[2];
 
-        var written = index.Match(["market", "NASDAQ", "MSFT"], destination);
+        var succeeded = index.TryMatch(["market", "NASDAQ", "MSFT"], destination, out var written);
 
         ShouldEqual(written, 2);
         ShouldSetEqual(destination[..written].ToArray(), [1, 2]);
     }
 
     [Test]
-    public void CallerProvidedDestinationThrowsWhenTooSmall()
+    public void CallerProvidedDestinationReportsFailureWhenTooSmall()
     {
         var builder = PattrnIndexBuilder<string, string>.Create("*");
         builder.Add(["market", "NASDAQ", "MSFT"], "exact");
@@ -207,7 +207,10 @@ public sealed class CoreMatchingTests
         var index = builder.Build();
         var destination = new string[1];
 
-        ShouldThrow<ArgumentException>(() => index.Match(["market", "NASDAQ", "MSFT"], destination));
+        var succeeded = index.TryMatch(["market", "NASDAQ", "MSFT"], destination, out var written);
+
+        ShouldBeFalse(succeeded, "Expected TryMatch to fail instead of throwing.");
+        ShouldEqual(written, 0);
     }
 }
 
@@ -223,7 +226,7 @@ public sealed class AllocationSensitiveMatchingTests
         var index = builder.Build(MatchOptions.Prefix);
         var destination = new string[1];
 
-        var written = index.Match(["NASDAQ", "MSFT"], destination);
+        var succeeded = index.TryMatch(["NASDAQ", "MSFT"], destination, out var written);
 
         ShouldEqual(written, 1);
         ShouldSequenceEqual(destination[..written].ToArray(), ["same-client"]);
@@ -239,7 +242,10 @@ public sealed class AllocationSensitiveMatchingTests
         var index = builder.Build(new MatchOptions(PrefixMatchMode.IncludePrefixPatterns, DuplicateValueMatchMode.PreserveDuplicates));
         var destination = new string[1];
 
-        ShouldThrow<ArgumentException>(() => index.Match(["NASDAQ", "MSFT"], destination));
+        var succeeded = index.TryMatch(["NASDAQ", "MSFT"], destination, out var written);
+
+        ShouldBeFalse(succeeded, "Expected TryMatch to fail when duplicate-preserving results exceed destination capacity.");
+        ShouldEqual(written, 0);
     }
 
     [Test]
@@ -250,7 +256,7 @@ public sealed class AllocationSensitiveMatchingTests
         var index = builder.Build();
         var destination = new[] { "sentinel" };
 
-        var written = index.Match(["NYSE", "IBM"], destination);
+        var succeeded = index.TryMatch(["NYSE", "IBM"], destination, out var written);
 
         ShouldEqual(written, 0);
         ShouldSequenceEqual(destination, ["sentinel"]);
@@ -272,7 +278,7 @@ public sealed class MatchCapacityTests
         var index = builder.Build(new MatchOptions(PrefixMatchMode.IncludePrefixPatterns, DuplicateValueMatchMode.PreserveDuplicates));
         var destination = new string[index.MatchCountUpperBound];
 
-        var written = index.Match(["market", "NASDAQ", "MSFT"], destination);
+        var succeeded = index.TryMatch(["market", "NASDAQ", "MSFT"], destination, out var written);
 
         ShouldEqual(written, index.MatchCountUpperBound);
         ShouldSetEqual(

@@ -248,7 +248,7 @@ var segments = new string[segmentCount];
 var written = RoutePattern.SplitPath(path, segments);
 
 var destination = new Handler[index.GetMatchCountUpperBound(segments.AsSpan(0, written))];
-var matches = index.Match(segments.AsSpan(0, written), destination);
+var matched = index.TryMatch(segments.AsSpan(0, written), destination, out var matches);
 ```
 
 `TrySplitPath(...)` is available when a caller wants to avoid exceptions for too-small buffers. On failure, it reports `written = 0` and does not write partial segments.

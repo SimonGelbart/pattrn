@@ -77,7 +77,12 @@ public sealed class StringPattrnIndex<TValue>
     /// </summary>
     public int Match(string path, Span<TValue> destination)
     {
-        return CoreIndex.Match(Options.Split(path, nameof(path)), destination);
+        if (CoreIndex.TryMatch(Options.Split(path, nameof(path)), destination, out var written))
+        {
+            return written;
+        }
+
+        throw new ArgumentException("The destination span is too small to hold all matched values.", nameof(destination));
     }
 
     /// <summary>

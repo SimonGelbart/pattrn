@@ -19,7 +19,7 @@ public sealed class MatchCountUpperBoundTests
 
         ShouldEqual(upperBound, 2);
         Span<int> destination = stackalloc int[upperBound];
-        var written = index.Match(["market", "NASDAQ", "MSFT"], destination);
+        var succeeded = index.TryMatch(["market", "NASDAQ", "MSFT"], destination, out var written);
         ShouldEqual(written, 2);
     }
 
@@ -38,7 +38,7 @@ public sealed class MatchCountUpperBoundTests
 
         ShouldEqual(upperBound, 3);
         Span<int> destination = stackalloc int[upperBound];
-        var written = index.Match(["market", "NASDAQ", "MSFT"], destination);
+        var succeeded = index.TryMatch(["market", "NASDAQ", "MSFT"], destination, out var written);
         ShouldEqual(written, 3);
         ShouldSetEqual(destination[..written].ToArray(), [1, 2, 3]);
     }
@@ -54,7 +54,7 @@ public sealed class MatchCountUpperBoundTests
 
         var upperBound = index.GetMatchCountUpperBound(["market", "NASDAQ", "MSFT"]);
         var destination = new string[upperBound];
-        var written = index.Match(["market", "NASDAQ", "MSFT"], destination);
+        var succeeded = index.TryMatch(["market", "NASDAQ", "MSFT"], destination, out var written);
 
         ShouldEqual(upperBound, 2);
         ShouldEqual(written, 1);
@@ -72,7 +72,7 @@ public sealed class MatchCountUpperBoundTests
 
         var upperBound = index.GetMatchCountUpperBound(["market", "NASDAQ", "MSFT"]);
         var destination = new string[upperBound];
-        var written = index.Match(["market", "NASDAQ", "MSFT"], destination);
+        var succeeded = index.TryMatch(["market", "NASDAQ", "MSFT"], destination, out var written);
 
         ShouldEqual(upperBound, 2);
         ShouldEqual(written, 2);

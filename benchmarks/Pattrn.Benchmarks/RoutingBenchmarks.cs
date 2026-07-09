@@ -81,14 +81,14 @@ public class RoutingBenchmarks
     [Benchmark]
     public int RouteIndex_MatchPreSplitToSpan()
     {
-        return _index.Match(_preSplitPath, _valueDestination);
+        return _index.TryMatch(_preSplitPath, _valueDestination, out var written) ? written : -1;
     }
 
     [Benchmark]
     public int RouteIndex_MatchRouteWithCallerBufferToSpan()
     {
         var written = RoutePattern.SplitPath(_path, _splitDestination);
-        return _index.Match(_splitDestination.AsSpan(0, written), _valueDestination);
+        return _index.TryMatch(_splitDestination.AsSpan(0, written), _valueDestination, out var matches) ? matches : -1;
     }
 
     [Benchmark]

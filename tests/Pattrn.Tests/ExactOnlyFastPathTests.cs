@@ -26,7 +26,7 @@ public sealed class ExactOnlyFastPathTests
             .Build();
         var destination = new[] { 42 };
 
-        var written = index.Match(["root", "missing"], destination);
+        var succeeded = index.TryMatch(["root", "missing"], destination, out var written);
 
         ShouldEqual(written, 0);
         ShouldSequenceEqual(destination, [42]);
@@ -45,7 +45,7 @@ public sealed class ExactOnlyFastPathTests
             .Build(MatchOptions.Prefix);
         Span<int> destination = stackalloc int[index.GetMatchCountUpperBound(["root", "a", "b", "c"] )];
 
-        var written = index.Match(["root", "a", "b", "c"], destination);
+        var succeeded = index.TryMatch(["root", "a", "b", "c"], destination, out var written);
 
         ShouldEqual(written, 3);
         ShouldSequenceEqual(destination[..written].ToArray(), [1, 2, 3]);

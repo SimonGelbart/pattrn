@@ -38,7 +38,7 @@ public sealed class DuplicateHeavyMatchingTests
         var index = builder.Build();
         var destination = new int[index.MatchCountUpperBound];
 
-        var written = index.Match(["market", "M42", "S42"], destination);
+        var succeeded = index.TryMatch(["market", "M42", "S42"], destination, out var written);
 
         ShouldEqual(written, 64);
         ShouldSequenceEqual(destination[..written], Enumerable.Range(0, 64));

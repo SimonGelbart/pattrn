@@ -18,19 +18,6 @@ public static class PattrnIndexExtensions
     }
 
     /// <summary>
-    /// Matches a memory-backed path and writes matching values into the caller-provided destination span.
-    /// </summary>
-    public static int Match<TSegment, TValue>(
-        this PattrnIndex<TSegment, TValue> index,
-        ReadOnlyMemory<TSegment> path,
-        Span<TValue> destination)
-        where TSegment : notnull
-    {
-        ArgumentNullException.ThrowIfNull(index);
-        return index.Match(path.Span, destination);
-    }
-
-    /// <summary>
     /// Attempts to match a memory-backed path and write matching values into the caller-provided destination span.
     /// </summary>
     public static bool TryMatch<TSegment, TValue>(

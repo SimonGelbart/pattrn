@@ -164,7 +164,6 @@ class Pattrn.PattrnIndexExtensions
   static bool TryMatchDetailed<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<TSegment>> captures, out int matchesWritten, out int capturesWritten)
   static int GetCaptureCountUpperBound<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path)
   static int GetMatchCountUpperBound<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path)
-  static int Match<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path, System.Span<TValue> destination)
   static int MatchDetailed<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<TSegment>> captures, out int capturesWritten)
 class Pattrn.PattrnIndex<TSegment, TValue>
   int MatchCountUpperBound { get; }
@@ -179,7 +178,6 @@ class Pattrn.PattrnIndex<TSegment, TValue>
   bool TryMatchDetailed(System.ReadOnlySpan<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<TSegment>> captures, out int matchesWritten, out int capturesWritten)
   int GetCaptureCountUpperBound(System.ReadOnlySpan<TSegment> path)
   int GetMatchCountUpperBound(System.ReadOnlySpan<TSegment> path)
-  int Match(System.ReadOnlySpan<TSegment> path, System.Span<TValue> destination)
   int MatchDetailed(System.ReadOnlySpan<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<TSegment>> captures, out int capturesWritten)
   static Pattrn.PattrnIndexBuilder<TSegment, TValue> Builder(System.Collections.Generic.IEqualityComparer<TSegment> segmentComparer = null, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
   static Pattrn.PattrnIndexBuilder<TSegment, TValue> Builder(TSegment wildcardSegment, System.Collections.Generic.IEqualityComparer<TSegment> segmentComparer = null, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)

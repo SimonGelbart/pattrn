@@ -9,11 +9,12 @@ public sealed class RoutingPerformanceSmokeTests
     {
         var state = CreateValueMatchState();
 
-        var written = state.Index.Match(state.PathSegments, state.Values);
+        var succeeded = state.Index.TryMatch(state.PathSegments, state.Values, out var written);
+        ShouldBeTrue(succeeded, "Expected TryMatch to succeed when the destination is large enough.");
         ShouldEqual(written, 1);
         ShouldEqual(state.Values[0], 1);
 
-        var measured = GetAllocatedBytes(static state => state.Index.Match(state.PathSegments, state.Values), state);
+        var measured = GetAllocatedBytes(static state => state.Index.TryMatch(state.PathSegments, state.Values, out var written) ? written : -1, state);
 
         ShouldEqual(measured.Result, 1);
         ShouldEqual(state.Values[0], 1);
