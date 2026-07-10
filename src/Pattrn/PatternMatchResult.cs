@@ -49,14 +49,23 @@ public readonly record struct PatternMatchDetailed<TSegment, TValue>(
     /// <inheritdoc />
     public bool Equals(PatternMatchDetailed<TSegment, TValue> other)
     {
-        return EqualityComparer<TValue>.Default.Equals(Value, other.Value)
-            && Kind == other.Kind
-            && PatternSegmentCount == other.PatternSegmentCount
-            && ConsumedSegmentCount == other.ConsumedSegmentCount
-            && Captures.SequenceEqual(other.Captures)
-            && string.Equals(PatternId, other.PatternId, StringComparison.Ordinal)
-            && RegistrationOrder == other.RegistrationOrder
-            && Specificity == other.Specificity;
+        if (!EqualityComparer<TValue>.Default.Equals(Value, other.Value)
+            || Kind != other.Kind
+            || PatternSegmentCount != other.PatternSegmentCount
+            || ConsumedSegmentCount != other.ConsumedSegmentCount
+            || !string.Equals(PatternId, other.PatternId, StringComparison.Ordinal)
+            || RegistrationOrder != other.RegistrationOrder
+            || Specificity != other.Specificity)
+        {
+            return false;
+        }
+
+        if (Captures.IsDefault || other.Captures.IsDefault)
+        {
+            return Captures.IsDefault == other.Captures.IsDefault;
+        }
+
+        return Captures.SequenceEqual(other.Captures);
     }
 
     /// <inheritdoc />
@@ -67,9 +76,12 @@ public readonly record struct PatternMatchDetailed<TSegment, TValue>(
         hash.Add(Kind);
         hash.Add(PatternSegmentCount);
         hash.Add(ConsumedSegmentCount);
-        foreach (var capture in Captures)
+        if (!Captures.IsDefault)
         {
-            hash.Add(capture);
+            foreach (var capture in Captures)
+            {
+                hash.Add(capture);
+            }
         }
 
         hash.Add(PatternId, StringComparer.Ordinal);
