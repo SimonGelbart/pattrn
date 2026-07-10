@@ -43,7 +43,7 @@ public sealed class ExactOnlyFastPathTests
             .Add(["root", "a", "b"], 3)
             .Add(["root", "x"], 4)
             .Build(MatchOptions.Prefix);
-        Span<int> destination = stackalloc int[index.MatchPrefixToArray(["root", "a", "b", "c"]).Length];
+        Span<int> destination = stackalloc int[index.GetPrefixMatchCountUpperBound(["root", "a", "b", "c"])];
 
         var succeeded = index.TryMatchPrefix(["root", "a", "b", "c"], destination, out var written);
 
@@ -60,7 +60,7 @@ public sealed class ExactOnlyFastPathTests
             .Add(["root", "a"], 2)
             .Build(MatchOptions.Prefix);
 
-        ShouldEqual(index.MatchPrefixToArray(["root", "a", "missing"]).Length, 2);
+        ShouldEqual(index.GetPrefixMatchCountUpperBound(["root", "a", "missing"]), 2);
         ShouldSequenceEqual(index.MatchPrefixToArray(["root", "a", "missing"]), [1, 2]);
     }
 }

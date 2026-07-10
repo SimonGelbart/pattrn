@@ -18,6 +18,18 @@ public static class PattrnIndexExtensions
     }
 
     /// <summary>
+    /// Gets a path-specific prefix match upper bound for a memory-backed path.
+    /// </summary>
+    public static int GetPrefixMatchCountUpperBound<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        ReadOnlyMemory<TSegment> path)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        return index.GetPrefixMatchCountUpperBound(path.Span);
+    }
+
+    /// <summary>
     /// Attempts to match a memory-backed path and write matching values into the caller-provided destination span.
     /// </summary>
     public static bool TryMatch<TSegment, TValue>(

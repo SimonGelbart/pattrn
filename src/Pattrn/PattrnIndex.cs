@@ -132,6 +132,21 @@ public sealed class PattrnIndex<TSegment, TValue>
     }
 
     /// <summary>
+    /// Gets a path-specific upper bound for the number of prefix matching values that matching this path can emit.
+    /// </summary>
+    /// <param name="path">The segmented input path to inspect.</param>
+    /// <returns>A safe upper bound for a destination span used with <see cref="TryMatchPrefix(ReadOnlySpan{TSegment}, Span{TValue}, out int)"/>.</returns>
+    /// <remarks>
+    /// This method traverses only the prefix branches that can match <paramref name="path"/>. When deduplication is enabled, the returned value can be larger than the final emitted value count because overlapping patterns may reach the same value.
+    /// </remarks>
+    public int GetPrefixMatchCountUpperBound(ReadOnlySpan<TSegment> path)
+    {
+        return !_hasWildcardBranches
+            ? CountPrefixExactOnly(path)
+            : CountPrefix(path);
+    }
+
+    /// <summary>
     /// Attempts to match the specified segmented path and write matching values into the caller-provided destination span.
     /// </summary>
     /// <param name="path">The segmented input path to match.</param>
@@ -207,7 +222,7 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// <returns><see langword="true"/> when <paramref name="destination"/> was large enough; otherwise, <see langword="false"/>.</returns>
     public bool TryMatchPrefix(ReadOnlySpan<TSegment> path, Span<TValue> destination, out int written)
     {
-        var upperBound = !_hasWildcardBranches ? CountPrefixExactOnly(path) : CountPrefix(path);
+        var upperBound = GetPrefixMatchCountUpperBound(path);
         if (upperBound == 0)
         {
             written = 0;
