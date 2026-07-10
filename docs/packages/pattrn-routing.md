@@ -139,7 +139,7 @@ For detailed matching with caller-provided buffers:
 
 ```csharp
 var matchBuffer = new PatternMatch<string>[index.GetRouteMatchCountUpperBound("/orders/123")];
-var captureBuffer = new PatternCapture<string>[index.GetRouteCaptureCountUpperBound("/orders/123")];
+var captureBuffer = new PatternCaptureSlice<string>[index.GetRouteCaptureCountUpperBound("/orders/123")];
 
 var ok = index.TryMatchRouteDetailed(
     "/orders/123",
@@ -148,6 +148,8 @@ var ok = index.TryMatchRouteDetailed(
     out var matchesWritten,
     out var capturesWritten);
 ```
+
+`PatternCaptureSlice<string>` is non-owning. It records the capture name, start index, and segment count relative to the split route path. The string route helpers rent and return their split buffer internally, so use `MatchRouteDetailedToArray(...)` when capture values are needed directly. For allocation-conscious code that needs values, split the path into a retained buffer and call the core detailed API, as shown under [Allocation behavior](#allocation-behavior).
 
 `TryMatchRoute(...)` and `TryMatchRouteDetailed(...)` follow the same no-partial-write contract as core `Try*` APIs when buffers are too small.
 
@@ -164,20 +166,23 @@ For `/orders/{id}` matched against `/orders/123`, the capture is:
 
 ```text
 Name: id
-Value: 123
-SegmentIndex: 1
+Values: [123]
+StartSegmentIndex: 1
+SegmentCount: 1
 ```
 
-For `/files/{*path}` matched against `/files/a/b/c.txt`, the catch-all produces one capture per remaining segment:
+For `/files/{*path}` matched against `/files/a/b/c.txt`, the catch-all produces one capture:
 
 ```text
-path = a      at segment index 1
-path = b      at segment index 2
-path = c.txt  at segment index 3
+Name: path
+Values: [a, b, c.txt]
+StartSegmentIndex: 1
+SegmentCount: 3
 ```
 
-The package does not join catch-all segments into a slash-separated string. Joining is domain-specific and should be done by the caller or a higher-level adapter.
+A named catch-all that consumes no remaining segments still produces one capture with empty `Values`. An unnamed catch-all produces no capture. `PatternCapture<string>.Value` is available only for single-segment captures and throws for zero-segment or multi-segment captures.
 
+The package does not join catch-all segments into a slash-separated string. Joining is domain-specific and should be done by the caller or a higher-level adapter.
 
 ## Optional constraint validation
 
@@ -252,6 +257,17 @@ var matched = index.TryMatch(segments.AsSpan(0, written), destination, out var m
 ```
 
 `TrySplitPath(...)` is available when a caller wants to avoid exceptions for too-small buffers. On failure, it reports `written = 0` and does not write partial segments.
+
+For detailed matching, retain the same segment buffer so capture slices can be resolved without copying:
+
+```csharp
+var matches = new PatternMatch<Handler>[index.GetMatchCountUpperBound(segments.AsSpan(0, written))];
+var captures = new PatternCaptureSlice<string>[index.GetCaptureCountUpperBound(segments.AsSpan(0, written))];
+
+var matchCount = index.MatchDetailed(segments.AsSpan(0, written), matches, captures, out var captureCount);
+var firstCapture = captures[0];
+var capturedValues = segments.AsSpan(firstCapture.StartSegmentIndex, firstCapture.SegmentCount);
+```
 
 ### Pre-segment once and call the core span APIs
 
