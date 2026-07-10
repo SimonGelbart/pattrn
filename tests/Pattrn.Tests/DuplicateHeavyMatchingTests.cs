@@ -107,7 +107,7 @@ public sealed class DuplicateHeavyMatchingTests
 
         var index = builder.Build();
         var matches = new PatternMatch<int>[index.GetMatchCountUpperBound(["market", "M42", "S42"])];
-        var captures = new PatternCapture<string>[Math.Max(1, index.GetCaptureCountUpperBound(["market", "M42", "S42"]))];
+        var captures = new PatternCaptureSlice<string>[Math.Max(1, index.GetCaptureCountUpperBound(["market", "M42", "S42"]))];
 
         var matchCount = index.MatchDetailed(["market", "M42", "S42"], matches, captures, out var captureCount);
 

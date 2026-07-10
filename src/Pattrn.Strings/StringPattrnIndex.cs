@@ -107,7 +107,7 @@ public sealed class StringPattrnIndex<TValue>
     public int MatchDetailed(
         string path,
         Span<PatternMatch<TValue>> matches,
-        Span<PatternCapture<string>> captures,
+        Span<PatternCaptureSlice<string>> captures,
         out int capturesWritten)
     {
         return CoreIndex.MatchDetailed(Options.Split(path, nameof(path)), matches, captures, out capturesWritten);
@@ -119,7 +119,7 @@ public sealed class StringPattrnIndex<TValue>
     public bool TryMatchDetailed(
         string path,
         Span<PatternMatch<TValue>> matches,
-        Span<PatternCapture<string>> captures,
+        Span<PatternCaptureSlice<string>> captures,
         out int matchesWritten,
         out int capturesWritten)
     {

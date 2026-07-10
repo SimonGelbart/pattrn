@@ -16,7 +16,7 @@ public sealed class StableMatchingContractTests
 
         var index = builder.Build(MatchOptions.PreserveDuplicates);
         var matches = new PatternMatch<string>[index.GetMatchCountUpperBound(["orders", "new"] )];
-        var captures = new PatternCapture<string>[index.GetCaptureCountUpperBound(["orders", "new"] )];
+        var captures = new PatternCaptureSlice<string>[index.GetCaptureCountUpperBound(["orders", "new"] )];
 
         var matchCount = index.MatchDetailed(["orders", "new"], matches, captures, out var captureCount);
 
@@ -32,7 +32,7 @@ public sealed class StableMatchingContractTests
         ShouldEqual(parameter.PatternId, "orders-by-id");
         ShouldEqual(parameter.RegistrationOrder, 1);
         ShouldEqual(parameter.Kind, PatternMatchKind.Parameter);
-        ShouldEqual(captures[parameter.CaptureStart], new PatternCapture<string>("id", "new", 1));
+        ShouldEqual(captures[parameter.CaptureStart], new PatternCaptureSlice<string>("id", 1, 1));
     }
 
     [Test]

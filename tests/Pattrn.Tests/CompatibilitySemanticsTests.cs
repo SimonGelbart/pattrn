@@ -121,7 +121,7 @@ public sealed class CompatibilitySemanticsTests
 
         var path = new[] { "orders", "123" };
         var matches = new PatternMatch<string>[index.GetMatchCountUpperBound(path)];
-        var captures = new PatternCapture<string>[index.GetCaptureCountUpperBound(path)];
+        var captures = new PatternCaptureSlice<string>[index.GetCaptureCountUpperBound(path)];
 
         var matchCount = index.MatchDetailed(path, matches, captures, out var captureCount);
 
@@ -129,10 +129,10 @@ public sealed class CompatibilitySemanticsTests
         ShouldEqual(captureCount, 2);
         ShouldEqual(matches[0].CaptureStart, 0);
         ShouldEqual(matches[0].CaptureCount, 1);
-        ShouldEqual(captures[matches[0].CaptureStart], new PatternCapture<string>("id", "123", 1));
+        ShouldEqual(captures[matches[0].CaptureStart], new PatternCaptureSlice<string>("id", 1, 1));
         ShouldEqual(matches[1].CaptureStart, 1);
         ShouldEqual(matches[1].CaptureCount, 1);
-        ShouldEqual(captures[matches[1].CaptureStart], new PatternCapture<string>("name", "123", 1));
+        ShouldEqual(captures[matches[1].CaptureStart], new PatternCaptureSlice<string>("name", 1, 1));
     }
 
     [Test]
@@ -144,7 +144,7 @@ public sealed class CompatibilitySemanticsTests
             .Build();
 
         var matches = new PatternMatch<string>[1];
-        var captures = Array.Empty<PatternCapture<string>>();
+        var captures = Array.Empty<PatternCaptureSlice<string>>();
 
         var succeeded = index.TryMatchDetailed(["orders", "123"], matches, captures, out var matchesWritten, out var capturesWritten);
 

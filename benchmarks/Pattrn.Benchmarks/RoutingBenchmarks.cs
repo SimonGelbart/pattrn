@@ -13,7 +13,7 @@ public class RoutingBenchmarks
     private string[] _splitDestination = [];
     private int[] _valueDestination = [];
     private PatternMatch<int>[] _matchDestination = [];
-    private PatternCapture<string>[] _captureDestination = [];
+    private PatternCaptureSlice<string>[] _captureDestination = [];
 
     [Params(
         RoutingBenchmarkScenario.ParseSimple,
@@ -51,7 +51,7 @@ public class RoutingBenchmarks
         _splitDestination = new string[Math.Max(1, RoutePattern.GetPathSegmentCount(_path))];
         _valueDestination = new int[Math.Max(1, _index.GetMatchCountUpperBound(_preSplitPath))];
         _matchDestination = new PatternMatch<int>[Math.Max(1, _index.GetMatchCountUpperBound(_preSplitPath))];
-        _captureDestination = new PatternCapture<string>[Math.Max(1, _index.GetCaptureCountUpperBound(_preSplitPath))];
+        _captureDestination = new PatternCaptureSlice<string>[Math.Max(1, _index.GetCaptureCountUpperBound(_preSplitPath))];
     }
 
     [Benchmark]

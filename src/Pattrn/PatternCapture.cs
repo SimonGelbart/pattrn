@@ -18,9 +18,21 @@ public readonly record struct PatternCapture<TSegment>(string Name, ImmutableArr
     }
 
     /// <summary>
-    /// Gets the first captured input segment value.
+    /// Gets the captured value for a single-segment capture.
     /// </summary>
-    public TSegment Value => Values[0];
+    /// <exception cref="InvalidOperationException">Thrown when this capture contains zero or multiple segments. Use <see cref="Values"/> for multi-segment and zero-segment captures.</exception>
+    public TSegment Value
+    {
+        get
+        {
+            if (Values.Length != 1)
+            {
+                throw new InvalidOperationException("PatternCapture.Value is only available for single-segment captures. Use Values for zero-segment or multi-segment captures.");
+            }
+
+            return Values[0];
+        }
+    }
 
     /// <summary>
     /// Gets the zero-based input segment index where this capture starts.

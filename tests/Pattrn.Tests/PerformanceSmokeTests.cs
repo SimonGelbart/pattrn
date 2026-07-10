@@ -51,7 +51,7 @@ public sealed class PerformanceSmokeTests
     }
 
     [Test]
-    public void MatchDetailedToCallerProvidedBuffersAllocatesCaptureValueArrays()
+    public void MatchDetailedToCallerProvidedBuffersAllocatesZeroBytes()
     {
         var state = CreateDetailedMatchState();
 
@@ -68,7 +68,28 @@ public sealed class PerformanceSmokeTests
             state);
 
         ShouldEqual(measured.Result, new DetailedResult(3, 2));
-        ShouldEqual(measured.Allocated, 64L);
+        ShouldEqual(measured.Allocated, 0L);
+    }
+
+    [Test]
+    public void TryMatchDetailedToCallerProvidedBuffersAllocatesZeroBytes()
+    {
+        var state = CreateDetailedMatchState();
+
+        var succeeded = state.Index.TryMatchDetailed(state.Path, state.Matches, state.Captures, out var matchesWritten, out var capturesWritten);
+        ShouldBeTrue(succeeded, "Expected TryMatchDetailed to succeed when the destinations are large enough.");
+        ShouldEqual(new DetailedResult(matchesWritten, capturesWritten), new DetailedResult(3, 2));
+
+        var measured = GetAllocatedBytes(
+            static state =>
+            {
+                var succeeded = state.Index.TryMatchDetailed(state.Path, state.Matches, state.Captures, out var matchesWritten, out var capturesWritten);
+                return succeeded ? new DetailedResult(matchesWritten, capturesWritten) : new DetailedResult(-1, -1);
+            },
+            state);
+
+        ShouldEqual(measured.Result, new DetailedResult(3, 2));
+        ShouldEqual(measured.Allocated, 0L);
     }
 
     private static ValueMatchState CreateValueMatchState()
@@ -97,7 +118,7 @@ public sealed class PerformanceSmokeTests
         var index = builder.Build(MatchOptions.PreserveDuplicates);
         var path = new[] { "orders", "new" };
         var matches = new PatternMatch<int>[index.GetMatchCountUpperBound(path)];
-        var captures = new PatternCapture<string>[index.GetCaptureCountUpperBound(path)];
+        var captures = new PatternCaptureSlice<string>[index.GetCaptureCountUpperBound(path)];
 
         return new DetailedMatchState(index, path, matches, captures);
     }
@@ -123,7 +144,7 @@ public sealed class PerformanceSmokeTests
         PattrnIndex<string, int> Index,
         string[] Path,
         PatternMatch<int>[] Matches,
-        PatternCapture<string>[] Captures);
+        PatternCaptureSlice<string>[] Captures);
 
     private readonly record struct DetailedResult(int MatchCount, int CaptureCount);
 

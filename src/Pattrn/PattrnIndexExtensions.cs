@@ -76,7 +76,7 @@ public static class PattrnIndexExtensions
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path,
         Span<PatternMatch<TValue>> matches,
-        Span<PatternCapture<TSegment>> captures,
+        Span<PatternCaptureSlice<TSegment>> captures,
         out int capturesWritten)
         where TSegment : notnull
     {
@@ -91,7 +91,7 @@ public static class PattrnIndexExtensions
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path,
         Span<PatternMatch<TValue>> matches,
-        Span<PatternCapture<TSegment>> captures,
+        Span<PatternCaptureSlice<TSegment>> captures,
         out int matchesWritten,
         out int capturesWritten)
         where TSegment : notnull

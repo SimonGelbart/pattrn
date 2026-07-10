@@ -19,7 +19,7 @@ public sealed class DetailedMatchTests
 
         var index = builder.Build();
         var matches = new PatternMatch<string>[index.GetMatchCountUpperBound(["customers", "42", "orders", "99"] )];
-        var captures = new PatternCapture<string>[index.GetCaptureCountUpperBound(["customers", "42", "orders", "99"] )];
+        var captures = new PatternCaptureSlice<string>[index.GetCaptureCountUpperBound(["customers", "42", "orders", "99"] )];
 
         var matchCount = index.MatchDetailed(["customers", "42", "orders", "99"], matches, captures, out var captureCount);
 
@@ -29,8 +29,8 @@ public sealed class DetailedMatchTests
         ShouldEqual(matches[0].Kind, PatternMatchKind.Parameter);
         ShouldEqual(matches[0].CaptureStart, 0);
         ShouldEqual(matches[0].CaptureCount, 2);
-        ShouldEqual(captures[0], new PatternCapture<string>("customerId", "42", 1));
-        ShouldEqual(captures[1], new PatternCapture<string>("orderId", "99", 3));
+        ShouldEqual(captures[0], new PatternCaptureSlice<string>("customerId", 1, 1));
+        ShouldEqual(captures[1], new PatternCaptureSlice<string>("orderId", 3, 1));
     }
 
     [Test]
@@ -65,7 +65,7 @@ public sealed class DetailedMatchTests
             .Build(MatchOptions.PreserveDuplicates);
 
         var matches = new PatternMatch<string>[index.GetMatchCountUpperBound(["orders", "new"])];
-        var captures = new PatternCapture<string>[index.GetCaptureCountUpperBound(["orders", "new"])];
+        var captures = new PatternCaptureSlice<string>[index.GetCaptureCountUpperBound(["orders", "new"])];
 
         var matchCount = index.MatchDetailed(["orders", "new"], matches, captures, out var captureCount);
 
@@ -201,7 +201,7 @@ public sealed class DetailedMatchTests
         var index = builder.Build();
 
         var matches = Array.Empty<PatternMatch<string>>();
-        var captures = new PatternCapture<string>[1];
+        var captures = new PatternCaptureSlice<string>[1];
 
         var succeeded = index.TryMatchDetailed(["orders", "123"], matches, captures, out var matchesWritten, out var capturesWritten);
 
@@ -218,7 +218,7 @@ public sealed class DetailedMatchTests
         var index = builder.Build();
 
         var matches = new PatternMatch<string>[1];
-        var captures = Array.Empty<PatternCapture<string>>();
+        var captures = Array.Empty<PatternCaptureSlice<string>>();
 
         var succeeded = index.TryMatchDetailed(["orders", "123"], matches, captures, out var matchesWritten, out var capturesWritten);
 
@@ -237,7 +237,7 @@ public sealed class DetailedMatchTests
         var index = builder.Build(MatchOptions.PreserveDuplicates);
 
         var matches = new[] { new PatternMatch<string>("sentinel", PatternMatchKind.Exact, 100, 0, 0) };
-        var captures = new[] { new PatternCapture<string>("sentinel", "value", 0) };
+        var captures = new[] { new PatternCaptureSlice<string>("sentinel", 0, 1) };
 
         var succeeded = index.TryMatchDetailed(["orders", "123"], matches, captures, out var matchesWritten, out var capturesWritten);
 
@@ -245,7 +245,7 @@ public sealed class DetailedMatchTests
         ShouldEqual(matchesWritten, 0);
         ShouldEqual(capturesWritten, 0);
         ShouldEqual(matches[0].Value, "sentinel");
-        ShouldEqual(captures[0], new PatternCapture<string>("sentinel", "value", 0));
+        ShouldEqual(captures[0], new PatternCaptureSlice<string>("sentinel", 0, 1));
     }
 
     [Test]
@@ -256,7 +256,7 @@ public sealed class DetailedMatchTests
         var index = builder.Build();
 
         var matches = new[] { new PatternMatch<string>("sentinel", PatternMatchKind.Exact, 100, 0, 0) };
-        var captures = new[] { new PatternCapture<string>("sentinel", "value", 0) };
+        var captures = new[] { new PatternCaptureSlice<string>("sentinel", 0, 1) };
 
         var succeeded = index.TryMatchDetailed(["orders", "123"], matches, [], out var matchesWritten, out var capturesWritten);
 
@@ -264,7 +264,7 @@ public sealed class DetailedMatchTests
         ShouldEqual(matchesWritten, 0);
         ShouldEqual(capturesWritten, 0);
         ShouldEqual(matches[0].Value, "sentinel");
-        ShouldEqual(captures[0], new PatternCapture<string>("sentinel", "value", 0));
+        ShouldEqual(captures[0], new PatternCaptureSlice<string>("sentinel", 0, 1));
     }
 
     [Test]
@@ -314,4 +314,67 @@ public sealed class DetailedMatchTests
         ShouldEqual(items.Captures.Length, 1);
         ShouldEqual(items.Captures[0], new PatternCapture<string>("id", "123", 1));
     }
+
+    [Test]
+    public void SingleSegmentCaptureValueReturnsOnlyValue()
+    {
+        var match = PattrnIndex<string, string>
+            .Builder("*")
+            .AddPattern([PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("id")], "handler")
+            .Build()
+            .MatchDetailedToArray(["orders", "123"])
+            .Single();
+
+        ShouldEqual(match.Captures[0].Value, "123");
+    }
+
+    [Test]
+    public void MultiSegmentCatchAllCaptureValueThrows()
+    {
+        var match = PattrnIndex<string, string>
+            .Builder("*")
+            .AddPattern([PatternSegment<string>.Literal("files"), PatternSegment<string>.CatchAll("path")], "handler")
+            .Build()
+            .MatchDetailedToArray(["files", "a", "b"])
+            .Single();
+
+        ShouldThrow<InvalidOperationException>(() => _ = match.Captures[0].Value);
+    }
+
+    [Test]
+    public void ZeroSegmentCatchAllCaptureValueThrows()
+    {
+        var match = PattrnIndex<string, string>
+            .Builder("*")
+            .AddPattern([PatternSegment<string>.Literal("files"), PatternSegment<string>.CatchAll("path")], "handler")
+            .Build()
+            .MatchDetailedToArray(["files"])
+            .Single();
+
+        ShouldThrow<InvalidOperationException>(() => _ = match.Captures[0].Value);
+    }
+
+    [Test]
+    public void PatternMatchDetailedUsesContentEqualityForCapturesAndMetadata()
+    {
+        var index = PattrnIndex<string, string>
+            .Builder("*")
+            .AddPattern([PatternSegment<string>.Literal("files"), PatternSegment<string>.CatchAll("path")], "handler", patternId: "files-path")
+            .Build();
+
+        var first = index.MatchDetailedToArray(["files", "a", "b"]).Single();
+        var second = index.MatchDetailedToArray(["files", "a", "b"]).Single();
+        var changedCapture = second with
+        {
+            Captures = [new PatternCapture<string>("path", ["a"], 1)]
+        };
+        var changedMetadata = second with { RegistrationOrder = second.RegistrationOrder + 1 };
+
+        ShouldBeTrue(first.Equals(second), "Expected content-equal detailed matches to compare equal.");
+        ShouldBeTrue(first == second, "Expected equality operator to use content equality.");
+        ShouldEqual(first.GetHashCode(), second.GetHashCode());
+        ShouldBeFalse(first.Equals(changedCapture), "Expected changed capture content to make detailed matches unequal.");
+        ShouldBeFalse(first.Equals(changedMetadata), "Expected changed metadata to make detailed matches unequal.");
+    }
+
 }

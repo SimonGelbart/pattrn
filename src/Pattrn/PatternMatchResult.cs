@@ -45,4 +45,36 @@ public readonly record struct PatternMatchDetailed<TSegment, TValue>(
     /// Gets the specificity score assigned to the pattern.
     /// </summary>
     public int Specificity { get; init; }
+
+    /// <inheritdoc />
+    public bool Equals(PatternMatchDetailed<TSegment, TValue> other)
+    {
+        return EqualityComparer<TValue>.Default.Equals(Value, other.Value)
+            && Kind == other.Kind
+            && PatternSegmentCount == other.PatternSegmentCount
+            && ConsumedSegmentCount == other.ConsumedSegmentCount
+            && Captures.SequenceEqual(other.Captures)
+            && string.Equals(PatternId, other.PatternId, StringComparison.Ordinal)
+            && RegistrationOrder == other.RegistrationOrder
+            && Specificity == other.Specificity;
+    }
+
+    /// <inheritdoc />
+    public override int GetHashCode()
+    {
+        var hash = new HashCode();
+        hash.Add(Value);
+        hash.Add(Kind);
+        hash.Add(PatternSegmentCount);
+        hash.Add(ConsumedSegmentCount);
+        foreach (var capture in Captures)
+        {
+            hash.Add(capture);
+        }
+
+        hash.Add(PatternId, StringComparer.Ordinal);
+        hash.Add(RegistrationOrder);
+        hash.Add(Specificity);
+        return hash.ToHashCode();
+    }
 }

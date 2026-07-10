@@ -4,6 +4,15 @@ This file is the public release-history record.
 
 The `3.0.0-alpha.*` entries below are preserved as **historical pre-beta chronology**. Current pre-beta versioning and roadmap policy are defined by [ADR 0012](docs/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones.md) and the current [roadmap](docs/roadmap.md).
 
+## Unreleased
+
+Detailed result and generic capture model update.
+
+- Added `PatternMatchDetailed<TSegment, TValue>` as the allocating detailed result model with `PatternSegmentCount`, `ConsumedSegmentCount`, and owning `PatternCapture<TSegment>` values.
+- Changed allocating detailed captures so each named pattern segment produces one capture. Named catch-all captures now store all consumed segments in `PatternCapture<TSegment>.Values`, including empty `Values` for zero-segment catch-all matches.
+- Added `PatternCaptureSlice<TSegment>` for caller-buffer detailed APIs so `MatchDetailed(...)` and `TryMatchDetailed(...)` remain zero-allocation when buffers are sufficiently sized.
+- Documented `PatternCapture<TSegment>.Value` as single-segment-only; it throws for zero-segment and multi-segment captures.
+
 ## 3.0.0-alpha.31
 
 Performance guardrails and speed triage update.

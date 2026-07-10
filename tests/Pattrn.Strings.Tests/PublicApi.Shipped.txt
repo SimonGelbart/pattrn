@@ -79,9 +79,9 @@ class Pattrn.StringPattrnIndex<TValue>
   Pattrn.PatternMatchExplanation<string, TValue> Explain(string path, Pattrn.PatternExplanationOptions options = default)
   TValue[] MatchToArray(string path)
   bool TryMatch(string path, System.Span<TValue> destination, out int written)
-  bool TryMatchDetailed(string path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<string>> captures, out int matchesWritten, out int capturesWritten)
+  bool TryMatchDetailed(string path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCaptureSlice<string>> captures, out int matchesWritten, out int capturesWritten)
   int GetCaptureCountUpperBound(string path)
   int GetMatchCountUpperBound(string path)
   int Match(string path, System.Span<TValue> destination)
-  int MatchDetailed(string path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<string>> captures, out int capturesWritten)
+  int MatchDetailed(string path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCaptureSlice<string>> captures, out int capturesWritten)
 struct Pattrn.StringSegmentTrimBehavior
