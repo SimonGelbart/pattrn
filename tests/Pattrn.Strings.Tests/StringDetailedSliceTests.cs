@@ -1,4 +1,4 @@
-using static Pattrn.Strings.Tests.TestAssertions;
+using static Pattrn.Tests.TestAssertions;
 
 namespace Pattrn.Strings.Tests;
 
