@@ -73,7 +73,6 @@ class Pattrn.Routing.RoutePattrnIndexBuilderExtensions
   static int RemoveAllRoute<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, Pattrn.Routing.RouteTemplate template)
   static int RemoveAllRoute<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern)
 class Pattrn.Routing.RoutePattrnIndexExtensions
-  static Pattrn.PatternMatchResult<string, TValue>[] MatchRouteDetailed<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path)
   static Pattrn.PatternMatchResult<string, TValue>[] MatchRouteDetailedToArray<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path)
   static TValue[] MatchRouteToArray<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path)
   static bool TryMatchRoute<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, out int written)

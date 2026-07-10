@@ -160,25 +160,6 @@ public static class RoutePattrnIndexExtensions
     /// <summary>
     /// Matches a route-like runtime path and returns detailed matches in a new array.
     /// </summary>
-    public static PatternMatchResult<string, TValue>[] MatchRouteDetailed<TValue>(
-        this PattrnIndex<string, TValue> index,
-        string path)
-    {
-        ArgumentNullException.ThrowIfNull(index);
-        var segments = RoutePattern.RentSplitPath(path, out var count);
-        try
-        {
-            return index.MatchDetailed(segments.AsSpan(0, count));
-        }
-        finally
-        {
-            RoutePattern.ReturnSplitPath(segments, count);
-        }
-    }
-
-    /// <summary>
-    /// Matches a route-like runtime path and returns detailed matches in a new array.
-    /// </summary>
     public static PatternMatchResult<string, TValue>[] MatchRouteDetailedToArray<TValue>(
         this PattrnIndex<string, TValue> index,
         string path)

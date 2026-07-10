@@ -37,7 +37,7 @@ The remaining main pre-beta decisions are registration DTO posture for determini
 - `MatchOptions`, `PrefixMatchMode`, and `DuplicateValueMatchMode` for stable match-time behavior.
 - `DuplicatePatternRegistrationBehavior` for build-time duplicate registration policy.
 - Span-based matching APIs: `GetMatchCountUpperBound`, `Match`, `TryMatch`, `GetCaptureCountUpperBound`, `MatchDetailed`, and `TryMatchDetailed`.
-- Materializing convenience APIs: `MatchToArray`, `MatchDetailed`, and `MatchDetailedToArray`, with allocations understood as convenience behavior.
+- Materializing convenience APIs: `MatchToArray` and `MatchDetailedToArray`, with allocations understood as convenience behavior.
 - Optional diagnostics and explanation APIs: `PatternDiagnostic<TSegment>`, `PatternDiagnosticKind`, `PatternDiagnosticSeverity`, `PatternMatchExplanation<TSegment, TValue>`, `PatternRejectedCandidate`, and `PatternExplanationOptions`, with stability documented in the diagnostics reference.
 - Extension helpers in `PattrnIndexExtensions` for `PattrnIndex<TSegment, TValue>` consumers.
 

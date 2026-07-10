@@ -134,14 +134,6 @@ public sealed class StringPattrnIndex<TValue>
     /// <summary>
     /// Matches a normalized string path and returns detailed matches as a new array.
     /// </summary>
-    public PatternMatchResult<string, TValue>[] MatchDetailed(string path)
-    {
-        return CoreIndex.MatchDetailed(Options.Split(path, nameof(path)));
-    }
-
-    /// <summary>
-    /// Matches a normalized string path and returns detailed matches as a new array.
-    /// </summary>
     public PatternMatchResult<string, TValue>[] MatchDetailedToArray(string path)
     {
         return CoreIndex.MatchDetailedToArray(Options.Split(path, nameof(path)));

@@ -275,7 +275,7 @@ public sealed class DetailedMatchTests
         builder.AddPattern([PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("id")], "handler");
         var index = builder.Build();
 
-        var matches = index.MatchDetailed(["orders", "123"]);
+        var matches = index.MatchDetailedToArray(["orders", "123"]);
 
         ShouldEqual(matches.Length, 1);
         ShouldEqual(matches[0].Value, "handler");

@@ -191,8 +191,8 @@ public sealed class RoutePatternTests
         builder.AddRoute("/archive/{year:int}/{month:int=6}/{day:int?}", "archive", patternId: "archive-template");
         var index = builder.Build();
 
-        var shortMatches = index.MatchDetailed(RoutePattern.SplitPath("/archive/2026"));
-        var fullMatches = index.MatchDetailed(RoutePattern.SplitPath("/archive/2026/7/14"));
+        var shortMatches = index.MatchDetailedToArray(RoutePattern.SplitPath("/archive/2026"));
+        var fullMatches = index.MatchDetailedToArray(RoutePattern.SplitPath("/archive/2026/7/14"));
 
         ShouldEqual(shortMatches.Length, 1);
         ShouldEqual(shortMatches[0].PatternId, "archive-template");

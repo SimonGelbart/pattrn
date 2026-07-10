@@ -154,8 +154,6 @@ class Pattrn.PattrnIndexBuilder<TSegment, TValue>
 class Pattrn.PattrnIndexExtensions
   static Pattrn.PatternMatchExplanation<TSegment, TValue> Explain<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.Collections.Generic.IEnumerable<TSegment> path, Pattrn.PatternExplanationOptions options = default)
   static Pattrn.PatternMatchExplanation<TSegment, TValue> Explain<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path, Pattrn.PatternExplanationOptions options = default)
-  static Pattrn.PatternMatchResult<TSegment, TValue>[] MatchDetailed<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.Collections.Generic.IEnumerable<TSegment> path)
-  static Pattrn.PatternMatchResult<TSegment, TValue>[] MatchDetailed<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path)
   static Pattrn.PatternMatchResult<TSegment, TValue>[] MatchDetailedToArray<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.Collections.Generic.IEnumerable<TSegment> path)
   static Pattrn.PatternMatchResult<TSegment, TValue>[] MatchDetailedToArray<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path)
   static TValue[] MatchPrefixToArray<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path)
@@ -174,7 +172,6 @@ class Pattrn.PattrnIndex<TSegment, TValue>
   int PatternCount { get; }
   int RegistrationCount { get; }
   Pattrn.PatternMatchExplanation<TSegment, TValue> Explain(System.ReadOnlySpan<TSegment> path, Pattrn.PatternExplanationOptions options = default)
-  Pattrn.PatternMatchResult<TSegment, TValue>[] MatchDetailed(System.ReadOnlySpan<TSegment> path)
   Pattrn.PatternMatchResult<TSegment, TValue>[] MatchDetailedToArray(System.ReadOnlySpan<TSegment> path)
   TValue[] MatchPrefixToArray(System.ReadOnlySpan<TSegment> path)
   TValue[] MatchToArray(System.ReadOnlySpan<TSegment> path)
