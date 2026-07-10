@@ -102,6 +102,23 @@ var detailed = index.MatchDetailedToArray("market.NASDAQ.MSFT.QUOTE");
 
 Use this path when wildcard, parameter, or catch-all intent should be explicit instead of encoded with a reserved token.
 
+## Detailed matches and capture slices
+
+`MatchDetailedToArray(...)` returns owning `PatternMatchDetailed<string, TValue>` results. Each named parameter or catch-all produces one `PatternCapture<string>`; a catch-all stores all consumed segments in `Values`.
+
+The caller-buffer `MatchDetailed(...)` and `TryMatchDetailed(...)` methods return non-owning `PatternCaptureSlice<string>` entries. A slice identifies the capture range in the normalized segment sequence by `StartSegmentIndex` and `SegmentCount`. Because the facade performs splitting internally, use the allocating detailed method when capture values are needed directly. For allocation-conscious code, retain the normalized segments and call the core index:
+
+```csharp
+const string path = "market.NASDAQ.MSFT.QUOTE";
+var segments = index.Options.Split(path);
+var matches = new PatternMatch<string>[index.CoreIndex.GetMatchCountUpperBound(segments)];
+var captures = new PatternCaptureSlice<string>[index.CoreIndex.GetCaptureCountUpperBound(segments)];
+
+var matchCount = index.CoreIndex.MatchDetailed(segments, matches, captures, out var captureCount);
+var catchAll = captures[1];
+var capturedValues = segments.AsSpan(catchAll.StartSegmentIndex, catchAll.SegmentCount);
+```
+
 ## Trimming and Native AOT
 
 `Pattrn.Strings` is supported for trimming and Native AOT when validated with the repository AOT compatibility harness. The package uses explicit string splitting and normalization before delegating to the core matcher. Consuming applications remain responsible for validating their own custom normalization delegates and surrounding dependencies. See [trimming and Native AOT compatibility](../reference/aot-trimming.md) for validation scope, commands, warning policy, and limits.
