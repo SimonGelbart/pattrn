@@ -75,8 +75,8 @@ class Pattrn.StringPattrnIndex<TValue>
   Pattrn.StringNormalizationOptions Options { get; }
   int PatternCount { get; }
   int RegistrationCount { get; }
+  Pattrn.PatternMatchDetailed<string, TValue>[] MatchDetailedToArray(string path)
   Pattrn.PatternMatchExplanation<string, TValue> Explain(string path, Pattrn.PatternExplanationOptions options = default)
-  Pattrn.PatternMatchResult<string, TValue>[] MatchDetailedToArray(string path)
   TValue[] MatchToArray(string path)
   bool TryMatch(string path, System.Span<TValue> destination, out int written)
   bool TryMatchDetailed(string path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<string>> captures, out int matchesWritten, out int capturesWritten)

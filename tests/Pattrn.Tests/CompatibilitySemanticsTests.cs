@@ -50,8 +50,7 @@ public sealed class CompatibilitySemanticsTests
             [
                 new PatternCapture<string>("customerId", "42", 1),
                 new PatternCapture<string>("orderId", "99", 3),
-                new PatternCapture<string>("tail", "items", 4),
-                new PatternCapture<string>("tail", "7", 5)
+                new PatternCapture<string>("tail", ["items", "7"], 4)
             ]);
     }
 
@@ -67,14 +66,13 @@ public sealed class CompatibilitySemanticsTests
         var manyRemainder = index.MatchDetailedToArray(["files", "a", "b", "c.txt"]);
 
         ShouldEqual(emptyRemainder.Length, 1);
-        ShouldEqual(emptyRemainder[0].Captures.Count, 0);
+        ShouldEqual(emptyRemainder[0].Captures.Length, 1);
+        ShouldEqual(emptyRemainder[0].Captures[0], new PatternCapture<string>("path", [], 1));
         ShouldEqual(manyRemainder.Length, 1);
         ShouldSequenceEqual(
             manyRemainder[0].Captures,
             [
-                new PatternCapture<string>("path", "a", 1),
-                new PatternCapture<string>("path", "b", 2),
-                new PatternCapture<string>("path", "c.txt", 3)
+                new PatternCapture<string>("path", ["a", "b", "c.txt"], 1)
             ]);
     }
 

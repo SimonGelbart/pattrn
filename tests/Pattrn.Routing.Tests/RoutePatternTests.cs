@@ -196,12 +196,12 @@ public sealed class RoutePatternTests
 
         ShouldEqual(shortMatches.Length, 1);
         ShouldEqual(shortMatches[0].PatternId, "archive-template");
-        ShouldEqual(shortMatches[0].Captures.Count, 1);
+        ShouldEqual(shortMatches[0].Captures.Length, 1);
         ShouldEqual(shortMatches[0].Captures[0].Name, "year");
 
         ShouldEqual(fullMatches.Length, 1);
         ShouldEqual(fullMatches[0].PatternId, "archive-template");
-        ShouldEqual(fullMatches[0].Captures.Count, 3);
+        ShouldEqual(fullMatches[0].Captures.Length, 3);
         ShouldEqual(fullMatches[0].Captures[2].Name, "day");
     }
 

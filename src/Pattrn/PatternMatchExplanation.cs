@@ -14,7 +14,7 @@ public sealed class PatternMatchExplanation<TSegment, TValue>
 {
     internal PatternMatchExplanation(
         TSegment[] path,
-        PatternMatchResult<TSegment, TValue>[] matches,
+        PatternMatchDetailed<TSegment, TValue>[] matches,
         PatternRejectedCandidate[] rejectedCandidates,
         MatchOptions matchOptions,
         PatternExplanationOptions explanationOptions,
@@ -38,7 +38,7 @@ public sealed class PatternMatchExplanation<TSegment, TValue>
     /// <summary>
     /// Gets the accepted detailed matches for the input path.
     /// </summary>
-    public IReadOnlyList<PatternMatchResult<TSegment, TValue>> Matches { get; }
+    public IReadOnlyList<PatternMatchDetailed<TSegment, TValue>> Matches { get; }
 
     /// <summary>
     /// Gets diagnostic rejected-branch hints, when requested through <see cref="PatternExplanationOptions.IncludeRejectedCandidates"/>.

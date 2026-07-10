@@ -314,7 +314,8 @@ public sealed class PattrnIndex<TSegment, TValue>
                 captureCount: 0,
                 detail.PatternId,
                 detail.RegistrationOrder,
-                consumedSegmentCount: path.Length);
+                consumedSegmentCount: path.Length,
+                patternSegmentCount: detail.PatternSegmentCount);
         }
 
         return values.Length;
@@ -525,7 +526,7 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// </summary>
     /// <param name="path">The segmented input path to match.</param>
     /// <returns>An array containing all detailed matches.</returns>
-    public PatternMatchResult<TSegment, TValue>[] MatchDetailedToArray(ReadOnlySpan<TSegment> path)
+    public PatternMatchDetailed<TSegment, TValue>[] MatchDetailedToArray(ReadOnlySpan<TSegment> path)
     {
         if (!_hasWildcardBranches && !_includePrefixMatches)
         {
@@ -550,7 +551,7 @@ public sealed class PattrnIndex<TSegment, TValue>
             return [];
         }
 
-        var results = new PatternMatchResult<TSegment, TValue>[matchCount];
+        var results = new PatternMatchDetailed<TSegment, TValue>[matchCount];
         for (var i = 0; i < matchCount; i++)
         {
             var match = matches[i];
@@ -560,13 +561,15 @@ public sealed class PattrnIndex<TSegment, TValue>
                 captures.AsSpan(match.CaptureStart, match.CaptureCount).CopyTo(matchCaptures);
             }
 
-            results[i] = new PatternMatchResult<TSegment, TValue>(
+            results[i] = new PatternMatchDetailed<TSegment, TValue>(
                 match.Value,
+                match.Kind,
+                match.PatternSegmentCount,
+                match.ConsumedSegmentCount,
+                [.. matchCaptures],
                 match.PatternId,
                 match.RegistrationOrder,
-                match.Kind,
-                match.Specificity,
-                matchCaptures);
+                match.Specificity);
         }
 
         return results;
@@ -603,14 +606,15 @@ public sealed class PattrnIndex<TSegment, TValue>
                 captureCount: 0,
                 detail.PatternId,
                 detail.RegistrationOrder,
-                consumedSegmentCount: path.Length);
+                consumedSegmentCount: path.Length,
+                patternSegmentCount: detail.PatternSegmentCount);
         }
 
         matchesWritten = values.Length;
         return true;
     }
 
-    private PatternMatchResult<TSegment, TValue>[] MatchDetailedExactOnlyToArray(ReadOnlySpan<TSegment> path)
+    private PatternMatchDetailed<TSegment, TValue>[] MatchDetailedExactOnlyToArray(ReadOnlySpan<TSegment> path)
     {
         var nodeIndex = TryDescendExactOnly(path);
         if (nodeIndex == CompiledNode.NoNode)
@@ -625,17 +629,19 @@ public sealed class PattrnIndex<TSegment, TValue>
         }
 
         var details = GetValueDetails(nodeIndex);
-        var results = new PatternMatchResult<TSegment, TValue>[values.Length];
+        var results = new PatternMatchDetailed<TSegment, TValue>[values.Length];
         for (var i = 0; i < values.Length; i++)
         {
             ref readonly var detail = ref details[i];
-            results[i] = new PatternMatchResult<TSegment, TValue>(
+            results[i] = new PatternMatchDetailed<TSegment, TValue>(
                 values[i],
+                detail.Kind,
+                detail.PatternSegmentCount,
+                path.Length,
+                [],
                 detail.PatternId,
                 detail.RegistrationOrder,
-                detail.Kind,
-                detail.Score,
-                []);
+                detail.Score);
         }
 
         return results;
@@ -791,11 +797,7 @@ public sealed class PattrnIndex<TSegment, TValue>
         for (var i = 0; i < details.Length; i++)
         {
             ref readonly var detail = ref details[i];
-            for (var j = 0; j < detail.CaptureCount; j++)
-            {
-                ref readonly var descriptor = ref _captureDescriptors[detail.FirstCapture + j];
-                count += descriptor.IsCatchAll ? Math.Max(0, pathLength - descriptor.SegmentIndex) : 1;
-            }
+            count += detail.CaptureCount;
         }
 
         return count;

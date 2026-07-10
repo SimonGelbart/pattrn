@@ -28,7 +28,7 @@ public sealed class RoutePatternExtensionTests
 
         ShouldEqual(matches.Length, 1);
         ShouldEqual(matches[0].Value, "handler");
-        ShouldEqual(matches[0].Captures.Count, 2);
+        ShouldEqual(matches[0].Captures.Length, 2);
         ShouldEqual(matches[0].Captures[0], new PatternCapture<string>("customerId", "42", 1));
         ShouldEqual(matches[0].Captures[1], new PatternCapture<string>("orderId", "99", 3));
     }
@@ -46,10 +46,8 @@ public sealed class RoutePatternExtensionTests
         ShouldEqual(matches.Length, 1);
         ShouldEqual(matches[0].Value, "file-handler");
         ShouldEqual(matches[0].Kind, PatternMatchKind.CatchAll);
-        ShouldEqual(matches[0].Captures.Count, 3);
-        ShouldEqual(matches[0].Captures[0], new PatternCapture<string>("path", "a", 1));
-        ShouldEqual(matches[0].Captures[1], new PatternCapture<string>("path", "b", 2));
-        ShouldEqual(matches[0].Captures[2], new PatternCapture<string>("path", "c.txt", 3));
+        ShouldEqual(matches[0].Captures.Length, 1);
+        ShouldEqual(matches[0].Captures[0], new PatternCapture<string>("path", ["a", "b", "c.txt"], 1));
     }
 
     [Test]

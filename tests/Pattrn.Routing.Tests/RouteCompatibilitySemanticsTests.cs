@@ -35,9 +35,7 @@ public sealed class RouteCompatibilitySemanticsTests
         ShouldSequenceEqual(
             matches[0].Captures,
             [
-                new PatternCapture<string>("path", "a", 1),
-                new PatternCapture<string>("path", "b%20c", 2),
-                new PatternCapture<string>("path", "d.txt", 3)
+                new PatternCapture<string>("path", ["a", "b%20c", "d.txt"], 1)
             ]);
     }
 

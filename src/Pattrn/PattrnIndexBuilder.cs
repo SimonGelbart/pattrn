@@ -222,7 +222,7 @@ public sealed class PattrnIndexBuilder<TSegment, TValue>
         }
 
         var kind = hasWildcard ? PatternMatchKind.Wildcard : PatternMatchKind.Exact;
-        AddRegistration(node, value, new BuilderRegistrationMetadata([], kind, score, patternId));
+        AddRegistration(node, value, new BuilderRegistrationMetadata([], kind, score, pattern.Length, patternId));
         return this;
     }
 
@@ -295,7 +295,7 @@ public sealed class PattrnIndexBuilder<TSegment, TValue>
         }
 
         var kind = GetMatchKind(hasParameter, hasWildcard, hasCatchAll);
-        AddRegistration(node, value, new BuilderRegistrationMetadata([.. captures], kind, score, patternId));
+        AddRegistration(node, value, new BuilderRegistrationMetadata([.. captures], kind, score, pattern.Length, patternId));
         return this;
     }
 

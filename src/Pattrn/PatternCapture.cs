@@ -1,72 +1,56 @@
+using System.Collections.Immutable;
+
 namespace Pattrn;
 
 /// <summary>
-/// Describes one named segment captured while matching a generic pattern.
+/// Describes one named capture produced while matching a generic pattern.
 /// </summary>
 /// <typeparam name="TSegment">The segment type used by registered patterns and incoming paths.</typeparam>
-public readonly struct PatternCapture<TSegment> : IEquatable<PatternCapture<TSegment>>
+public readonly record struct PatternCapture<TSegment>(string Name, ImmutableArray<TSegment> Values, int StartSegmentIndex)
     where TSegment : notnull
 {
     /// <summary>
-    /// Initializes a new captured segment value.
+    /// Initializes a new single-segment capture.
     /// </summary>
-    /// <param name="name">The parameter name assigned by the registered pattern.</param>
-    /// <param name="value">The input segment value captured for the parameter.</param>
-    /// <param name="segmentIndex">The zero-based input segment index captured for the parameter.</param>
-    public PatternCapture(string name, TSegment value, int segmentIndex)
+    public PatternCapture(string name, TSegment value, int startSegmentIndex)
+        : this(name, ImmutableArray.Create(value), startSegmentIndex)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        ArgumentNullException.ThrowIfNull(value);
-
-        if (segmentIndex < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(segmentIndex), segmentIndex, "Segment index must be non-negative.");
-        }
-
-        Name = name;
-        Value = value;
-        SegmentIndex = segmentIndex;
     }
 
     /// <summary>
-    /// Gets the parameter name assigned by the registered pattern.
+    /// Gets the first captured input segment value.
     /// </summary>
-    public string Name { get; }
+    public TSegment Value => Values[0];
 
     /// <summary>
-    /// Gets the input segment value captured for the parameter.
+    /// Gets the zero-based input segment index where this capture starts.
     /// </summary>
-    public TSegment Value { get; }
+    public int SegmentIndex => StartSegmentIndex;
 
     /// <summary>
-    /// Gets the zero-based input segment index captured for the parameter.
+    /// Gets the number of input segments captured by this capture.
     /// </summary>
-    public int SegmentIndex { get; }
+    public int SegmentCount => Values.Length;
 
     /// <inheritdoc />
     public bool Equals(PatternCapture<TSegment> other)
     {
         return string.Equals(Name, other.Name, StringComparison.Ordinal)
-            && EqualityComparer<TSegment>.Default.Equals(Value, other.Value)
-            && SegmentIndex == other.SegmentIndex;
+            && Values.SequenceEqual(other.Values)
+            && StartSegmentIndex == other.StartSegmentIndex;
     }
 
     /// <inheritdoc />
-    public override bool Equals(object? obj) => obj is PatternCapture<TSegment> other && Equals(other);
+    public override int GetHashCode()
+    {
+        var hash = new HashCode();
+        hash.Add(Name, StringComparer.Ordinal);
+        foreach (var value in Values)
+        {
+            hash.Add(value);
+        }
 
-    /// <inheritdoc />
-    public override int GetHashCode() => HashCode.Combine(StringComparer.Ordinal.GetHashCode(Name), Value, SegmentIndex);
-
-    /// <inheritdoc />
-    public override string ToString() => Name + "=" + (Value?.ToString() ?? string.Empty);
-
-    /// <summary>
-    /// Compares two captures for equality.
-    /// </summary>
-    public static bool operator ==(PatternCapture<TSegment> left, PatternCapture<TSegment> right) => left.Equals(right);
-
-    /// <summary>
-    /// Compares two captures for inequality.
-    /// </summary>
-    public static bool operator !=(PatternCapture<TSegment> left, PatternCapture<TSegment> right) => !left.Equals(right);
+        hash.Add(StartSegmentIndex);
+        return hash.ToHashCode();
+    }
 }

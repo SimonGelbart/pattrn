@@ -276,9 +276,7 @@ public sealed class RankingSpecificityContractTests
         ShouldSequenceEqual(
             detailed[2].Captures,
             [
-                new PatternCapture<string>("path", "public", 1),
-                new PatternCapture<string>("path", "images", 2),
-                new PatternCapture<string>("path", "logo.png", 3)
+                new PatternCapture<string>("path", ["public", "images", "logo.png"], 1)
             ]);
     }
 
@@ -296,7 +294,8 @@ public sealed class RankingSpecificityContractTests
         ShouldSequenceEqual(matches.Select(match => match.Value), ["files-root", "files-catch-all"]);
         ShouldEqual(matches[0].Kind, PatternMatchKind.Exact);
         ShouldEqual(matches[1].Kind, PatternMatchKind.CatchAll);
-        ShouldEqual(matches[1].Captures.Count, 0);
+        ShouldEqual(matches[1].Captures.Length, 1);
+        ShouldEqual(matches[1].Captures[0], new PatternCapture<string>("path", [], 1));
     }
 
     [Test]
@@ -319,9 +318,9 @@ public sealed class RankingSpecificityContractTests
         ShouldEqual(matches[1].RegistrationOrder, 1);
         ShouldSequenceEqual(
             matches[0].Captures,
-            [new PatternCapture<string>("firstPath", "a", 1), new PatternCapture<string>("firstPath", "b.txt", 2)]);
+            [new PatternCapture<string>("firstPath", ["a", "b.txt"], 1)]);
         ShouldSequenceEqual(
             matches[1].Captures,
-            [new PatternCapture<string>("secondPath", "a", 1), new PatternCapture<string>("secondPath", "b.txt", 2)]);
+            [new PatternCapture<string>("secondPath", ["a", "b.txt"], 1)]);
     }
 }

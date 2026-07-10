@@ -265,8 +265,9 @@ public sealed class StringPattrnIndexBuilderFacadeTests
 
         ShouldEqual(match.Value, "handler");
         ShouldEqual(match.PatternId, "market-handler");
-        ShouldSequenceEqual(match.Captures.Select(capture => capture.Name).ToArray(), ["exchange", "symbol", "symbol"]);
-        ShouldSequenceEqual(match.Captures.Select(capture => capture.Value).ToArray(), ["NASDAQ", "MSFT", "QUOTE"]);
+        ShouldSequenceEqual(match.Captures.Select(capture => capture.Name).ToArray(), ["exchange", "symbol"]);
+        ShouldSequenceEqual(match.Captures[0].Values, ["NASDAQ"]);
+        ShouldSequenceEqual(match.Captures[1].Values, ["MSFT", "QUOTE"]);
     }
 
     [Test]

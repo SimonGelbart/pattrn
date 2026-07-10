@@ -94,7 +94,7 @@ public sealed class RouteTemplate
     /// <param name="options">Optional route constraint validation options.</param>
     /// <returns>The route constraint validation result.</returns>
     public RouteConstraintValidationResult ValidateConstraints<TValue>(
-        PatternMatchResult<string, TValue> match,
+        PatternMatchDetailed<string, TValue> match,
         RouteConstraintValidationOptions? options = null)
     {
         return RouteConstraintValidation.Validate(this, match, options);

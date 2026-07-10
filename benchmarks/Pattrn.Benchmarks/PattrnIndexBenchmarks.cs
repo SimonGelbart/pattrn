@@ -155,7 +155,7 @@ public class PattrnIndexBenchmarks
     }
 
     [Benchmark]
-    public PatternMatchResult<string, int>[] Trie_MatchDetailedToArray()
+    public PatternMatchDetailed<string, int>[] Trie_MatchDetailedToArray()
     {
         return _index.MatchDetailedToArray(_path);
     }

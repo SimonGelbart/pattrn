@@ -137,8 +137,7 @@ public sealed class DetailedMatchTests
             matches[0].Captures,
             [
                 new PatternCapture<string>("bucket", "public", 1),
-                new PatternCapture<string>("path", "a", 2),
-                new PatternCapture<string>("path", "b.txt", 3)
+                new PatternCapture<string>("path", ["a", "b.txt"], 2)
             ]);
     }
 
@@ -172,7 +171,7 @@ public sealed class DetailedMatchTests
 
         ShouldEqual(matches.Length, 1);
         ShouldEqual(matches[0].Kind, PatternMatchKind.Wildcard);
-        ShouldEqual(matches[0].Captures.Count, 0);
+        ShouldEqual(matches[0].Captures.Length, 0);
     }
 
     [Test]
@@ -293,7 +292,7 @@ public sealed class DetailedMatchTests
 
         ShouldEqual(matches.Length, 1);
         ShouldEqual(matches[0].Value, "handler");
-        ShouldEqual(matches[0].Captures.Count, 1);
+        ShouldEqual(matches[0].Captures.Length, 1);
         ShouldEqual(matches[0].Captures[0], new PatternCapture<string>("id", "123", 1));
     }
 
@@ -310,9 +309,9 @@ public sealed class DetailedMatchTests
         ShouldSetEqual(matches.Select(match => match.Value), ["order", "items"]);
         var order = matches.Single(match => match.Value == "order");
         var items = matches.Single(match => match.Value == "items");
-        ShouldEqual(order.Captures.Count, 1);
+        ShouldEqual(order.Captures.Length, 1);
         ShouldEqual(order.Captures[0], new PatternCapture<string>("id", "123", 1));
-        ShouldEqual(items.Captures.Count, 1);
+        ShouldEqual(items.Captures.Length, 1);
         ShouldEqual(items.Captures[0], new PatternCapture<string>("id", "123", 1));
     }
 }

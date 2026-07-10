@@ -21,6 +21,7 @@ public readonly struct PatternMatch<TValue> : IEquatable<PatternMatch<TValue>>
     /// <param name="patternId">The optional caller-provided pattern identity associated with the matched registration.</param>
     /// <param name="registrationOrder">The zero-based order assigned when the registration was accepted by the builder, or <c>-1</c> for manually created descriptors.</param>
     /// <param name="consumedSegmentCount">The number of input segments consumed by this match.</param>
+    /// <param name="patternSegmentCount">The number of segments in the pattern that produced the match.</param>
     public PatternMatch(
         TValue value,
         PatternMatchKind kind,
@@ -29,7 +30,8 @@ public readonly struct PatternMatch<TValue> : IEquatable<PatternMatch<TValue>>
         int captureCount,
         string? patternId = null,
         int registrationOrder = -1,
-        int consumedSegmentCount = 0)
+        int consumedSegmentCount = 0,
+        int patternSegmentCount = 0)
     {
         if (captureStart < 0)
         {
@@ -51,6 +53,11 @@ public readonly struct PatternMatch<TValue> : IEquatable<PatternMatch<TValue>>
             throw new ArgumentOutOfRangeException(nameof(consumedSegmentCount), consumedSegmentCount, "Consumed segment count must be non-negative.");
         }
 
+        if (patternSegmentCount < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(patternSegmentCount), patternSegmentCount, "Pattern segment count must be non-negative.");
+        }
+
         Value = value;
         Kind = kind;
         Specificity = specificity;
@@ -59,6 +66,7 @@ public readonly struct PatternMatch<TValue> : IEquatable<PatternMatch<TValue>>
         PatternId = patternId;
         RegistrationOrder = registrationOrder;
         ConsumedSegmentCount = consumedSegmentCount;
+        PatternSegmentCount = patternSegmentCount;
     }
 
     /// <summary>
@@ -83,6 +91,11 @@ public readonly struct PatternMatch<TValue> : IEquatable<PatternMatch<TValue>>
     /// Gets the number of input segments consumed by this match.
     /// </summary>
     public int ConsumedSegmentCount { get; }
+
+    /// <summary>
+    /// Gets the number of segments in the pattern that produced the match.
+    /// </summary>
+    public int PatternSegmentCount { get; }
 
     /// <summary>
     /// Gets the shape of the pattern that produced the match.
@@ -111,6 +124,7 @@ public readonly struct PatternMatch<TValue> : IEquatable<PatternMatch<TValue>>
             && string.Equals(PatternId, other.PatternId, StringComparison.Ordinal)
             && RegistrationOrder == other.RegistrationOrder
             && ConsumedSegmentCount == other.ConsumedSegmentCount
+            && PatternSegmentCount == other.PatternSegmentCount
             && Kind == other.Kind
             && Specificity == other.Specificity
             && CaptureStart == other.CaptureStart
@@ -128,6 +142,7 @@ public readonly struct PatternMatch<TValue> : IEquatable<PatternMatch<TValue>>
         hash.Add(PatternId, StringComparer.Ordinal);
         hash.Add(RegistrationOrder);
         hash.Add(ConsumedSegmentCount);
+        hash.Add(PatternSegmentCount);
         hash.Add(Kind);
         hash.Add(Specificity);
         hash.Add(CaptureStart);
