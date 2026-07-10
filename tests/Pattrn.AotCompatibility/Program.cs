@@ -27,7 +27,10 @@ static void RunCoreSmoke()
     RequireContains(index.MatchToArray(["market", "NASDAQ", "AAPL"]), "wildcard", "wildcard match");
 
     var catchAllMatch = index.MatchDetailedToArray(["files", "a", "b", "c.txt"]).Single(match => match.Value == "catch-all");
-    Require(catchAllMatch.Captures.Length == 3, "catch-all capture count");
+    Require(catchAllMatch.Captures.Length == 1, "catch-all capture count");
+    Require(
+        catchAllMatch.Captures[0].Values.SequenceEqual(["a", "b", "c.txt"]),
+        "catch-all capture values");
 
     var explanation = index.Explain(["orders", "42"]);
     Require(explanation.Matches.Any(match => match.Value == "parameter"), "explain accepted match");

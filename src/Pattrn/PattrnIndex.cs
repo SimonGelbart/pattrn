@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Collections.Immutable;
 
 namespace Pattrn;
 
@@ -385,7 +386,7 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// Gets a path-specific upper bound for the number of named captures that detailed matching this path can emit.
     /// </summary>
     /// <param name="path">The segmented input path to inspect.</param>
-    /// <returns>A safe upper bound for a capture destination span used with <see cref="MatchDetailed(ReadOnlySpan{TSegment}, Span{PatternMatch{TValue}}, Span{PatternCapture{TSegment}}, out int)"/>.</returns>
+    /// <returns>A safe upper bound for a capture destination span used with <see cref="MatchDetailed(ReadOnlySpan{TSegment}, Span{PatternMatch{TValue}}, Span{PatternCaptureSlice{TSegment}}, out int)"/>.</returns>
     public int GetCaptureCountUpperBound(ReadOnlySpan<TSegment> path)
     {
         if (!_hasWildcardBranches)
@@ -410,7 +411,7 @@ public sealed class PattrnIndex<TSegment, TValue>
     public int MatchDetailed(
         ReadOnlySpan<TSegment> path,
         Span<PatternMatch<TValue>> matches,
-        Span<PatternCapture<TSegment>> captures,
+        Span<PatternCaptureSlice<TSegment>> captures,
         out int capturesWritten)
     {
         if (!_hasWildcardBranches && !_includePrefixMatches)
@@ -443,7 +444,7 @@ public sealed class PattrnIndex<TSegment, TValue>
     public bool TryMatchDetailed(
         ReadOnlySpan<TSegment> path,
         Span<PatternMatch<TValue>> matches,
-        Span<PatternCapture<TSegment>> captures,
+        Span<PatternCaptureSlice<TSegment>> captures,
         out int matchesWritten,
         out int capturesWritten)
     {
@@ -487,7 +488,7 @@ public sealed class PattrnIndex<TSegment, TValue>
         }
 
         var rentedMatches = ArrayPool<PatternMatch<TValue>>.Shared.Rent(matchUpperBound);
-        var rentedCaptures = ArrayPool<PatternCapture<TSegment>>.Shared.Rent(Math.Max(1, captureUpperBound));
+        var rentedCaptures = ArrayPool<PatternCaptureSlice<TSegment>>.Shared.Rent(Math.Max(1, captureUpperBound));
         try
         {
             var temporaryMatches = rentedMatches.AsSpan(0, matchUpperBound);
@@ -517,7 +518,7 @@ public sealed class PattrnIndex<TSegment, TValue>
         finally
         {
             ArrayPool<PatternMatch<TValue>>.Shared.Return(rentedMatches, clearArray: true);
-            ArrayPool<PatternCapture<TSegment>>.Shared.Return(rentedCaptures, clearArray: true);
+            ArrayPool<PatternCaptureSlice<TSegment>>.Shared.Return(rentedCaptures, clearArray: true);
         }
     }
 
@@ -542,7 +543,7 @@ public sealed class PattrnIndex<TSegment, TValue>
         }
 
         var matches = new PatternMatch<TValue>[matchUpperBound];
-        var captures = new PatternCapture<TSegment>[captureUpperBound];
+        var captures = new PatternCaptureSlice<TSegment>[captureUpperBound];
         var matchCount = MatchDetailed(path, matches, captures, out var captureCount);
         _ = captureCount;
 
@@ -556,9 +557,13 @@ public sealed class PattrnIndex<TSegment, TValue>
         {
             var match = matches[i];
             var matchCaptures = new PatternCapture<TSegment>[match.CaptureCount];
-            if (match.CaptureCount > 0)
+            for (var captureIndex = 0; captureIndex < match.CaptureCount; captureIndex++)
             {
-                captures.AsSpan(match.CaptureStart, match.CaptureCount).CopyTo(matchCaptures);
+                var capture = captures[match.CaptureStart + captureIndex];
+                matchCaptures[captureIndex] = new PatternCapture<TSegment>(
+                    capture.Name,
+                    ImmutableArray.Create(path.Slice(capture.StartSegmentIndex, capture.SegmentCount)),
+                    capture.StartSegmentIndex);
             }
 
             results[i] = new PatternMatchDetailed<TSegment, TValue>(

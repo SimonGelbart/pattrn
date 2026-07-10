@@ -119,7 +119,7 @@ public static class RoutePattrnIndexExtensions
         this PattrnIndex<string, TValue> index,
         string path,
         Span<PatternMatch<TValue>> matches,
-        Span<PatternCapture<string>> captures,
+        Span<PatternCaptureSlice<string>> captures,
         out int capturesWritten)
     {
         ArgumentNullException.ThrowIfNull(index);
@@ -141,7 +141,7 @@ public static class RoutePattrnIndexExtensions
         this PattrnIndex<string, TValue> index,
         string path,
         Span<PatternMatch<TValue>> matches,
-        Span<PatternCapture<string>> captures,
+        Span<PatternCaptureSlice<string>> captures,
         out int matchesWritten,
         out int capturesWritten)
     {

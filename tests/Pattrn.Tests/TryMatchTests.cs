@@ -130,7 +130,7 @@ public sealed class TryMatchTests
             .Add(["market", "NASDAQ", "MSFT"], "client-a")
             .Build();
         var matches = new PatternMatch<string>[1];
-        Span<PatternCapture<string>> captures = [];
+        Span<PatternCaptureSlice<string>> captures = [];
 
         var succeeded = index.TryMatchDetailed(["market", "NASDAQ", "MSFT"], matches, captures, out var matchesWritten, out var capturesWritten);
 

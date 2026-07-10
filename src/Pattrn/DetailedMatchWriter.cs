@@ -1,5 +1,3 @@
-using System.Collections.Immutable;
-
 namespace Pattrn;
 
 internal ref struct DetailedMatchWriter<TSegment, TValue>
@@ -8,7 +6,7 @@ internal ref struct DetailedMatchWriter<TSegment, TValue>
     private const int OrderedBlockDedupThreshold = 8;
 
     private readonly Span<PatternMatch<TValue>> _matches;
-    private readonly Span<PatternCapture<TSegment>> _captures;
+    private readonly Span<PatternCaptureSlice<TSegment>> _captures;
     private readonly ReadOnlySpan<TSegment> _path;
     private readonly bool _deduplicateValues;
     private readonly IEqualityComparer<TValue> _valueComparer;
@@ -19,7 +17,7 @@ internal ref struct DetailedMatchWriter<TSegment, TValue>
 
     internal DetailedMatchWriter(
         Span<PatternMatch<TValue>> matches,
-        Span<PatternCapture<TSegment>> captures,
+        Span<PatternCaptureSlice<TSegment>> captures,
         ReadOnlySpan<TSegment> path,
         bool deduplicateValues,
         IEqualityComparer<TValue> valueComparer,
@@ -102,18 +100,18 @@ internal ref struct DetailedMatchWriter<TSegment, TValue>
             ref readonly var descriptor = ref captureDescriptors[detail.FirstCapture + i];
             if (descriptor.IsCatchAll)
             {
-                _captures[_captureCount] = new PatternCapture<TSegment>(
+                _captures[_captureCount] = new PatternCaptureSlice<TSegment>(
                     descriptor.Name,
-                    ImmutableArray.Create(_path[descriptor.SegmentIndex..]),
-                    descriptor.SegmentIndex);
+                    descriptor.SegmentIndex,
+                    _path.Length - descriptor.SegmentIndex);
                 _captureCount++;
                 continue;
             }
 
-            _captures[_captureCount] = new PatternCapture<TSegment>(
+            _captures[_captureCount] = new PatternCaptureSlice<TSegment>(
                 descriptor.Name,
-                ImmutableArray.Create(_path[descriptor.SegmentIndex]),
-                descriptor.SegmentIndex);
+                descriptor.SegmentIndex,
+                1);
             _captureCount++;
         }
     }

@@ -122,7 +122,7 @@ builder.AddPattern(
     "file-handler");
 ```
 
-Named catch-alls return one `PatternCapture<TSegment>` per captured segment. String joining, URL decoding, optional route syntax, and constraint parsing belong in companion packages.
+Named catch-alls return one `PatternCapture<TSegment>` whose `Values` contains all captured segments; a zero-segment named catch-all has empty `Values`. `PatternCapture.Value` is single-segment-only and throws for zero-segment or multi-segment captures. Caller-buffer detailed APIs use `PatternCaptureSlice<TSegment>` to preserve zero-allocation matching when buffers are sufficient. String joining, URL decoding, optional route syntax, and constraint parsing belong in companion packages.
 
 ## Trimming and Native AOT
 

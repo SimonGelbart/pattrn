@@ -23,7 +23,7 @@ literal
 
 This ordering follows the compiled traversal: exact literal children are visited before wildcard/parameter children, and catch-all branches are emitted last for the same node.
 
-`PatternMatch<TValue>.Specificity` and `PatternMatchResult<TSegment, TValue>.Specificity` expose the generic specificity value used to compare these broad categories. Higher values are more specific. The current numeric weights are implementation details, but the ordering above is compatibility-covered. See [ranking and specificity](ranking-specificity.md) for the full contract.
+`PatternMatch<TValue>.Specificity` and `PatternMatchDetailed<TSegment, TValue>.Specificity` expose the generic specificity value used to compare these broad categories. Higher values are more specific. The current numeric weights are implementation details, but the ordering above is compatibility-covered. See [ranking and specificity](ranking-specificity.md) for the full contract.
 
 ## Captures
 
@@ -31,9 +31,9 @@ Named captures are emitted in pattern order.
 
 For a named single-segment parameter, one capture is emitted with the input segment value and its zero-based input segment index.
 
-For a named terminal catch-all, one capture is emitted for each remaining input segment. The core does not concatenate these values and does not apply string or route normalization.
+For allocating detailed results, each named pattern segment emits one `PatternCapture<TSegment>` in pattern order. A named single-segment parameter has one value in `Values`. A named terminal catch-all emits one capture whose `Values` contains all remaining input segments. The core does not concatenate these values and does not apply string or route normalization.
 
-A terminal catch-all can match an empty remainder. In that case the detailed match is emitted with zero captures for the catch-all name.
+A terminal catch-all can match an empty remainder. In that case a named catch-all capture is emitted with empty `Values`; an unnamed catch-all still produces no capture. Caller-buffer detailed APIs use non-owning `PatternCaptureSlice<TSegment>` entries and remain zero-allocation when caller-provided buffers are sufficient.
 
 ## Duplicate-pattern behavior
 

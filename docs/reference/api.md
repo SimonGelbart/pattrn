@@ -137,15 +137,15 @@ int GetCaptureCountUpperBound(ReadOnlySpan<TSegment> path);
 int MatchDetailed(
     ReadOnlySpan<TSegment> path,
     Span<PatternMatch<TValue>> matches,
-    Span<PatternCapture<TSegment>> captures,
+    Span<PatternCaptureSlice<TSegment>> captures,
     out int capturesWritten);
 bool TryMatchDetailed(
     ReadOnlySpan<TSegment> path,
     Span<PatternMatch<TValue>> matches,
-    Span<PatternCapture<TSegment>> captures,
+    Span<PatternCaptureSlice<TSegment>> captures,
     out int matchesWritten,
     out int capturesWritten);
-PatternMatchResult<TSegment, TValue>[] MatchDetailedToArray(ReadOnlySpan<TSegment> path);
+PatternMatchDetailed<TSegment, TValue>[] MatchDetailedToArray(ReadOnlySpan<TSegment> path);
 
 PatternMatchExplanation<TSegment, TValue> Explain(
     ReadOnlySpan<TSegment> path,
@@ -248,7 +248,7 @@ Use the detailed APIs when you need match metadata, pattern identity, registrati
 ```csharp
 var path = new[] { "orders", "123" };
 var matches = new PatternMatch<string>[index.GetMatchCountUpperBound(path)];
-var captures = new PatternCapture<string>[index.GetCaptureCountUpperBound(path)];
+var captures = new PatternCaptureSlice<string>[index.GetCaptureCountUpperBound(path)];
 
 var written = index.MatchDetailed(path, matches, captures, out var capturesWritten);
 
@@ -258,9 +258,11 @@ var registrationOrder = first.RegistrationOrder;
 var firstCaptures = captures.AsSpan(first.CaptureStart, first.CaptureCount);
 ```
 
-`MatchDetailedToArray(...)` is the allocating detailed convenience API and creates per-match capture arrays. Keep latency-sensitive read paths on `Match` or `MatchDetailed` with caller-provided buffers, or use `TryMatchDetailed` when you prefer no partial writes on insufficient capacity.
+`MatchDetailed(...)` and `TryMatchDetailed(...)` use `PatternCaptureSlice<TSegment>` so caller-provided detailed matching can remain allocation-sensitive and zero-allocation when the destination spans are large enough. Each slice gives the capture name, `StartSegmentIndex`, and `SegmentCount`; callers read the captured values from the original input path.
 
-Detailed matches expose `PatternId`, `RegistrationOrder`, `Kind`, `Specificity`, and capture slice metadata. `PatternId` is optional caller-provided identity; `RegistrationOrder` is a deterministic zero-based order assigned when the builder accepts the registration. See [compatibility semantics](compatibility-semantics.md) for the ordering contract currently covered by tests.
+`MatchDetailedToArray(...)` is the allocating detailed convenience API. It returns `PatternMatchDetailed<TSegment, TValue>` values with owning `PatternCapture<TSegment>` captures. `PatternCapture<TSegment>.Values` contains the captured input segments, `StartSegmentIndex` identifies where the capture begins, and `SegmentCount` is computed from `Values.Length`. `PatternCapture<TSegment>.Value` is only for single-segment captures and throws `InvalidOperationException` for zero-segment or multi-segment captures.
+
+Detailed matches expose `PatternId`, `RegistrationOrder`, `Kind`, `Specificity`, `PatternSegmentCount`, and `ConsumedSegmentCount`. `PatternId` is optional caller-provided identity; `RegistrationOrder` is a deterministic zero-based order assigned when the builder accepts the registration. See [compatibility semantics](compatibility-semantics.md) for the ordering contract currently covered by tests.
 
 ## Explanation results
 

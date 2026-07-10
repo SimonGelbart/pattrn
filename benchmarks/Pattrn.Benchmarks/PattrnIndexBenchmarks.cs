@@ -10,7 +10,7 @@ public class PattrnIndexBenchmarks
     private string[] _path = [];
     private int[] _valueDestination = [];
     private PatternMatch<int>[] _matchDestination = [];
-    private PatternCapture<string>[] _captureDestination = [];
+    private PatternCaptureSlice<string>[] _captureDestination = [];
 
     [Params(
         BenchmarkScenario.ExactOnlySparseDeep,
@@ -97,7 +97,7 @@ public class PattrnIndexBenchmarks
         var matchUpperBound = _index.GetMatchCountUpperBound(_path);
         _valueDestination = new int[Math.Max(1, matchUpperBound)];
         _matchDestination = new PatternMatch<int>[Math.Max(1, matchUpperBound)];
-        _captureDestination = new PatternCapture<string>[Math.Max(1, _index.GetCaptureCountUpperBound(_path))];
+        _captureDestination = new PatternCaptureSlice<string>[Math.Max(1, _index.GetCaptureCountUpperBound(_path))];
     }
 
     [Benchmark(Baseline = true)]

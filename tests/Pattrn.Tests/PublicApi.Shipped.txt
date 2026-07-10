@@ -15,6 +15,19 @@ struct Pattrn.MatchOptions
   static bool op_Equality(Pattrn.MatchOptions left, Pattrn.MatchOptions right)
   static bool op_Inequality(Pattrn.MatchOptions left, Pattrn.MatchOptions right)
   void Deconstruct(out Pattrn.PrefixMatchMode prefixMatchMode, out Pattrn.DuplicateValueMatchMode duplicateValueMatchMode)
+struct Pattrn.PatternCaptureSlice<TSegment>
+  .ctor(string Name, int StartSegmentIndex, int SegmentCount)
+  string Name { get; set; }
+  int SegmentCount { get; set; }
+  int SegmentIndex { get; }
+  int StartSegmentIndex { get; set; }
+  bool Equals(Pattrn.PatternCaptureSlice<TSegment> other)
+  bool Equals(object obj)
+  int GetHashCode()
+  static bool op_Equality(Pattrn.PatternCaptureSlice<TSegment> left, Pattrn.PatternCaptureSlice<TSegment> right)
+  static bool op_Inequality(Pattrn.PatternCaptureSlice<TSegment> left, Pattrn.PatternCaptureSlice<TSegment> right)
+  string ToString()
+  void Deconstruct(out string Name, out int StartSegmentIndex, out int SegmentCount)
 struct Pattrn.PatternCapture<TSegment>
   .ctor(string Name, System.Collections.Immutable.ImmutableArray<TSegment> Values, int StartSegmentIndex)
   .ctor(string name, TSegment value, int startSegmentIndex)
@@ -176,12 +189,12 @@ class Pattrn.PattrnIndexExtensions
   static TValue[] MatchToArray<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.Collections.Generic.IEnumerable<TSegment> path)
   static TValue[] MatchToArray<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path)
   static bool TryMatch<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path, System.Span<TValue> destination, out int written)
-  static bool TryMatchDetailed<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<TSegment>> captures, out int matchesWritten, out int capturesWritten)
+  static bool TryMatchDetailed<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCaptureSlice<TSegment>> captures, out int matchesWritten, out int capturesWritten)
   static bool TryMatchPrefix<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path, System.Span<TValue> destination, out int written)
   static int GetCaptureCountUpperBound<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path)
   static int GetMatchCountUpperBound<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path)
   static int GetPrefixMatchCountUpperBound<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path)
-  static int MatchDetailed<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<TSegment>> captures, out int capturesWritten)
+  static int MatchDetailed<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCaptureSlice<TSegment>> captures, out int capturesWritten)
 class Pattrn.PattrnIndex<TSegment, TValue>
   int MatchCountUpperBound { get; }
   Pattrn.MatchOptions Options { get; }
@@ -192,12 +205,12 @@ class Pattrn.PattrnIndex<TSegment, TValue>
   TValue[] MatchPrefixToArray(System.ReadOnlySpan<TSegment> path)
   TValue[] MatchToArray(System.ReadOnlySpan<TSegment> path)
   bool TryMatch(System.ReadOnlySpan<TSegment> path, System.Span<TValue> destination, out int written)
-  bool TryMatchDetailed(System.ReadOnlySpan<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<TSegment>> captures, out int matchesWritten, out int capturesWritten)
+  bool TryMatchDetailed(System.ReadOnlySpan<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCaptureSlice<TSegment>> captures, out int matchesWritten, out int capturesWritten)
   bool TryMatchPrefix(System.ReadOnlySpan<TSegment> path, System.Span<TValue> destination, out int written)
   int GetCaptureCountUpperBound(System.ReadOnlySpan<TSegment> path)
   int GetMatchCountUpperBound(System.ReadOnlySpan<TSegment> path)
   int GetPrefixMatchCountUpperBound(System.ReadOnlySpan<TSegment> path)
-  int MatchDetailed(System.ReadOnlySpan<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<TSegment>> captures, out int capturesWritten)
+  int MatchDetailed(System.ReadOnlySpan<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCaptureSlice<TSegment>> captures, out int capturesWritten)
   static Pattrn.PattrnIndexBuilder<TSegment, TValue> Builder(System.Collections.Generic.IEqualityComparer<TSegment> segmentComparer = null, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
   static Pattrn.PattrnIndexBuilder<TSegment, TValue> Builder(TSegment wildcardSegment, System.Collections.Generic.IEqualityComparer<TSegment> segmentComparer = null, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
 struct Pattrn.PrefixMatchMode

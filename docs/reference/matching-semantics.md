@@ -101,7 +101,7 @@ path:    files.a.b.c
 result:  match
 ```
 
-Named catch-alls are exposed as one capture per remaining input segment. Unnamed catch-alls produce no captures. The core does not join segments into strings, decode paths, or parse route-template syntax; companion packages can add those domain-specific behaviors.
+Named catch-alls are exposed as one capture whose `Values` contains all remaining input segments. If the catch-all consumes zero segments, the named capture has empty `Values`. Unnamed catch-alls produce no captures. The core does not join segments into strings, decode paths, or parse route-template syntax; companion packages can add those domain-specific behaviors.
 
 ## Single-segment wildcard
 
@@ -199,7 +199,7 @@ When multiple structural branches match the same input at the same depth, result
 literal > named parameter > anonymous wildcard > terminal catch-all
 ```
 
-`PatternMatch<TValue>.Specificity` and `PatternMatchResult<TSegment, TValue>.Specificity` expose the specificity value for detailed results. Higher values are more specific. The broad ordering above is compatibility-covered; exact numeric weights remain an implementation detail.
+`PatternMatch<TValue>.Specificity` and `PatternMatchDetailed<TSegment, TValue>.Specificity` expose the specificity value for detailed results. Higher values are more specific. The broad ordering above is compatibility-covered; exact numeric weights remain an implementation detail.
 
 Registrations with the same structural specificity preserve registration order when duplicate preservation is enabled. When default value deduplication suppresses equal values, the first accepted value in deterministic rank order wins.
 
