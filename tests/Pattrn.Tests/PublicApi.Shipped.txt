@@ -166,6 +166,7 @@ class Pattrn.PattrnIndexExtensions
   static bool TryMatchPrefix<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path, System.Span<TValue> destination, out int written)
   static int GetCaptureCountUpperBound<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path)
   static int GetMatchCountUpperBound<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path)
+  static int GetPrefixMatchCountUpperBound<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path)
   static int MatchDetailed<TSegment, TValue>(Pattrn.PattrnIndex<TSegment, TValue> index, System.ReadOnlyMemory<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<TSegment>> captures, out int capturesWritten)
 class Pattrn.PattrnIndex<TSegment, TValue>
   int MatchCountUpperBound { get; }
@@ -182,6 +183,7 @@ class Pattrn.PattrnIndex<TSegment, TValue>
   bool TryMatchPrefix(System.ReadOnlySpan<TSegment> path, System.Span<TValue> destination, out int written)
   int GetCaptureCountUpperBound(System.ReadOnlySpan<TSegment> path)
   int GetMatchCountUpperBound(System.ReadOnlySpan<TSegment> path)
+  int GetPrefixMatchCountUpperBound(System.ReadOnlySpan<TSegment> path)
   int MatchDetailed(System.ReadOnlySpan<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<TSegment>> captures, out int capturesWritten)
   static Pattrn.PattrnIndexBuilder<TSegment, TValue> Builder(System.Collections.Generic.IEqualityComparer<TSegment> segmentComparer = null, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
   static Pattrn.PattrnIndexBuilder<TSegment, TValue> Builder(TSegment wildcardSegment, System.Collections.Generic.IEqualityComparer<TSegment> segmentComparer = null, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
