@@ -157,7 +157,7 @@ public sealed class TokenlessBuilderTests
 
         ShouldEqual(detailed.Length, 1);
         ShouldEqual(detailed[0].Value, "client-a");
-        ShouldEqual(detailed[0].Captures.Count, 1);
+        ShouldEqual(detailed[0].Captures.Length, 1);
         ShouldEqual(detailed[0].Captures[0].Name, "symbol");
         ShouldEqual(detailed[0].Captures[0].Value, "MSFT");
     }

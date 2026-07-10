@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace Pattrn;
 
 internal ref struct DetailedMatchWriter<TSegment, TValue>
@@ -82,21 +84,15 @@ internal ref struct DetailedMatchWriter<TSegment, TValue>
                 actualCaptureCount,
                 detail.PatternId,
                 detail.RegistrationOrder,
-                consumedSegmentCount);
+                consumedSegmentCount,
+                patternSegmentCount: detail.PatternSegmentCount);
             _matchCount++;
         }
     }
 
     private readonly int GetActualCaptureCount(CompiledValueDetail detail, ReadOnlySpan<CaptureDescriptor> captureDescriptors)
     {
-        var count = 0;
-        for (var i = 0; i < detail.CaptureCount; i++)
-        {
-            ref readonly var descriptor = ref captureDescriptors[detail.FirstCapture + i];
-            count += descriptor.IsCatchAll ? Math.Max(0, _path.Length - descriptor.SegmentIndex) : 1;
-        }
-
-        return count;
+        return detail.CaptureCount;
     }
 
     private void WriteCaptures(CompiledValueDetail detail, ReadOnlySpan<CaptureDescriptor> captureDescriptors)
@@ -106,21 +102,17 @@ internal ref struct DetailedMatchWriter<TSegment, TValue>
             ref readonly var descriptor = ref captureDescriptors[detail.FirstCapture + i];
             if (descriptor.IsCatchAll)
             {
-                for (var segmentIndex = descriptor.SegmentIndex; segmentIndex < _path.Length; segmentIndex++)
-                {
-                    _captures[_captureCount] = new PatternCapture<TSegment>(
-                        descriptor.Name,
-                        _path[segmentIndex],
-                        segmentIndex);
-                    _captureCount++;
-                }
-
+                _captures[_captureCount] = new PatternCapture<TSegment>(
+                    descriptor.Name,
+                    ImmutableArray.Create(_path[descriptor.SegmentIndex..]),
+                    descriptor.SegmentIndex);
+                _captureCount++;
                 continue;
             }
 
             _captures[_captureCount] = new PatternCapture<TSegment>(
                 descriptor.Name,
-                _path[descriptor.SegmentIndex],
+                ImmutableArray.Create(_path[descriptor.SegmentIndex]),
                 descriptor.SegmentIndex);
             _captureCount++;
         }

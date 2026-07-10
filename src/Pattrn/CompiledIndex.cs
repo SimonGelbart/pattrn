@@ -299,7 +299,8 @@ internal sealed class CompiledIndex<TSegment, TValue>
                 metadata.Kind,
                 metadata.Score,
                 metadata.PatternId,
-                metadata.RegistrationOrder));
+                metadata.RegistrationOrder,
+                metadata.PatternSegmentCount));
         }
 
         private static BuilderRegistrationMetadata GetMetadata(List<BuilderRegistrationMetadata>? metadata, int index)

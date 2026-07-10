@@ -117,7 +117,7 @@ public class RoutingBenchmarks
     }
 
     [Benchmark]
-    public PatternMatchResult<string, int>[] RouteIndex_MatchRouteDetailedToArray()
+    public PatternMatchDetailed<string, int>[] RouteIndex_MatchRouteDetailedToArray()
     {
         return _index.MatchRouteDetailedToArray(_path);
     }

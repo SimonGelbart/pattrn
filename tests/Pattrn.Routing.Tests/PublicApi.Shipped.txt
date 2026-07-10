@@ -9,7 +9,7 @@ class Pattrn.Routing.RouteConstraint
   string Text { get; }
 class Pattrn.Routing.RouteConstraintValidation
   static Pattrn.Routing.RouteConstraintValidationResult Validate(Pattrn.Routing.RouteTemplate template, System.Collections.Generic.IReadOnlyList<Pattrn.PatternCapture<string>> captures, Pattrn.Routing.RouteConstraintValidationOptions options = null)
-  static Pattrn.Routing.RouteConstraintValidationResult Validate<TValue>(Pattrn.Routing.RouteTemplate template, Pattrn.PatternMatchResult<string, TValue> match, Pattrn.Routing.RouteConstraintValidationOptions options = null)
+  static Pattrn.Routing.RouteConstraintValidationResult Validate<TValue>(Pattrn.Routing.RouteTemplate template, Pattrn.PatternMatchDetailed<string, TValue> match, Pattrn.Routing.RouteConstraintValidationOptions options = null)
 class Pattrn.Routing.RouteConstraintValidationFailure
   string Code { get; }
   Pattrn.Routing.RouteConstraint Constraint { get; }
@@ -73,7 +73,7 @@ class Pattrn.Routing.RoutePattrnIndexBuilderExtensions
   static int RemoveAllRoute<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, Pattrn.Routing.RouteTemplate template)
   static int RemoveAllRoute<TValue>(Pattrn.PattrnIndexBuilder<string, TValue> builder, string pattern)
 class Pattrn.Routing.RoutePattrnIndexExtensions
-  static Pattrn.PatternMatchResult<string, TValue>[] MatchRouteDetailedToArray<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path)
+  static Pattrn.PatternMatchDetailed<string, TValue>[] MatchRouteDetailedToArray<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path)
   static TValue[] MatchRouteToArray<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path)
   static bool TryMatchRoute<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path, System.Span<TValue> destination, out int written)
   static bool TryMatchRouteDetailed<TValue>(Pattrn.PattrnIndex<string, TValue> index, string path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCapture<string>> captures, out int matchesWritten, out int capturesWritten)
@@ -95,7 +95,7 @@ class Pattrn.Routing.RouteTemplate
   Pattrn.PatternSegment<string>[] Compile()
   Pattrn.PatternSegment<string>[][] Expand()
   Pattrn.Routing.RouteConstraintValidationResult ValidateConstraints(System.Collections.Generic.IReadOnlyList<Pattrn.PatternCapture<string>> captures, Pattrn.Routing.RouteConstraintValidationOptions options = null)
-  Pattrn.Routing.RouteConstraintValidationResult ValidateConstraints<TValue>(Pattrn.PatternMatchResult<string, TValue> match, Pattrn.Routing.RouteConstraintValidationOptions options = null)
+  Pattrn.Routing.RouteConstraintValidationResult ValidateConstraints<TValue>(Pattrn.PatternMatchDetailed<string, TValue> match, Pattrn.Routing.RouteConstraintValidationOptions options = null)
   Pattrn.Routing.RouteTemplateExpansion[] ExpandDetailed()
   static Pattrn.Routing.RouteTemplate Parse(string template)
   static bool TryParse(string template, out Pattrn.Routing.RouteTemplate routeTemplate, out Pattrn.Routing.RouteTemplateDiagnostic[] diagnostics)

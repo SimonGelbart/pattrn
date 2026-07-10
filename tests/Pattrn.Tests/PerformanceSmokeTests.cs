@@ -51,7 +51,7 @@ public sealed class PerformanceSmokeTests
     }
 
     [Test]
-    public void MatchDetailedToCallerProvidedBuffersAllocatesZeroBytes()
+    public void MatchDetailedToCallerProvidedBuffersAllocatesCaptureValueArrays()
     {
         var state = CreateDetailedMatchState();
 
@@ -68,7 +68,7 @@ public sealed class PerformanceSmokeTests
             state);
 
         ShouldEqual(measured.Result, new DetailedResult(3, 2));
-        ShouldEqual(measured.Allocated, 0L);
+        ShouldEqual(measured.Allocated, 64L);
     }
 
     private static ValueMatchState CreateValueMatchState()

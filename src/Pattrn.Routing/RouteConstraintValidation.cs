@@ -15,10 +15,9 @@ public static class RouteConstraintValidation
     /// <returns>The constraint validation result.</returns>
     public static RouteConstraintValidationResult Validate<TValue>(
         RouteTemplate template,
-        PatternMatchResult<string, TValue> match,
+        PatternMatchDetailed<string, TValue> match,
         RouteConstraintValidationOptions? options = null)
     {
-        ArgumentNullException.ThrowIfNull(match);
         return Validate(template, match.Captures, options);
     }
 

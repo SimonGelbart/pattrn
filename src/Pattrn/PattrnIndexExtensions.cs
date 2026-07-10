@@ -136,7 +136,7 @@ public static class PattrnIndexExtensions
     /// <summary>
     /// Matches a memory-backed path and returns detailed matches as a new array.
     /// </summary>
-    public static PatternMatchResult<TSegment, TValue>[] MatchDetailedToArray<TSegment, TValue>(
+    public static PatternMatchDetailed<TSegment, TValue>[] MatchDetailedToArray<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path)
         where TSegment : notnull
@@ -148,7 +148,7 @@ public static class PattrnIndexExtensions
     /// <summary>
     /// Matches an enumerable path and returns detailed matches as a new array.
     /// </summary>
-    public static PatternMatchResult<TSegment, TValue>[] MatchDetailedToArray<TSegment, TValue>(
+    public static PatternMatchDetailed<TSegment, TValue>[] MatchDetailedToArray<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         IEnumerable<TSegment> path)
         where TSegment : notnull

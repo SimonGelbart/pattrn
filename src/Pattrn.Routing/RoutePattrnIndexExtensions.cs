@@ -160,7 +160,7 @@ public static class RoutePattrnIndexExtensions
     /// <summary>
     /// Matches a route-like runtime path and returns detailed matches in a new array.
     /// </summary>
-    public static PatternMatchResult<string, TValue>[] MatchRouteDetailedToArray<TValue>(
+    public static PatternMatchDetailed<string, TValue>[] MatchRouteDetailedToArray<TValue>(
         this PattrnIndex<string, TValue> index,
         string path)
     {

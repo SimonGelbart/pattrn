@@ -8,7 +8,8 @@ internal readonly struct CompiledValueDetail
         PatternMatchKind kind,
         int score,
         string? patternId,
-        int registrationOrder)
+        int registrationOrder,
+        int patternSegmentCount)
     {
         FirstCapture = firstCapture;
         CaptureCount = captureCount;
@@ -16,6 +17,7 @@ internal readonly struct CompiledValueDetail
         Score = score;
         PatternId = patternId;
         RegistrationOrder = registrationOrder;
+        PatternSegmentCount = patternSegmentCount;
     }
 
     internal int FirstCapture { get; }
@@ -29,4 +31,6 @@ internal readonly struct CompiledValueDetail
     internal string? PatternId { get; }
 
     internal int RegistrationOrder { get; }
+
+    internal int PatternSegmentCount { get; }
 }
