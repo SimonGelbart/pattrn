@@ -136,18 +136,6 @@ public static class PattrnIndexExtensions
     /// <summary>
     /// Matches a memory-backed path and returns detailed matches as a new array.
     /// </summary>
-    public static PatternMatchResult<TSegment, TValue>[] MatchDetailed<TSegment, TValue>(
-        this PattrnIndex<TSegment, TValue> index,
-        ReadOnlyMemory<TSegment> path)
-        where TSegment : notnull
-    {
-        ArgumentNullException.ThrowIfNull(index);
-        return index.MatchDetailed(path.Span);
-    }
-
-    /// <summary>
-    /// Matches a memory-backed path and returns detailed matches as a new array.
-    /// </summary>
     public static PatternMatchResult<TSegment, TValue>[] MatchDetailedToArray<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path)
@@ -155,25 +143,6 @@ public static class PattrnIndexExtensions
     {
         ArgumentNullException.ThrowIfNull(index);
         return index.MatchDetailedToArray(path.Span);
-    }
-
-    /// <summary>
-    /// Matches an enumerable path and returns detailed matches as a new array.
-    /// </summary>
-    public static PatternMatchResult<TSegment, TValue>[] MatchDetailed<TSegment, TValue>(
-        this PattrnIndex<TSegment, TValue> index,
-        IEnumerable<TSegment> path)
-        where TSegment : notnull
-    {
-        ArgumentNullException.ThrowIfNull(index);
-        ArgumentNullException.ThrowIfNull(path);
-
-        if (path is TSegment[] array)
-        {
-            return index.MatchDetailed(array.AsSpan());
-        }
-
-        return index.MatchDetailed(path.ToArray().AsSpan());
     }
 
     /// <summary>

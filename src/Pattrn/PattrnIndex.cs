@@ -525,13 +525,6 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// </summary>
     /// <param name="path">The segmented input path to match.</param>
     /// <returns>An array containing all detailed matches.</returns>
-    public PatternMatchResult<TSegment, TValue>[] MatchDetailed(ReadOnlySpan<TSegment> path) => MatchDetailedToArray(path);
-
-    /// <summary>
-    /// Matches the specified segmented path and returns detailed matches as a newly allocated array.
-    /// </summary>
-    /// <param name="path">The segmented input path to match.</param>
-    /// <returns>An array containing all detailed matches.</returns>
     public PatternMatchResult<TSegment, TValue>[] MatchDetailedToArray(ReadOnlySpan<TSegment> path)
     {
         if (!_hasWildcardBranches && !_includePrefixMatches)

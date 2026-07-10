@@ -47,7 +47,7 @@ public sealed class DuplicateBehaviorInteractionTests
         ShouldEqual(index.PatternCount, 1);
         ShouldEqual(index.RegistrationCount, 1);
 
-        var matches = index.MatchDetailed(["orders", "123"]);
+        var matches = index.MatchDetailedToArray(["orders", "123"]);
 
         ShouldEqual(matches.Length, 1);
         ShouldEqual(matches[0].Value, "second");

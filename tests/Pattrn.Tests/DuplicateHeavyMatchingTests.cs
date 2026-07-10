@@ -130,7 +130,7 @@ public sealed class DuplicateHeavyMatchingTests
         }
 
         var index = builder.Build(MatchOptions.PreserveDuplicates);
-        var matches = index.MatchDetailed(["market", "M42", "S42"]);
+        var matches = index.MatchDetailedToArray(["market", "M42", "S42"]);
 
         ShouldEqual(matches.Length, 256);
         foreach (var value in Enumerable.Range(0, 64))
