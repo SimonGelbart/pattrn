@@ -89,7 +89,7 @@ builder.AddPattern(
     "handler");
 ```
 
-A catch-all matches zero or more remaining input segments. It must be the final segment in the registered pattern.
+A compiled catch-all matches zero or more remaining input segments. The public segment value is not intrinsically restricted by array position, but the current compiler supports catch-all only as the final registered segment and rejects non-terminal placement as unsupported in this version.
 
 ```text
 pattern: files.<catch-all>
@@ -153,7 +153,7 @@ The dotted string helpers deliberately reject empty strings. Use the core segmen
 
 ## Capture names
 
-Named parameters and named catch-alls use simple identifier capture names. A valid capture name is non-null, non-empty, and non-whitespace; starts with a Unicode letter or `_`; and then contains only Unicode letters, decimal digits, or `_`. Capture names are case-sensitive and are not normalized.
+Named parameters and named catch-alls use Unicode simple-identifier capture names. A valid capture name is non-null, non-empty, and non-whitespace; its first Unicode scalar value is a Unicode letter or `_`; later scalar values are Unicode letters, decimal digits, or `_`; and malformed UTF-16, including unpaired surrogates, is rejected. Capture names are case-sensitive and are not normalized.
 
 Within one registered pattern, duplicate capture names are rejected with ordinal, case-sensitive comparison. This applies across named parameters and named catch-alls. Reusing the same name in separate patterns is allowed.
 

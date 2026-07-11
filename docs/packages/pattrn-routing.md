@@ -28,9 +28,9 @@ Supported segment kinds and metadata:
 | `{id:int:min(1)}` | named parameter with multiple preserved constraints |
 | `{id?}` | optional suffix parameter expanded into an omitted variant |
 | `{format=json}` | defaulted suffix parameter expanded into an omitted variant and preserving the default text |
-| `{*path}` | terminal named catch-all |
+| `{*path}` | terminal named catch-all that compiles to a core catch-all segment |
 
-The `*` character outside braces is treated as a literal route segment. This avoids reintroducing a reserved wildcard token into route templates.
+The `*` character outside braces is treated as a literal route segment. This avoids reintroducing a reserved wildcard token into route templates. Named route parameters and named catch-alls must use the same Unicode simple-identifier capture-name grammar as the core: the first Unicode scalar value must be a Unicode letter or underscore, later scalar values must be Unicode letters, decimal digits, or underscores, and malformed UTF-16 is rejected with diagnostic `ROUTE015`.
 
 ## Boundary
 
