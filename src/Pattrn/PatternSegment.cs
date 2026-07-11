@@ -1,3 +1,7 @@
+using System.Buffers;
+using System.Globalization;
+using System.Text;
+
 namespace Pattrn;
 
 /// <summary>
@@ -108,13 +112,13 @@ public readonly struct PatternSegment<TSegment> : IEquatable<PatternSegment<TSeg
     }
 
     /// <summary>
-    /// Creates an anonymous terminal catch-all pattern segment that matches zero or more remaining input segments.
+    /// Creates an anonymous catch-all pattern segment that matches zero or more remaining input segments.
     /// </summary>
     /// <returns>An anonymous catch-all pattern segment.</returns>
     public static PatternSegment<TSegment> CatchAll() => AnonymousCatchAll;
 
     /// <summary>
-    /// Creates a named terminal catch-all pattern segment that matches zero or more remaining input segments.
+    /// Creates a named catch-all pattern segment that matches zero or more remaining input segments.
     /// </summary>
     /// <param name="name">The logical catch-all parameter name.</param>
     /// <returns>A named catch-all pattern segment.</returns>
@@ -135,23 +139,45 @@ public readonly struct PatternSegment<TSegment> : IEquatable<PatternSegment<TSeg
             throw new ArgumentException("Capture names must not be empty or whitespace.", nameof(name));
         }
 
-        if (!IsIdentifierStart(name[0]))
+        var remaining = name.AsSpan();
+        if (!TryReadRune(ref remaining, out var first) || !IsIdentifierStart(first))
         {
-            throw new ArgumentException("Capture names must start with a Unicode letter or underscore.", nameof(name));
+            throw new ArgumentException("Capture names must be valid Unicode simple identifiers: the first scalar value must be a Unicode letter or underscore, and later scalar values must be Unicode letters, decimal digits, or underscores.", nameof(name));
         }
 
-        for (var i = 1; i < name.Length; i++)
+        while (!remaining.IsEmpty)
         {
-            if (!IsIdentifierPart(name[i]))
+            if (!TryReadRune(ref remaining, out var current) || !IsIdentifierPart(current))
             {
-                throw new ArgumentException("Capture names may contain only Unicode letters, decimal digits, or underscores after the first character.", nameof(name));
+                throw new ArgumentException("Capture names must be valid Unicode simple identifiers: the first scalar value must be a Unicode letter or underscore, and later scalar values must be Unicode letters, decimal digits, or underscores.", nameof(name));
             }
         }
     }
 
-    private static bool IsIdentifierStart(char character) => character == '_' || char.IsLetter(character);
+    private static bool TryReadRune(ref ReadOnlySpan<char> remaining, out Rune rune)
+    {
+        var status = Rune.DecodeFromUtf16(remaining, out rune, out var charsConsumed);
+        if (status != OperationStatus.Done)
+        {
+            return false;
+        }
 
-    private static bool IsIdentifierPart(char character) => character == '_' || char.IsLetter(character) || char.IsDigit(character);
+        remaining = remaining[charsConsumed..];
+        return true;
+    }
+
+    private static bool IsIdentifierStart(Rune rune) => rune.Value == '_' || IsLetter(rune);
+
+    private static bool IsIdentifierPart(Rune rune) => rune.Value == '_' || IsLetter(rune) || Rune.GetUnicodeCategory(rune) == UnicodeCategory.DecimalDigitNumber;
+
+    private static bool IsLetter(Rune rune)
+    {
+        return Rune.GetUnicodeCategory(rune) is UnicodeCategory.UppercaseLetter
+            or UnicodeCategory.LowercaseLetter
+            or UnicodeCategory.TitlecaseLetter
+            or UnicodeCategory.ModifierLetter
+            or UnicodeCategory.OtherLetter;
+    }
 
     /// <summary>
     /// Deconstructs the segment into its kind, literal value, and parameter name.

@@ -1,3 +1,7 @@
+using System.Buffers;
+using System.Globalization;
+using System.Text;
+
 namespace Pattrn.Routing;
 
 internal static class RouteTemplateParser
@@ -153,6 +157,12 @@ internal static class RouteTemplateParser
             return false;
         }
 
+        if (!IsValidRouteParameterName(name))
+        {
+            diagnostics.Add(new RouteTemplateDiagnostic("ROUTE015", "Route parameter names must be valid Unicode simple identifiers: the first scalar value must be a Unicode letter or underscore, and later scalar values must be Unicode letters, decimal digits, or underscores.", segmentIndex));
+            return false;
+        }
+
         if (isCatchAll && (isOptional || defaultValue is not null || tokens.Count > 1))
         {
             diagnostics.Add(new RouteTemplateDiagnostic("ROUTE010", "Route catch-all parameters cannot declare optional markers, defaults, or constraints in this framework-neutral parser.", segmentIndex));
@@ -172,6 +182,50 @@ internal static class RouteTemplateParser
 
         parameter = new RouteParameter(name, isCatchAll, isOptional, defaultValue, constraints);
         return true;
+    }
+
+    private static bool IsValidRouteParameterName(string name)
+    {
+        var remaining = name.AsSpan();
+        if (!TryReadRune(ref remaining, out var first) || !IsIdentifierStart(first))
+        {
+            return false;
+        }
+
+        while (!remaining.IsEmpty)
+        {
+            if (!TryReadRune(ref remaining, out var current) || !IsIdentifierPart(current))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool TryReadRune(ref ReadOnlySpan<char> remaining, out Rune rune)
+    {
+        var status = Rune.DecodeFromUtf16(remaining, out rune, out var charsConsumed);
+        if (status != OperationStatus.Done)
+        {
+            return false;
+        }
+
+        remaining = remaining[charsConsumed..];
+        return true;
+    }
+
+    private static bool IsIdentifierStart(Rune rune) => rune.Value == '_' || IsLetter(rune);
+
+    private static bool IsIdentifierPart(Rune rune) => rune.Value == '_' || IsLetter(rune) || Rune.GetUnicodeCategory(rune) == UnicodeCategory.DecimalDigitNumber;
+
+    private static bool IsLetter(Rune rune)
+    {
+        return Rune.GetUnicodeCategory(rune) is UnicodeCategory.UppercaseLetter
+            or UnicodeCategory.LowercaseLetter
+            or UnicodeCategory.TitlecaseLetter
+            or UnicodeCategory.ModifierLetter
+            or UnicodeCategory.OtherLetter;
     }
 
     private static bool TryParseConstraint(

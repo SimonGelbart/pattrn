@@ -67,6 +67,9 @@ public sealed class PatternSegmentTests
         ShouldEqual(PatternSegment<string>.Parameter("_id").ParameterName, "_id");
         ShouldEqual(PatternSegment<string>.Parameter("Δelta9").ParameterName, "Δelta9");
         ShouldEqual(PatternSegment<string>.CatchAll("path_2").ParameterName, "path_2");
+        ShouldEqual(PatternSegment<string>.Parameter("𐐀id").ParameterName, "𐐀id");
+        ShouldEqual(PatternSegment<string>.Parameter("id𐐀").ParameterName, "id𐐀");
+        ShouldEqual(PatternSegment<string>.CatchAll("path𐒠").ParameterName, "path𐒠");
     }
 
     [Test]
@@ -79,11 +82,26 @@ public sealed class PatternSegmentTests
         ShouldThrow<ArgumentException>(() => PatternSegment<string>.Parameter("9id"));
         ShouldThrow<ArgumentException>(() => PatternSegment<string>.Parameter("order-id"));
         ShouldThrow<ArgumentException>(() => PatternSegment<string>.Parameter("id.name"));
+        ShouldThrow<ArgumentException>(() => PatternSegment<string>.Parameter("𐒠id"));
+        ShouldThrow<ArgumentException>(() => PatternSegment<string>.Parameter("\uD801"));
+        ShouldThrow<ArgumentException>(() => PatternSegment<string>.Parameter("\uDC00"));
         ShouldThrow<ArgumentNullException>(() => PatternSegment<string>.CatchAll(null!));
         ShouldThrow<ArgumentException>(() => PatternSegment<string>.CatchAll(""));
         ShouldThrow<ArgumentException>(() => PatternSegment<string>.CatchAll("   "));
         ShouldThrow<ArgumentException>(() => PatternSegment<string>.CatchAll("9path"));
         ShouldThrow<ArgumentException>(() => PatternSegment<string>.CatchAll("path/*"));
+        ShouldThrow<ArgumentException>(() => PatternSegment<string>.CatchAll("𐒠path"));
+        ShouldThrow<ArgumentException>(() => PatternSegment<string>.CatchAll("\uD801"));
+        ShouldThrow<ArgumentException>(() => PatternSegment<string>.CatchAll("\uDC00"));
+    }
+
+    [Test]
+    public void FactoriesPreserveExactAcceptedCaptureName()
+    {
+        var name = "𐐀Id_𐒠";
+
+        ShouldEqual(PatternSegment<string>.Parameter(name).ParameterName, name);
+        ShouldEqual(PatternSegment<string>.CatchAll(name).ParameterName, name);
     }
 
     [Test]

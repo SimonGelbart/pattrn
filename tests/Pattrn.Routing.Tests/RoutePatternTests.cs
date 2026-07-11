@@ -218,6 +218,79 @@ public sealed class RoutePatternTests
     }
 
     [Test]
+    public void TryParseTemplateRejectsInvalidCaptureNamesWithRoute015()
+    {
+        AssertRoute015("/orders/{order-id}", 1);
+        AssertRoute015("/{9id}", 0);
+        AssertRoute015("/{id.name}", 0);
+        AssertRoute015("/files/{*path-name}", 1);
+        AssertRoute015("/{\uD801}", 0);
+        AssertRoute015("/{\uDC00}", 0);
+    }
+
+    [Test]
+    public void SupplementaryPlaneParameterNameParsesCompilesAndExpands()
+    {
+        var success = RoutePattern.TryParseTemplate("/orders/{𐐀id}", out var template, out var diagnostics);
+
+        ShouldBeTrue(success, "Expected supplementary-plane letter parameter name to parse.");
+        ShouldEqual(diagnostics.Length, 0);
+        ShouldEqual(template!.Compile()[1], PatternSegment<string>.Parameter("𐐀id"));
+        ShouldSequenceEqual(RoutePattern.Expand("/orders/{𐐀id}")[0], [PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("𐐀id")]);
+        ShouldSequenceEqual(RoutePattern.ExpandDetailed("/orders/{𐐀id}")[0].Pattern, [PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("𐐀id")]);
+    }
+
+    [Test]
+    public void InvalidCaptureNamesThrowFromParseApis()
+    {
+        ShouldThrow<ArgumentException>(() => RouteTemplate.Parse("/orders/{order-id}"));
+        ShouldThrow<ArgumentException>(() => RoutePattern.Parse("/orders/{order-id}"));
+    }
+
+    [Test]
+    public void AddRouteRejectsInvalidCaptureNamesBeforeMutatingBuilder()
+    {
+        var builder = PattrnIndex<string, string>.Builder();
+        builder.AddRoute("/orders/{id}", "existing");
+        var patternCount = builder.PatternCount;
+        var registrationCount = builder.RegistrationCount;
+
+        ShouldThrow<ArgumentException>(() => builder.AddRoute("/orders/{order-id}", "invalid"));
+
+        ShouldEqual(builder.PatternCount, patternCount);
+        ShouldEqual(builder.RegistrationCount, registrationCount);
+    }
+
+    [Test]
+    public void SuccessfulParseCompilesAndExpandsWithoutCaptureNameException()
+    {
+        var template = RoutePattern.ParseTemplate("/archive/{year}/{month=07}/{day?}");
+
+        ShouldEqual(template.Compile().Length, 4);
+        ShouldEqual(template.Expand().Length, 3);
+        ShouldEqual(template.ExpandDetailed().Length, 3);
+    }
+
+    private static void AssertRoute015(string pattern, int segmentIndex)
+    {
+        var success = RouteTemplate.TryParse(pattern, out var template, out var diagnostics);
+
+        ShouldBeFalse(success, "Expected route template parsing to reject invalid capture name.");
+        ShouldEqual(template, null);
+        ShouldEqual(diagnostics.Length, 1);
+        ShouldEqual(diagnostics[0].Code, "ROUTE015");
+        ShouldEqual(diagnostics[0].SegmentIndex, segmentIndex);
+
+        success = RoutePattern.TryParseTemplate(pattern, out template, out diagnostics);
+
+        ShouldBeFalse(success, "Expected route pattern parsing to reject invalid capture name.");
+        ShouldEqual(template, null);
+        ShouldEqual(diagnostics.Length, 1);
+        ShouldEqual(diagnostics[0].Code, "ROUTE015");
+        ShouldEqual(diagnostics[0].SegmentIndex, segmentIndex);
+    }
+
+    [Test]
     public void ParseRejectsInvalidRouteSyntax()
     {
         ShouldThrow<ArgumentException>(() => RoutePattern.Parse("/orders/{}"));

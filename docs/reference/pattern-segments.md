@@ -48,13 +48,13 @@ For input `"*"`, both registrations can match. For any other single segment, onl
 
 ## Catch-all semantics
 
-`PatternSegment<TSegment>.CatchAll()` and `CatchAll(name)` represent a terminal catch-all segment. Catch-all complements the other segment kinds:
+`PatternSegment<TSegment>.CatchAll()` and `CatchAll(name)` create catch-all segment values. The public segment value is not intrinsically restricted by array position; the current `PattrnIndexBuilder.AddPattern` compiler supports catch-all only as the final registered segment and rejects non-terminal placement as unsupported in this version. Catch-all complements the other segment kinds:
 
 - `Literal` still matches one exact segment.
 - `Wildcard` and `Parameter` still match one segment.
 - `CatchAll` matches the remaining suffix (including an empty suffix).
 
-Named catch-all captures are exposed through detailed match APIs, with one capture per matched remaining segment. Unnamed catch-alls produce no capture. A non-terminal catch-all is rejected by the current compiler with wording that describes the construct as unsupported in this version rather than permanently impossible in the model.
+Named catch-all captures are exposed through detailed match APIs as one capture whose values contain all matched remaining segments. Unnamed catch-alls produce no capture. A non-terminal catch-all is rejected by the current compiler with wording that describes the construct as unsupported in this version rather than permanently impossible in the model.
 
 ## Capture names
 
@@ -62,8 +62,9 @@ Named catch-all captures are exposed through detailed match APIs, with one captu
 
 - the name must not be `null`;
 - the name must not be empty or whitespace;
-- the first character must be a Unicode letter or `_`;
-- subsequent characters must be Unicode letters, decimal digits, or `_`;
+- the first Unicode scalar value must be a Unicode letter or `_`;
+- subsequent Unicode scalar values must be Unicode letters, decimal digits, or `_`;
+- malformed UTF-16, including unpaired high or low surrogates, is rejected;
 - names are case-sensitive and are not normalized.
 
 Duplicate capture names within one pattern are rejected during pattern registration. The duplicate check uses ordinal, case-sensitive comparison, so `id` and `ID` are distinct names. Reusing the same capture name in different patterns is allowed.

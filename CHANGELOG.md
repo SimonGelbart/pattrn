@@ -8,6 +8,9 @@ The `3.0.0-alpha.*` entries below are preserved as **historical pre-beta chronol
 
 Detailed result and generic capture model update.
 
+- Aligned core parameter and named catch-all capture names on a Unicode simple-identifier grammar: the first Unicode scalar value must be a Unicode letter or underscore, and later scalar values must be Unicode letters, decimal digits, or underscores. Validation is Unicode-scalar-aware, rejects malformed UTF-16, preserves accepted names exactly, and keeps duplicate-name rejection within one pattern ordinal and case-sensitive.
+- Updated the route parser to reject parameter and catch-all names that cannot become core capture names. Invalid route names now fail parsing with diagnostic `ROUTE015`; names previously accepted despite being invalid core capture names may now fail as a deliberate pre-beta correction.
+
 - Added `PatternMatchDetailed<TSegment, TValue>` as the allocating detailed result model with `PatternSegmentCount`, `ConsumedSegmentCount`, and owning `PatternCapture<TSegment>` values.
 - Changed allocating detailed captures so each named pattern segment produces one capture. Named catch-all captures now store all consumed segments in `PatternCapture<TSegment>.Values`, including empty `Values` for zero-segment catch-all matches.
 - Added `PatternCaptureSlice<TSegment>` for caller-buffer detailed APIs so `MatchDetailed(...)` and `TryMatchDetailed(...)` remain zero-allocation when buffers are sufficiently sized.
