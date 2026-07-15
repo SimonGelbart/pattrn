@@ -9,17 +9,19 @@ body:
         Use this template for implementation, documentation, test, CI, benchmark, or cleanup work.
 
         A good issue should be clear enough that a human or AI agent can:
-        1. triage whether it is ready;
+        1. triage whether it is ready for local work;
         2. identify the affected area;
-        3. implement the change within scope;
-        4. validate the result;
-        5. open a focused PR linked to this issue.
+        3. understand the proposed implementation scope;
+        4. plan validation and reporting;
+        5. identify which separate maintainer authorization is still required for branch creation, commits, pushes, publication, or pull requests.
+
+        Readiness means the issue appears sufficiently specified for bounded local implementation. It does not grant authority to create or switch branches, commit, push, publish, tag, release, open a pull request, or change any other remote state.
 
   - type: dropdown
     id: readiness
     attributes:
       label: Readiness
-      description: Can this issue be implemented without a product/design decision?
+      description: Is this issue specified enough for bounded local implementation without a product/design decision? This does not grant authority for commits or remote actions.
       options:
         - Needs design
         - Ready to implement
@@ -135,6 +137,8 @@ body:
         - dotnet test
         - dotnet run --project benchmarks/Pattrn.Benchmarks -c Release -- --filter '*TryMatch*'
         - docs links checked manually
+
+        Local validation is preflight evidence only, not CI evidence or merge authority.
     validations:
       required: true
 
@@ -142,7 +146,7 @@ body:
     id: out_of_scope
     attributes:
       label: Out of scope
-      description: What should the implementer avoid doing in this issue?
+      description: What should the implementer avoid doing in this issue? Do not push, publish, tag, release, or open a pull request unless separately authorized by a maintainer.
       value: |
         - 
         - 
@@ -153,7 +157,7 @@ body:
     id: agent_instructions
     attributes:
       label: Notes for AI/human implementer
-      description: Extra instructions for an AI agent or contributor.
+      description: Extra instructions for an AI agent or contributor. These notes do not grant authority for branch, commit, push, publication, pull-request, or other remote-state changes.
       placeholder: |
         Example:
         Start by inspecting existing benchmark scenarios and benchmark docs.
