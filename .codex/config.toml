@@ -1,0 +1,8 @@
+# Minimal Codex runtime configuration for this repository.
+# Repository authority remains in AGENTS.md, accepted ADRs, and docs/reference/**.
+
+profile = "pattrn-local"
+
+[profiles.pattrn-local]
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
