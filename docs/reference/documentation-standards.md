@@ -50,7 +50,7 @@ Avoid duplicating:
 
 ## Durable maintainer reference
 
-Maintainer-facing docs may be rendered publicly when they describe durable repository operation rather than local scratch work. Current durable maintainer references include project profile, validation, repository layout, Git workflow, documentation standards, documentation-site operation, benchmark evidence policy, AI documentation-management workflow, and offline-build guidance.
+Maintainer-facing docs may be rendered publicly when they describe durable repository operation rather than local scratch work. Current durable maintainer references include project profile, validation, repository layout, Git workflow, documentation standards, documentation-site operation, benchmark evidence policy, and offline-build guidance.
 
 Keep local transcripts, raw benchmark output, generated logs, package caches, and one-off review notes out of the rendered docs surface.
 

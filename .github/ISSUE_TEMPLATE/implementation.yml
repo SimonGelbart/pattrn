@@ -1,5 +1,5 @@
 name: Implementation task
-description: A scoped task that should be implementable by a human or AI agent.
+description: A scoped implementation, documentation, test, CI, benchmark, or cleanup task.
 title: "[Task]: "
 labels: ["status:needs-design"]
 body:
@@ -8,20 +8,14 @@ body:
       value: |
         Use this template for implementation, documentation, test, CI, benchmark, or cleanup work.
 
-        A good issue should be clear enough that a human or AI agent can:
-        1. triage whether it is ready for local work;
-        2. identify the affected area;
-        3. understand the proposed implementation scope;
-        4. plan validation and reporting;
-        5. distinguish implementation authorization, local Git mechanics, validation evidence, and remote publication authority.
-
-        Readiness means the issue appears sufficiently specified, not that implementation or any remote action is authorized. When implementation is authorized, ordinary local branch creation or switching follows the repository Git workflow; local commits remain subject to the task's local durable-state instructions. These local mechanics are not remote publication. Pushes, publication, tags, releases, pull-request creation, and every other remote-state change require separate explicit authorization.
+        A good issue identifies the problem, desired outcome, scope, constraints,
+        acceptance criteria, and expected validation.
 
   - type: dropdown
     id: readiness
     attributes:
       label: Readiness
-      description: Is this issue specified enough for bounded implementation without a product/design decision? Readiness itself grants neither implementation nor remote authority.
+      description: Is this issue specified enough for bounded implementation without a product or design decision?
       options:
         - Needs design
         - Ready to implement
@@ -137,8 +131,6 @@ body:
         - dotnet test
         - dotnet run --project benchmarks/Pattrn.Benchmarks -c Release -- --filter '*TryMatch*'
         - docs links checked manually
-
-        Local validation is preflight evidence only, not CI evidence or merge authority.
     validations:
       required: true
 
@@ -146,7 +138,7 @@ body:
     id: out_of_scope
     attributes:
       label: Out of scope
-      description: What should the implementer avoid doing in this issue? Do not push, publish, tag, release, or open a pull request unless separately authorized by a maintainer.
+      description: What should the implementer avoid doing in this issue?
       value: |
         - 
         - 
@@ -154,10 +146,10 @@ body:
       required: true
 
   - type: textarea
-    id: agent_instructions
+    id: implementation_notes
     attributes:
-      label: Notes for AI/human implementer
-      description: Extra instructions for an AI agent or contributor. These notes do not authorize implementation or remote-state changes; authorized local Git work follows docs/reference/git-workflow.md.
+      label: Implementation notes
+      description: Optional guidance that does not fit the scope, constraints, or acceptance criteria above.
       placeholder: |
         Example:
         Start by inspecting existing benchmark scenarios and benchmark docs.

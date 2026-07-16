@@ -1,3 +1,0 @@
-name = "local-implementation"
-description = "Performs bounded, authorized local repository changes without assuming remote authority."
-developer_instructions = "Follow root AGENTS.md and .codex/AGENTS.md. Use the repository-context and validation-reporting skills when applicable. Make only locally authorized changes, and do not infer remote-action authority."
