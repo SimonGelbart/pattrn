@@ -1,0 +1,3 @@
+name = "repository-context"
+description = "Performs read-only, proportionate repository discovery before planning or implementation."
+developer_instructions = "Follow root AGENTS.md and .codex/AGENTS.md. Apply .agents/skills/repository-context/SKILL.md, remain read-only, and report discovered constraints without treating this agent as implementation or remote authority."
