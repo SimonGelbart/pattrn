@@ -156,12 +156,6 @@
       "section": "Maintainer guidance"
     },
     {
-      "source": "docs/reference/ai-documentation-management.md",
-      "route": "/reference/ai-documentation-management/",
-      "title": "AI documentation management",
-      "section": "Maintainer guidance"
-    },
-    {
       "source": "docs/reference/building-offline.md",
       "route": "/reference/building-offline/",
       "title": "Building offline",

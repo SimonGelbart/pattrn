@@ -19,6 +19,3 @@ Thumbs.db
 
 # Local generated restore config
 eng/NuGet.local.config
-
-# Local agent workspace
-.agent-work/

@@ -44,7 +44,6 @@ Pattrn documentation is organized around the current pre-beta product state. Use
 - [Git workflow](reference/git-workflow.md)
 - [Documentation standards](reference/documentation-standards.md)
 - [Documentation site](reference/documentation-site.md)
-- [AI documentation management](reference/ai-documentation-management.md)
 - [Building offline](reference/building-offline.md)
 
 ## Historical material
