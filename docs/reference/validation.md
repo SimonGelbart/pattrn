@@ -2,6 +2,18 @@
 
 Do not claim validation passed unless it was actually run and passed.
 
+## Canonical result classifications
+
+This page is the sole definition source for validation result classifications:
+
+- **Passed:** the check completed and met its success criteria.
+- **Failed:** the check completed and did not meet its success criteria.
+- **Not run:** no attempt was made; state why it was intentionally omitted, out of scope, or not requested.
+- **Not completed:** execution started but did not reach a conclusive result; state where and why it stopped.
+- **Skipped:** no attempt was made because a required executable, SDK, network capability, permission, target platform, or similar execution capability was unavailable; state the missing capability.
+
+Supporting instructions and skills must link to these definitions rather than reproduce them. Local validation is not CI evidence.
+
 ## Source of truth
 
 CI is the authoritative verification path for pull requests and protected branches.
@@ -82,7 +94,7 @@ For every reported command or workflow, include:
 
 - command or workflow name;
 - working directory, when applicable;
-- result: `Passed`, `Failed`, `Not run`, or `Not completed`;
+- result using one canonical classification from this page;
 - concise output summary;
 - failure reason, if any;
 - reason a normally relevant command was not run, if skipped.

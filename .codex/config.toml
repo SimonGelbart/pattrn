@@ -1,8 +1,2 @@
-# Minimal Codex runtime configuration for this repository.
-# Repository authority remains in AGENTS.md, accepted ADRs, and docs/reference/**.
-
-profile = "pattrn-local"
-
-[profiles.pattrn-local]
-approval_policy = "never"
-sandbox_mode = "danger-full-access"
+# Project configuration is intentionally empty. Repository authority is defined
+# by AGENTS.md; supported local clients may load custom agents from agents/*.toml.

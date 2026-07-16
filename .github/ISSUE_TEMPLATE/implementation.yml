@@ -13,15 +13,15 @@ body:
         2. identify the affected area;
         3. understand the proposed implementation scope;
         4. plan validation and reporting;
-        5. identify which separate maintainer authorization is still required for branch creation, commits, pushes, publication, or pull requests.
+        5. distinguish implementation authorization, local Git mechanics, validation evidence, and remote publication authority.
 
-        Readiness means the issue appears sufficiently specified for bounded local implementation. It does not grant authority to create or switch branches, commit, push, publish, tag, release, open a pull request, or change any other remote state.
+        Readiness means the issue appears sufficiently specified, not that implementation or any remote action is authorized. When implementation is authorized, ordinary local branch creation or switching follows the repository Git workflow; local commits remain subject to the task's local durable-state instructions. These local mechanics are not remote publication. Pushes, publication, tags, releases, pull-request creation, and every other remote-state change require separate explicit authorization.
 
   - type: dropdown
     id: readiness
     attributes:
       label: Readiness
-      description: Is this issue specified enough for bounded local implementation without a product/design decision? This does not grant authority for commits or remote actions.
+      description: Is this issue specified enough for bounded implementation without a product/design decision? Readiness itself grants neither implementation nor remote authority.
       options:
         - Needs design
         - Ready to implement
@@ -157,7 +157,7 @@ body:
     id: agent_instructions
     attributes:
       label: Notes for AI/human implementer
-      description: Extra instructions for an AI agent or contributor. These notes do not grant authority for branch, commit, push, publication, pull-request, or other remote-state changes.
+      description: Extra instructions for an AI agent or contributor. These notes do not authorize implementation or remote-state changes; authorized local Git work follows docs/reference/git-workflow.md.
       placeholder: |
         Example:
         Start by inspecting existing benchmark scenarios and benchmark docs.

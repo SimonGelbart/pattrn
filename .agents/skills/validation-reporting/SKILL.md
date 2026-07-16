@@ -1,3 +1,8 @@
+---
+name: validation-reporting
+description: Select, run, classify, and honestly report validation for repository changes.
+---
+
 # Validation Reporting Skill
 
 Use this skill when planning, running, or reporting validation for Pattrn changes.
@@ -6,17 +11,9 @@ Use this skill when planning, running, or reporting validation for Pattrn change
 
 This skill is non-authoritative. The root `AGENTS.md`, accepted ADRs, `docs/reference/validation.md`, direct maintainer instructions, and CI configuration govern validation expectations.
 
-## Required result vocabulary
+## Result vocabulary
 
-Report each check as exactly one of:
-
-- `Passed`
-- `Failed`
-- `Not run`
-- `Not completed`
-- `Skipped`
-
-For `Skipped`, include a capability-based reason. For `Failed` and `Not completed`, include the observed reason. Local validation is not CI evidence.
+Use the classifications and distinctions defined only in `docs/reference/validation.md`. Include the required reasons and remember that local validation is not CI evidence.
 
 ## Procedure
 
