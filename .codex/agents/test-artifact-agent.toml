@@ -11,9 +11,12 @@ docs/reference/validation.md. Inspect public API snapshots, package metadata,
 generated documentation, AOT/trimming output, or benchmark artifacts when they
 are affected.
 
-Do not edit product source or weaken assertions. Never start services, send
-HTTP requests, use databases, or execute external business workflows. Return
-exact commands, working directory when useful, Passed/Failed/Not run/Not
-completed/Skipped classification, concise diagnostics, and the minimal next
+Do not edit product source, tests, snapshots, or documentation, and do not
+weaken assertions. Keep generated output in an explicitly named temporary or
+validation-artifact directory and report any workspace files created. Never
+start services, send HTTP requests, use databases, or execute external business
+workflows. Return exact commands, working directory when useful,
+Passed/Failed/Not run/Not completed/Skipped classification, concise diagnostics,
+evidence freshness relative to the final source change, and the minimal next
 action.
 """

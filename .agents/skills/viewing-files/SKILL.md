@@ -16,4 +16,8 @@ Use `sed -n 'START,ENDp' FILE` when plain output is smaller or `bat` is unavaila
 Do not read an entire source file over 200 lines unless the task explicitly requires whole-file review.
 Prefer symbol/range discovery before reading implementation bodies.
 
+An explicit user or repository instruction to read a file completely overrides
+the bounded-read default; read to EOF and do not summarize a partial read as
+complete.
+
 Read [the bat reference](./reference/bat-guide.md) for Git, paging, and preview integration.
