@@ -78,7 +78,10 @@ only `DuplicateValueMatchMode` and its `DeduplicateValues` convenience property.
 `MatchDetailedToArray` returns owning `PatternMatchDetailed<TSegment, TValue>`
 records with immutable captures. Caller-buffer detailed methods return
 `PatternMatchDetailedSlice<TValue>` plus a capture span. Use `TryGetCapture` or
-`GetCapture` for ordinal capture-name lookup.
+`GetCapture` for ordinal capture-name lookup. Use
+`GetPrefixCaptureCountUpperBound` or
+`GetEnumeratePrefixCaptureCountUpperBound` to size the capture span for
+best-prefix or all-prefix detailed matching, respectively.
 
 ## Companion packages
 

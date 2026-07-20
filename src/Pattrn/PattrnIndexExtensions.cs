@@ -109,6 +109,30 @@ public static class PattrnIndexExtensions
     }
 
     /// <summary>
+    /// Gets a path-specific best-prefix capture upper bound for a memory-backed path.
+    /// </summary>
+    public static int GetPrefixCaptureCountUpperBound<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        ReadOnlyMemory<TSegment> path)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        return index.GetPrefixCaptureCountUpperBound(path.Span);
+    }
+
+    /// <summary>
+    /// Gets a path-specific all-prefix capture upper bound for a memory-backed path.
+    /// </summary>
+    public static int GetEnumeratePrefixCaptureCountUpperBound<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        ReadOnlyMemory<TSegment> path)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        return index.GetEnumeratePrefixCaptureCountUpperBound(path.Span);
+    }
+
+    /// <summary>
     /// Matches a memory-backed path and writes detailed matches and captures into caller-provided destination spans.
     /// </summary>
     public static int MatchDetailed<TSegment, TValue>(
