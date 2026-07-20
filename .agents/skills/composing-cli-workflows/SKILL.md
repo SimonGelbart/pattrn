@@ -19,11 +19,26 @@ Choose the shortest sequence that answers the task:
 5. Preview transformations with `sd` or `ast-grep`.
 6. Apply changes and verify with the narrowest relevant query.
 
+For a multi-package or public-contract change, add two gates before the first
+edit: capture `git status --short` and `git diff --stat`, then build a compact
+requirement matrix linking each requirement to files, tests, validation, and
+deferrals. Do not let a broad source search substitute for that matrix.
+
+Use waves for parallel work: run independent read-only discovery together,
+serialize overlapping writers, and run independent artifact checks together
+only when their output directories do not overlap. Serialize build, test, and
+pack commands that share `bin/` or `obj/`. Review the final diff only after the
+last source change; a review from an earlier diff is stale.
+
 Before running a pipeline, state the intended output shape: filenames, line ranges, symbols, counts, or changed files.
 Do not run a pipeline that produces unbounded source output.
 
 Use non-interactive commands during agent execution. Use `fzf` only when generating a command for a human-driven terminal workflow.
 
 Skip steps that add no value. Avoid loading whole files, printing large trees, or adding pipeline stages merely because a tool exists.
+
+When the user explicitly requests a complete file read, follow that request
+even though bounded reads are the default. For final reporting, preserve the
+exact command and classify unsupported-command fallbacks separately.
 
 Read [the workflow recipes](./reference/workflow-recipes.md) when selecting a multi-tool pipeline or restoring a less common combination.

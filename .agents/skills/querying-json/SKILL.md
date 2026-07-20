@@ -3,7 +3,7 @@ name: querying-json
 description: Query, filter, or transform JSON with jq or jaq. Use to extract fields from JSON files or command output, inspect nested data selectively, or reduce large JSON before loading it into context.
 ---
 
-# Query JSON with jkq
+# Query JSON with jq
 
 Use `jq` as the default JSON processor. It is largely `jaq` compatible, so familiar filters usually work unchanged.
 Use `jaq` only when `jq` is unavailable or when compatibility behavior is required, and state the fallback reason.

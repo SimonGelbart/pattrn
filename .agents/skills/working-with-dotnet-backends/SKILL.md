@@ -7,6 +7,13 @@ description: Explore, modify, build, and test .NET backend solutions with minima
 
 Use the smallest .NET workflow that identifies the affected boundary and verifies the change.
 
+For a shared contract or multi-project change, run a command-compatibility
+preflight before spending time on the full gate: inspect `global.json`, check
+the solution/test-platform shape, and prefer the repository's documented test
+module command over guessing CLI syntax. Preserve both the exact requested
+command result and the canonical equivalent in the final report when they
+differ.
+
 ## Discover The Solution
 
 ```bash
@@ -64,6 +71,10 @@ dotnet test path/to/Project.Tests.csproj --nologo -v:minimal --no-build --filter
 
 Use `--no-restore` only when restore assets are current. Broaden to the solution when shared contracts, packages, or cross-cutting behavior changed. Increase verbosity only when compact failure output is insufficient.
 
+Do not run build, test, and pack concurrently when they share `bin/` or
+`obj/`. Independent Python, documentation, API-snapshot, and artifact checks
+may run in parallel when their output paths are isolated.
+
 ## Verification Failure Policy
 
 When build or test verification fails:
@@ -87,5 +98,9 @@ Run solution-wide build/test only when one of these is true:
 5. Narrow verification passed but cross-project risk remains
 
 State the escalation reason before running the wider command.
+
+When tests are removed or renamed during an API migration, perform a focused
+test-inventory review before declaring the change complete: each removed test
+must have a replacement contract test or an explicit obsolete-behavior reason.
 
 Read [the .NET workflow recipes](./reference/dotnet-backend-recipes.md) for dependency audits, ASP.NET Core searches, and escalation guidance.

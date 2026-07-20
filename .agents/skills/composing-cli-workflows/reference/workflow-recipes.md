@@ -50,7 +50,7 @@ bat --line-range 80:145 --style=numbers src/client.ts
 - **finding-files -> analyzing-code**: Scope language statistics to a directory or file set.
 - **finding-files -> querying-json/querying-yaml**: Inspect structured configuration selectively.
 - **analyzing-code -> finding-files -> searching-text**: Use language statistics to choose a focused search.
-- **searching-text -> analyzing-code-structure**: Locate suspicious areas, then match code shapes precisely.
+- **searching-text -> structural search**: Locate suspicious areas, then match code shapes precisely with `ast-grep`, `ctags`, or language-native tooling.
 - **querying-json/querying-yaml -> searching-text**: Extract names or values, then locate their usage.
 
 ```bash
@@ -64,10 +64,10 @@ rg -n -C 2 -F 'FEATURE_FLAG' src
 ## Refactoring Phase
 
 - **finding-files -> replacing-text**: Apply a reviewed literal or regex replacement to selected files.
-- **finding-files -> analyzing-code-structure**: Apply a structural search or refactor to selected source files.
+- **finding-files -> structural search**: Apply a structural search or refactor to selected source files with `ast-grep`, `ctags`, or language-native tooling.
 - **finding-files -> xargs**: Run a batch command over a reviewed file list.
 - **searching-text -> replacing-text -> searching-text**: Locate, preview, apply, and verify text substitutions.
-- **searching-text -> analyzing-code-structure -> searching-text**: Find likely regions, refactor AST patterns, and verify old patterns are gone.
+- **searching-text -> structural search -> searching-text**: Find likely regions, refactor AST patterns, and verify old patterns are gone.
 - **analyzing-code -> refactor -> analyzing-code**: Measure composition or line-count changes before and after broad work.
 
 ```bash
@@ -114,7 +114,7 @@ git show HEAD:path/to/file | sed -n '40,100p'
 ## Code Exploration
 
 - **extracting-code-structure -> searching-text**: Get an outline, then search for references to selected symbols.
-- **extracting-code-structure -> analyzing-code-structure**: Inspect declarations, then search or refactor code shapes.
+- **extracting-code-structure -> structural search**: Inspect declarations, then search or refactor code shapes.
 - **extracting-code-structure -> viewing-files**: Read only the implementation range that matters.
 - **searching-text -> extracting-code-structure**: Find relevant files, then request a compact symbol outline.
 

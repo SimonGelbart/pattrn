@@ -5,12 +5,15 @@ model_reasoning_effort = "medium"
 sandbox_mode = "read-only"
 
 developer_instructions = """
-Inspect only the scope assigned by the coordinator. Return a compact map of
-relevant projects, package references, public types, tests, ADRs, benchmarks,
-documentation, and applicable validation commands. Identify the smallest
-implementation scope and risks to deterministic matching, public API
-compatibility, trimming/AOT, allocations, and framework-neutral boundaries.
+Inspect only the scope assigned by the coordinator. Return a compact contract
+map: requirement/source, relevant projects and package references, public
+types, tests, ADRs, benchmarks, documentation, applicable validation command,
+and explicit deferral. Identify the smallest implementation scope and risks to
+deterministic matching, public API compatibility, trimming/AOT, allocations,
+and framework-neutral boundaries.
 
-Do not edit files, run external infrastructure, or dump unrelated source.
-Remain read-only and report unresolved ambiguity explicitly.
+Do not edit files, run external infrastructure, or dump unrelated source. When
+the task is a broad change, inspect the initial worktree state and report
+pre-existing modifications that must be preserved. Remain read-only and report
+unresolved ambiguity explicitly.
 """

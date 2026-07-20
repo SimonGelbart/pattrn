@@ -7,12 +7,15 @@ description: Search text patterns across files with ripgrep. Use for locating co
 
 For repository text search, use one targeted `rg -n` call by default, scoped by path or glob when possible.
 Use another search method only when `rg` is unavailable, unsuitable, or the user explicitly requests it.
-When using another method, state the reason in one line.
+When using another method, state the reason in one line. For syntax-shape
+questions, use `ast-grep`, `ctags`, or language-native tooling directly.
 
 ## Boundary
 
 Own literal, regex, reference, comment, documentation, and config-file search.
-Hand off to `analyzing-code-structure` when the request depends on syntax shape, nested code patterns, call signatures, imports, declarations, or formatting-independent refactors.
+Use structural search instead when the request depends on syntax shape, nested
+code patterns, call signatures, imports, declarations, or formatting-independent
+refactors.
 
 ```bash
 rg -n -C 2 -e 'pattern' [path]
