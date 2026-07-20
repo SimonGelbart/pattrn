@@ -21,3 +21,47 @@ This repository accepts assisted and automated changes when they are scoped, rev
 - Select the smallest relevant validation set using `docs/reference/validation.md`; local checks are not CI evidence.
 - Never claim a check passed unless it ran and passed, and never hide failures or incomplete work.
 - Report the changed scope, exact checks and result classifications, and any commit, branch, or remote action.
+
+## Pattrn product invariants
+
+Pattrn is an allocation-conscious, immutable segmented-pattern matcher for .NET.
+Keep the generic core framework-neutral; string, dependency-injection, and
+routing behavior belongs in companion packages.
+
+- Preserve deterministic registration order, duplicate behavior, ranking, and
+  matching results.
+- Keep diagnostics and explanation APIs separate from the default hot path.
+- Treat public API snapshots and package documentation as compatibility
+  contracts; update them intentionally when public behavior changes.
+- Preserve trimming and Native AOT compatibility for the stable candidate
+  packages. Do not introduce reflection, dynamic code, or linker-sensitive
+  behavior without explicit justification and validation.
+- Treat `Pattrn.Routing` as preview and do not broaden generic-core semantics
+  to accommodate framework-specific routing behavior.
+- Support performance claims with the relevant benchmark evidence. A local
+  benchmark is investigation evidence, not CI proof.
+
+## Bounded agent workflow
+
+For a bounded change, use this sequence when the task benefits from multiple
+agents:
+
+```text
+targeted exploration
+→ exactly one product-source writer
+→ focused tests and affected validation
+→ independent compatibility review
+→ artifact/API/benchmark inspection
+→ final affected gate
+```
+
+Parallelize independent read-only exploration and reviews, but never run
+concurrent writers against overlapping product files. Keep each worker inside
+the declared package and invariant scope. Stop for an architectural decision,
+non-converging repair, or a required validation capability that is unavailable;
+do not silently broaden the milestone.
+
+The repository agents are role boundaries, not extra authorization. They must
+not push, publish, open pull requests, modify remote state, or alter unrelated
+worktree changes. Do not introduce a durable run ledger for ordinary changes;
+use one only when an explicitly unattended workflow needs persistent evidence.
