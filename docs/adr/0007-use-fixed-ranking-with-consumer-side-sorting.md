@@ -1,18 +1,16 @@
-# ADR 0013: Use fixed ranking with consumer-side sorting
+# ADR 0007: Use fixed ranking with consumer-side sorting
 
 ## Status
 
 Accepted
 
+## Date
+
+2026-06-21
+
 ## Context
 
 Pattrn must return deterministic results when literal, parameter, wildcard, catch-all, duplicate, and prefix registrations overlap. It also needs to stay domain-neutral. A public ranking plugin or comparer would be attractive for advanced routing-like domains, but it would widen the beta surface before real users have shown that extensibility is necessary.
-
-## Historical context
-
-Earlier alpha roadmap notes considered specificity customization. The product-foundation roadmap later narrowed that direction: use fixed built-in deterministic ranking plus exposed metadata for consumer-side custom sorting, and avoid a public ranking plugin or comparer before beta.
-
-The current implementation already exposes `Specificity`, `RegistrationOrder`, `PatternId`, `PatternMatchKind`, and captures through detailed match APIs. That is enough for consumers to sort or filter detailed matches outside the core.
 
 ## Decision
 
@@ -47,4 +45,4 @@ Some advanced scenarios will need a small amount of consumer-side code instead o
 
 ## Follow-up work
 
-Keep `docs/reference/ranking-specificity.md` and compatibility tests aligned with this ADR. Revisit ranking extensibility after beta feedback if real consumers need a first-class hook.
+Keep `docs/reference/matching-semantics.md` and ranking tests aligned with this ADR. Revisit ranking extensibility only if real consumers need a first-class hook.

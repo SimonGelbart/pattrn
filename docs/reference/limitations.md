@@ -1,6 +1,6 @@
 # Known limitations
 
-This document records intentional pre-beta product boundaries. These are product choices, not missing framework features.
+This document records current product boundaries.
 
 ## .NET target
 
@@ -20,7 +20,7 @@ The core preserves generic pattern metadata and captures, but it does not valida
 
 ## Catch-all semantics are segmented
 
-Core catch-all captures are returned as one `PatternCapture<TSegment>` per captured input segment. String joining such as `"a/b/c"` is a routing-layer convenience, not a core behavior.
+Core catch-all captures are returned as one `PatternCapture<TSegment>` whose `Values` contains all captured input segments. String joining such as `"a/b/c"` is a routing-layer convenience, not a core behavior.
 
 ## Synchronous matching
 

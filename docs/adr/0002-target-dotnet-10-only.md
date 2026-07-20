@@ -4,13 +4,13 @@
 
 Accepted
 
+## Date
+
+2026-06-21
+
 ## Context
 
 The project is pre-beta and should optimize for a clear implementation and validation story before broadening compatibility. Multi-targeting would increase build, test, package, and support complexity.
-
-## Historical context
-
-The solution already targets `net10.0` across production projects, tests, samples, and benchmarks. Offline validation artifacts were prepared around the .NET 10 SDK. No current consumer requires older target frameworks.
 
 ## Decision
 

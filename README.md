@@ -4,7 +4,7 @@ Fast immutable segmented-pattern matching for .NET 10.
 
 `Pattrn` indexes segmented patterns once, then resolves matching inputs quickly and predictably. The core package is generic and dependency-light; string paths, dependency-injection helpers, and route-template syntax live in companion packages.
 
-Pattrn is pre-beta. Package versioning is intentionally centralized and simple during pre-beta. For current direction and milestone status, see the [roadmap](docs/roadmap.md) and [ADR 0012](docs/adr/0012-simplify-pre-beta-versioning-and-roadmap-milestones.md).
+Pattrn is pre-beta. The public surface may still change while the core contracts are being exercised by real users.
 
 ## Packages
 
@@ -36,13 +36,12 @@ var matches = index.MatchToArray(["orders", "123"]);
 
 ## Start with the docs hub
 
-Use the [documentation index](docs/README.md) for the newcomer path, package install guidance, tutorials, reference docs, and historical context.
+Use the [documentation index](docs/README.md) for package guidance, tutorials, and the current behavior reference.
 
 Key links:
 
 - [Documentation index](docs/README.md)
-- [Roadmap](docs/roadmap.md)
 - [Core package docs](docs/packages/pattrn.md)
 - [API overview](docs/reference/api.md)
-- [Pattern segments](docs/reference/pattern-segments.md)
+- [Matching semantics](docs/reference/matching-semantics.md)
 - [Architecture decisions](docs/adr/README.md)

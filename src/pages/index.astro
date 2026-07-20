@@ -83,14 +83,13 @@ const withBase = (path: string) => `${base}${path}`;
     <div class="doc-grid">
       <a class="doc-link" href={withBase('/docs/')}><strong>Docs</strong><p>Start, understand, operate, and package documentation links.</p></a>
       <a class="doc-link" href={withBase('/adr/')}><strong>ADRs</strong><p>Decision records for architecture, semantics, packaging, and validation policy.</p></a>
-      <a class="doc-link" href={withBase('/roadmap/')}><strong>Roadmap</strong><p>Pre-beta product direction, status, boundaries, and package strategy.</p></a>
-      <a class="doc-link" href={withBase('/reference/')}><strong>Reference</strong><p>API, segment model, matching, ranking, diagnostics, validation, and layout references.</p></a>
+      <a class="doc-link" href={withBase('/reference/')}><strong>Reference</strong><p>API, matching, diagnostics, validation, and package references.</p></a>
       <a class="doc-link" href={withBase('/benchmarks/')}><strong>Benchmarks</strong><p>CI-owned benchmark evidence and guardrail rules.</p></a>
       <a class="doc-link" href={withBase('/packages/')}><strong>Packages</strong><p>Package roles and stability posture.</p></a>
     </div>
   </section>
 
   <section class="section section-compact">
-    <aside class="note"><p><strong>Current status:</strong> Pattrn is pre-beta and pre-1.0. Roadmap milestones describe product readiness, not release-train numbers.</p></aside>
+    <aside class="note"><p><strong>Current status:</strong> Pattrn is pre-beta and pre-1.0. The public surface may still change before beta.</p></aside>
   </section>
 </PattrnLayout>

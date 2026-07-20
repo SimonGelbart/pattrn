@@ -4,13 +4,13 @@
 
 Accepted
 
+## Date
+
+2026-06-21
+
 ## Context
 
 Pattrn can support routing-like, glob-like, policy, command, topic, and resource lookup use cases. If the core owns any one of those domains, the generic engine will inherit domain-specific rules, edge cases, and performance costs.
-
-## Historical context
-
-Earlier alpha documentation and implementation explored routing, strings, diagnostics, package metadata, and performance work while the product boundary was still being shaped. The historical architecture review and roadmap consistently point toward a reusable segmented-pattern engine rather than a web framework, router, filesystem abstraction, authorization engine, or business-rule engine.
 
 ## Decision
 
@@ -18,7 +18,7 @@ Earlier alpha documentation and implementation explored routing, strings, diagno
 
 The core owns segments, explicit pattern segment kinds, literals, parameters, wildcards, terminal catch-alls, captures, duplicate behavior, deterministic matching metadata, immutable compiled indexes, and optional generic diagnostics.
 
-The core does not own HTTP, ASP.NET Core routing, filesystem globbing, authorization, tenancy, OpenAPI, endpoint metadata, business rules, or framework-specific precedence.
+The core does not own HTTP, ASP.NET Core routing, filesystem globbing, authorization, tenancy, OpenAPI, endpoint metadata, business rules, dependency injection, or framework-specific precedence. Companion packages translate domain syntax into the generic model.
 
 ## Consequences
 

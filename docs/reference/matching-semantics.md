@@ -2,7 +2,7 @@
 
 `Pattrn` matches an incoming segmented path against registered segmented patterns.
 
-The semantics are intentionally small and explicit so the library remains useful outside the starter-kit domain.
+The semantics are intentionally small and explicit so the library remains useful across domains.
 
 ## Terms
 
@@ -54,13 +54,15 @@ This default is deliberate. The starter kit's reference project behaves like a s
 
 ## Explicit prefix matching
 
-Prefix matching is enabled at build time:
+Detailed and explanation prefix traversal is enabled at build time:
 
 ```csharp
 var index = builder.Build(MatchOptions.Prefix);
 ```
 
 With prefix matching enabled, a pattern can match the beginning of a longer input path.
+
+For value-only matching, use `MatchPrefixToArray`, `TryMatchPrefix`, or `GetPrefixMatchCountUpperBound` explicitly. The ordinary value-only methods remain exact-length operations even when the index was built with `MatchOptions.Prefix`.
 
 ```text
 pattern: NASDAQ
@@ -205,10 +207,10 @@ Registrations with the same structural specificity preserve registration order w
 
 Prefix mode is deterministic but traversal ordered. A registration at a prefix node is emitted before deeper descendant registrations. Within competing branches at the same depth, the generic specificity order still applies. Use detailed match metadata plus application-owned value metadata for consumer-side sorting if a scenario needs one global ranking order across prefix and descendant matches.
 
-See [ranking and specificity](ranking-specificity.md) for the full contract and consumer-side sorting guidance.
+Use detailed match metadata and consumer-side sorting when a domain needs more than the built-in order.
 
 ## Threading
 
 The builder is a mutable, single-writer construction object and is not safe for concurrent mutation. The compiled index returned by `Build()` is an immutable snapshot and is safe for concurrent readers after construction.
 
-If registrations are discovered concurrently, collect and order them deterministically before applying them to one builder. Publish completed compiled indexes to readers, and rebuild/swap a new index when registrations change. See the [API lifecycle guidance](api.md#builder-and-index-lifecycle) and [ADR 0014](../adr/0014-builders-single-writer-compiled-indexes-concurrent-reader-safe.md).
+If registrations are discovered concurrently, collect and order them deterministically before applying them to one builder. Publish completed compiled indexes to readers, and rebuild/swap a new index when registrations change. See the [API lifecycle guidance](api.md#builder-and-index-lifecycle) and [ADR 0008](../adr/0008-builders-single-writer-compiled-indexes-concurrent-reader-safe.md).

@@ -16,9 +16,10 @@ The package is pre-beta. The fluent registration model is the stable-candidate s
 
 ```csharp
 services.AddPattrnIndex<string, string>(registration => registration
-    .UseMatchOptions(MatchOptions.Prefix)
     .Configure(builder => builder.Add(["market", "NASDAQ"], "client-a")));
 ```
+
+Use `MatchPrefixToArray` or `TryMatchPrefix` on the resolved index when the application needs prefix matches. `UseMatchOptions(MatchOptions.Prefix)` remains relevant to detailed and explanation traversal, but does not change the exact value-only methods.
 
 The compiled index is registered as a singleton concrete `PattrnIndex<TSegment, TValue>`:
 
@@ -119,4 +120,4 @@ Preview:
 - `IPattrnRegistrationSource<TSegment, TValue>`.
 - `PattrnRegistrationContext<TSegment, TValue>`.
 
-See [project profile](../reference/project-profile.md) and [roadmap](../roadmap.md) for current package-level stability posture.
+The package is pre-beta; its registration helpers remain intentionally thin.

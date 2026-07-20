@@ -17,7 +17,7 @@ Not included:
 
 - project-specific landing copy
 - project-specific package descriptions
-- project-specific roadmap or benchmark wording
+- project-specific benchmark wording
 - main-site editorial project data
 
 Future extraction:

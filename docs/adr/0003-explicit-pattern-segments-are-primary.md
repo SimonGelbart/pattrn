@@ -4,13 +4,13 @@
 
 Accepted
 
+## Date
+
+2026-06-21
+
 ## Context
 
 A segmented matcher needs to distinguish literals from parameters, wildcards, and catch-alls without reserving magic values in the user's segment type.
-
-## Historical context
-
-Earlier alpha APIs supported tokenized wildcard registration as a compact convenience. The alpha design later moved toward tokenless builders and explicit `PatternSegment<TSegment>` registrations. Existing docs and tests already describe explicit segment registration as the documentation-first model.
 
 ## Decision
 

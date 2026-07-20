@@ -25,7 +25,7 @@ Prefer focused commits and Conventional Commit messages:
 build: centralize pre-beta package metadata
 docs: add project workflow foundation
 docs: record product boundary decisions
-docs: simplify roadmap milestones
+docs: refresh current documentation
 fix: align package inspection with repository metadata
 ```
 

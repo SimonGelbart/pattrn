@@ -32,7 +32,7 @@ The default builder is tokenless. `AddPattern(...)` callers do not need to reser
 
 ## Builder and index lifecycle
 
-[ADR 0014](../adr/0014-builders-single-writer-compiled-indexes-concurrent-reader-safe.md) is the source of truth for the builder/index concurrency model: builders are mutable, single-writer construction objects, and compiled indexes are immutable snapshots safe for concurrent readers after construction.
+[ADR 0008](../adr/0008-builders-single-writer-compiled-indexes-concurrent-reader-safe.md) is the source of truth for the builder/index concurrency model: builders are mutable, single-writer construction objects, and compiled indexes are immutable snapshots safe for concurrent readers after construction.
 
 ### Builder ownership
 
@@ -108,7 +108,7 @@ public void Reload(IEnumerable<Registration> registrations)
 }
 ```
 
-The compiled index read APIs are safe for concurrent callers after construction. Keep hot paths on `Match`, `TryMatch`, `MatchToArray`, `MatchDetailed`, or `TryMatchDetailed` as appropriate. Use `Explain(...)` for diagnostics and troubleshooting rather than as the hot path because it is allocation-oriented and can include extra diagnostic traversal.
+The compiled index read APIs are safe for concurrent callers after construction. Keep hot paths on `TryMatch`, `MatchToArray`, the explicit prefix methods, or detailed span APIs as appropriate. Use `Explain(...)` for diagnostics and troubleshooting rather than as the hot path because it is allocation-oriented and can include extra diagnostic traversal.
 
 ## Match to an array
 
@@ -151,6 +151,8 @@ PatternMatchExplanation<TSegment, TValue> Explain(
     ReadOnlySpan<TSegment> path,
     PatternExplanationOptions options = default);
 ```
+
+Value-only matching is split into exact and prefix operations. `MatchToArray`, `TryMatch`, and `GetMatchCountUpperBound` are exact-length operations. `MatchPrefixToArray`, `TryMatchPrefix`, and `GetPrefixMatchCountUpperBound` explicitly include registrations at matching prefix nodes. The build-time `MatchOptions.Prefix` setting currently controls detailed and explanation traversal; it does not turn the exact value-only methods into prefix methods.
 
 Convenience overloads for `ReadOnlyMemory<T>` and `IEnumerable<T>` are extension methods in the core package. Dotted and separated string helpers live in `Pattrn.Strings`.
 
@@ -207,9 +209,9 @@ RemovePattern(...);
 RemoveAllPattern(...);
 ```
 
-`PatternSegment<TSegment>.Literal(value)` always registers an exact literal value. `PatternSegment<TSegment>.Wildcard()` and `PatternSegment<TSegment>.Parameter(name)` both register a single-segment wildcard branch. Named parameters are exposed by the detailed match APIs. `Any()`, the `Wildcard` property, and the `CatchAllWildcard` property were removed before beta in favor of explicit factory methods.
+`PatternSegment<TSegment>.Literal(value)` always registers an exact literal value. `PatternSegment<TSegment>.Wildcard()` and `PatternSegment<TSegment>.Parameter(name)` both register a single-segment wildcard branch. Named parameters are exposed by the detailed match APIs.
 
-See [generic pattern segments](pattern-segments.md).
+See [matching semantics](matching-semantics.md).
 
 ## Builder maintenance and convenience APIs
 
@@ -262,7 +264,7 @@ var firstCaptures = captures.AsSpan(first.CaptureStart, first.CaptureCount);
 
 `MatchDetailedToArray(...)` is the allocating detailed convenience API. It returns `PatternMatchDetailed<TSegment, TValue>` values with owning `PatternCapture<TSegment>` captures. `PatternCapture<TSegment>.Values` contains the captured input segments, `StartSegmentIndex` identifies where the capture begins, and `SegmentCount` is computed from `Values.Length`. `PatternCapture<TSegment>.Value` is only for single-segment captures and throws `InvalidOperationException` for zero-segment or multi-segment captures.
 
-Detailed matches expose `PatternId`, `RegistrationOrder`, `Kind`, `Specificity`, `PatternSegmentCount`, and `ConsumedSegmentCount`. `PatternId` is optional caller-provided identity; `RegistrationOrder` is a deterministic zero-based order assigned when the builder accepts the registration. See [compatibility semantics](compatibility-semantics.md) for the ordering contract currently covered by tests.
+Detailed matches expose `PatternId`, `RegistrationOrder`, `Kind`, `Specificity`, `PatternSegmentCount`, and `ConsumedSegmentCount`. `PatternId` is optional caller-provided identity; `RegistrationOrder` is a deterministic zero-based order assigned when the builder accepts the registration. See [matching semantics](matching-semantics.md) for the ordering contract.
 
 ## Explanation results
 
@@ -289,7 +291,7 @@ var explanation = index.Explain(
     PatternExplanationOptions.IncludeRejections);
 ```
 
-`Explain(...)` does not replace the hot APIs. Keep request-routing, policy checks, and repeated read paths on `Match`, `TryMatch`, `MatchToArray`, or span-based `MatchDetailed`.
+`Explain(...)` does not replace the hot APIs. Keep request-routing, policy checks, and repeated read paths on `TryMatch`, `MatchToArray`, explicit prefix methods, or span-based `MatchDetailed`.
 
 ## Builder duplicate and validation policies
 
@@ -322,8 +324,8 @@ builder.ValidateOnBuild(diagnostic => diagnostic.Kind == PatternDiagnosticKind.O
 
 ## Try method failure semantics
 
-`TryMatch` and `TryMatchDetailed` do not publish partial results. When a destination span is too small, the method returns `false`, reports zero written counts, and does not write to caller-provided destination spans. Use `Match` or the span-based `MatchDetailed` when you prefer an exception on insufficient capacity.
+`TryMatch` and `TryMatchDetailed` do not publish partial results. When a destination span is too small, the method returns `false`, reports zero written counts, and does not write to caller-provided destination spans. Use the allocating array APIs or span-based `MatchDetailed` when you prefer an exception on insufficient capacity.
 
 ## Preview status
 
-`Pattrn`, `Pattrn.Strings`, and `Pattrn.DependencyInjection` are stable candidates before beta. `Pattrn.Routing` remains preview. Public API names may still change before beta when doing so makes the long-term surface clearer. See [project profile](project-profile.md) and [roadmap](../roadmap.md) for current package-level stability posture.
+`Pattrn`, `Pattrn.Strings`, and `Pattrn.DependencyInjection` are pre-beta packages intended for early use. `Pattrn.Routing` remains preview. Public API names may still change before beta.

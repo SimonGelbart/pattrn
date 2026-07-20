@@ -12,10 +12,7 @@ const groups: ReferenceGroup[] = [
     title: 'API and semantics',
     items: [
       { ...linkForSource('docs/reference/api.md', 'Core API'), text: 'Core public API map and entry points.' },
-      { ...linkForSource('docs/reference/pattern-segments.md', 'Pattern segments'), text: 'Literal, parameter, wildcard, and catch-all segment model.' },
       { ...linkForSource('docs/reference/matching-semantics.md', 'Matching semantics'), text: 'What matches, why, and how detailed matching behaves.' },
-      { ...linkForSource('docs/reference/ranking-specificity.md', 'Ranking and specificity'), text: 'Deterministic ranking metadata and specificity model.' },
-      { ...linkForSource('docs/reference/compatibility-semantics.md', 'Compatibility semantics'), text: 'Compatibility posture for pre-beta evolution.' },
       { ...linkForSource('docs/reference/duplicate-behavior.md', 'Duplicate behavior'), text: 'Duplicate registration and materialization behavior.' },
       { ...linkForSource('docs/reference/diagnostics.md', 'Diagnostics'), text: 'Opt-in explanation APIs and rejection diagnostics.' },
       { ...linkForSource('docs/reference/limitations.md', 'Known limitations'), text: 'Current boundaries and intentionally unsupported behavior.' },
@@ -24,13 +21,9 @@ const groups: ReferenceGroup[] = [
   {
     title: 'Maintainer reference',
     items: [
-      { ...linkForSource('docs/reference/project-profile.md', 'Project profile'), text: 'Durable public facts about Pattrn.' },
       { ...linkForSource('docs/reference/validation.md', 'Validation'), text: 'Validation posture and maintainer checks.' },
-      { ...linkForSource('docs/reference/repository-layout.md', 'Repository layout'), text: 'Where code, docs, tests, and workflow assets live.' },
       { ...linkForSource('docs/reference/git-workflow.md', 'Git workflow'), text: 'Branch, commit, and remote operation guidance.' },
-      { ...linkForSource('docs/reference/documentation-standards.md', 'Documentation standards'), text: 'Documentation ownership, curation, and staleness rules.' },
       { ...linkForSource('docs/reference/documentation-site.md', 'Documentation site'), text: 'Rendered site model, manifest ownership, and source boundaries.' },
-      { ...linkForSource('docs/reference/building-offline.md', 'Building offline'), text: 'Local offline restore guidance when maintainers need it.' },
     ],
   },
   {

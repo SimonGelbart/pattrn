@@ -4,7 +4,7 @@ Fast immutable segmented-pattern matching for .NET 10.
 
 `Pattrn` indexes segmented patterns once, then resolves matching inputs quickly and predictably. The core package is generic and dependency-light; string paths, dependency-injection helpers, and route-template syntax live in companion packages.
 
-Pattrn is pre-beta. The current package version is intentionally simple and centralized. Roadmap milestones describe product readiness, not release-train numbers.
+Pattrn is pre-beta. The public surface may still change before beta.
 
 ## Install
 
@@ -12,7 +12,6 @@ Pattrn is pre-beta. The current package version is intentionally simple and cent
 <PackageReference Include="Pattrn" Version="0.1.0-alpha.1" />
 ```
 
-See [packaging reference](../reference/packaging.md) for centralized versioning policy and package metadata details.
 
 ## Packages
 
@@ -195,20 +194,14 @@ Start with the [documentation index](../README.md).
 
 Key pages:
 
-- [Roadmap](../roadmap.md)
 - [Architecture decisions](../adr/README.md)
-- [Project profile](../reference/project-profile.md)
 - [Validation](../reference/validation.md)
 - [API overview](../reference/api.md)
-- [Pattern segments](../reference/pattern-segments.md)
 - [Matching semantics](../reference/matching-semantics.md)
-- [Ranking and specificity](../reference/ranking-specificity.md)
 - [Duplicate behavior](../reference/duplicate-behavior.md)
 - [Diagnostics](../reference/diagnostics.md)
 - [Benchmarks](../reference/benchmarks.md)
 
 ## Product direction
 
-For current milestone status and sequencing, see the [roadmap](../roadmap.md). Historical alpha-train context is preserved in [CHANGELOG.md](../../CHANGELOG.md) and archive docs.
-
-Routing remains preview. Globbing, ASP.NET Core helpers, source generators, analyzers, custom ranking plugins, and multidimensional matching helpers are deferred until after the core/string/DI product is ready for beta feedback.
+Routing remains preview. Framework-specific routing, globbing, source generators, analyzers, and domain-specific ranking remain outside the core package.

@@ -1,6 +1,6 @@
 # Build your first Pattrn index
 
-This tutorial introduces the core `Pattrn` package. It uses explicit pattern segments because that is the current documentation-first model for the pre-beta core API.
+This tutorial introduces the core `Pattrn` package. It uses explicit pattern segments, which avoid reserving a segment value for wildcard behavior.
 
 Use companion packages only after the segmented core model is clear:
 
@@ -76,9 +76,7 @@ Detailed matches expose pattern identity, registration order, specificity metada
 ## 6. Next steps
 
 - Read the [core API reference](../reference/api.md).
-- Read [generic pattern segments](../reference/pattern-segments.md).
 - Read [matching semantics](../reference/matching-semantics.md).
-- Read [ranking and specificity](../reference/ranking-specificity.md).
 - Use [string helpers](../packages/pattrn-strings.md) for separated string paths.
 - Use [dependency injection](../packages/pattrn-dependency-injection.md) for service registration.
 - Use [routing](../packages/pattrn-routing.md) only when preview route-template syntax is appropriate.
