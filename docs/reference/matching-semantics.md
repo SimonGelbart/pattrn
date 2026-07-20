@@ -201,13 +201,13 @@ When multiple structural branches match the same input at the same depth, result
 literal > named parameter > anonymous wildcard > terminal catch-all
 ```
 
-`PatternMatch<TValue>.Specificity` and `PatternMatchDetailed<TSegment, TValue>.Specificity` expose the specificity value for detailed results. Higher values are more specific. The broad ordering above is compatibility-covered; exact numeric weights remain an implementation detail.
+Specificity weights are internal. The public contract is the deterministic returned order described above.
 
 Registrations with the same structural specificity preserve registration order when duplicate preservation is enabled. When default value deduplication suppresses equal values, the first accepted value in deterministic rank order wins.
 
 Prefix mode is deterministic but traversal ordered. A registration at a prefix node is emitted before deeper descendant registrations. Within competing branches at the same depth, the generic specificity order still applies. Use detailed match metadata plus application-owned value metadata for consumer-side sorting if a scenario needs one global ranking order across prefix and descendant matches.
 
-Use detailed match metadata and consumer-side sorting when a domain needs more than the built-in order.
+Use application-owned value metadata for domain-specific precedence when a domain needs more than the built-in order.
 
 ## Threading
 

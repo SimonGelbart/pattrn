@@ -91,9 +91,6 @@ public sealed class CatchAllPatternTests
         var matches = index.MatchDetailedToArray(["files", "new"]);
 
         ShouldSetEqual(matches.Select(match => match.Value), ["literal", "parameter", "wildcard", "catch-all"]);
-        ShouldBeTrue(matches.Single(match => match.Value == "literal").Specificity > matches.Single(match => match.Value == "parameter").Specificity, "Literal should score higher than parameter.");
-        ShouldBeTrue(matches.Single(match => match.Value == "parameter").Specificity > matches.Single(match => match.Value == "wildcard").Specificity, "Parameter should score higher than wildcard.");
-        ShouldBeTrue(matches.Single(match => match.Value == "wildcard").Specificity > matches.Single(match => match.Value == "catch-all").Specificity, "Wildcard should score higher than catch-all.");
     }
 
     [Test]

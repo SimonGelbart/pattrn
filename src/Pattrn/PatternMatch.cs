@@ -15,21 +15,15 @@ public readonly struct PatternMatch<TValue> : IEquatable<PatternMatch<TValue>>
     /// </summary>
     /// <param name="value">The matched registration value.</param>
     /// <param name="kind">The shape of the pattern that produced the match.</param>
-    /// <param name="specificity">The specificity score assigned to the pattern.</param>
     /// <param name="captureStart">The starting capture index for this match in the shared capture span.</param>
     /// <param name="captureCount">The number of captures that belong to this match.</param>
-    /// <param name="patternId">The optional caller-provided pattern identity associated with the matched registration.</param>
-    /// <param name="registrationOrder">The zero-based order assigned when the registration was accepted by the builder, or <c>-1</c> for manually created descriptors.</param>
     /// <param name="consumedSegmentCount">The number of input segments consumed by this match.</param>
     /// <param name="patternSegmentCount">The number of segments in the pattern that produced the match.</param>
     public PatternMatch(
         TValue value,
         PatternMatchKind kind,
-        int specificity,
         int captureStart,
         int captureCount,
-        string? patternId = null,
-        int registrationOrder = -1,
         int consumedSegmentCount = 0,
         int patternSegmentCount = 0)
     {
@@ -41,11 +35,6 @@ public readonly struct PatternMatch<TValue> : IEquatable<PatternMatch<TValue>>
         if (captureCount < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(captureCount), captureCount, "Capture count must be non-negative.");
-        }
-
-        if (registrationOrder < -1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(registrationOrder), registrationOrder, "Registration order must be -1 or non-negative.");
         }
 
         if (consumedSegmentCount < 0)
@@ -60,11 +49,8 @@ public readonly struct PatternMatch<TValue> : IEquatable<PatternMatch<TValue>>
 
         Value = value;
         Kind = kind;
-        Specificity = specificity;
         CaptureStart = captureStart;
         CaptureCount = captureCount;
-        PatternId = patternId;
-        RegistrationOrder = registrationOrder;
         ConsumedSegmentCount = consumedSegmentCount;
         PatternSegmentCount = patternSegmentCount;
     }
@@ -73,19 +59,6 @@ public readonly struct PatternMatch<TValue> : IEquatable<PatternMatch<TValue>>
     /// Gets the matched registration value.
     /// </summary>
     public TValue Value { get; }
-
-    /// <summary>
-    /// Gets the optional caller-provided pattern identity associated with the matched registration.
-    /// </summary>
-    public string? PatternId { get; }
-
-    /// <summary>
-    /// Gets the zero-based order assigned when the registration was accepted by the builder.
-    /// </summary>
-    /// <remarks>
-    /// A value of <c>-1</c> means the descriptor was created manually rather than by a compiled index.
-    /// </remarks>
-    public int RegistrationOrder { get; }
 
     /// <summary>
     /// Gets the number of input segments consumed by this match.
@@ -103,11 +76,6 @@ public readonly struct PatternMatch<TValue> : IEquatable<PatternMatch<TValue>>
     public PatternMatchKind Kind { get; }
 
     /// <summary>
-    /// Gets the specificity score assigned to the pattern.
-    /// </summary>
-    public int Specificity { get; }
-
-    /// <summary>
     /// Gets the starting capture index for this match in the shared capture span.
     /// </summary>
     public int CaptureStart { get; }
@@ -121,12 +89,9 @@ public readonly struct PatternMatch<TValue> : IEquatable<PatternMatch<TValue>>
     public bool Equals(PatternMatch<TValue> other)
     {
         return EqualityComparer<TValue>.Default.Equals(Value, other.Value)
-            && string.Equals(PatternId, other.PatternId, StringComparison.Ordinal)
-            && RegistrationOrder == other.RegistrationOrder
             && ConsumedSegmentCount == other.ConsumedSegmentCount
             && PatternSegmentCount == other.PatternSegmentCount
             && Kind == other.Kind
-            && Specificity == other.Specificity
             && CaptureStart == other.CaptureStart
             && CaptureCount == other.CaptureCount;
     }
@@ -139,12 +104,9 @@ public readonly struct PatternMatch<TValue> : IEquatable<PatternMatch<TValue>>
     {
         var hash = new HashCode();
         hash.Add(Value);
-        hash.Add(PatternId, StringComparer.Ordinal);
-        hash.Add(RegistrationOrder);
         hash.Add(ConsumedSegmentCount);
         hash.Add(PatternSegmentCount);
         hash.Add(Kind);
-        hash.Add(Specificity);
         hash.Add(CaptureStart);
         hash.Add(CaptureCount);
         return hash.ToHashCode();
@@ -153,8 +115,7 @@ public readonly struct PatternMatch<TValue> : IEquatable<PatternMatch<TValue>>
     /// <inheritdoc />
     public override string ToString()
     {
-        var identity = PatternId is null ? $"registration {RegistrationOrder}" : $"pattern '{PatternId}', registration {RegistrationOrder}";
-        return $"{Value} ({Kind}, specificity {Specificity}, {identity})";
+        return $"{Value} ({Kind})";
     }
 
     /// <summary>

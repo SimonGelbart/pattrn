@@ -96,7 +96,6 @@ public sealed class DuplicateBehaviorInteractionTests
 
         ShouldEqual(matches.Length, 1);
         ShouldEqual(matches[0].Value, "handler");
-        ShouldEqual(matches[0].PatternId, "literal-handler");
         ShouldEqual(matches[0].Kind, PatternMatchKind.Exact);
     }
 
@@ -113,11 +112,7 @@ public sealed class DuplicateBehaviorInteractionTests
 
         ShouldEqual(matches.Length, 2);
         ShouldSequenceEqual(matches.Select(match => match.Value), ["handler", "handler"]);
-        ShouldSequenceEqual(matches.Select(match => match.PatternId), ["literal-handler", "wildcard-handler"]);
         ShouldSequenceEqual(matches.Select(match => match.Kind), [PatternMatchKind.Exact, PatternMatchKind.Wildcard]);
-        ShouldBeTrue(
-            matches[0].RegistrationOrder > matches[1].RegistrationOrder,
-            "The literal registration was added after the wildcard registration, so registration metadata should remain visible even when specificity determines match order.");
     }
 
     [Test]

@@ -77,11 +77,8 @@ internal ref struct DetailedMatchWriter<TSegment, TValue>
             _matches[_matchCount] = new PatternMatch<TValue>(
                 values[i],
                 detail.Kind,
-                detail.Score,
                 captureStart,
                 actualCaptureCount,
-                detail.PatternId,
-                detail.RegistrationOrder,
                 consumedSegmentCount,
                 patternSegmentCount: detail.PatternSegmentCount);
             _matchCount++;

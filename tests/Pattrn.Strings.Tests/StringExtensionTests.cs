@@ -161,8 +161,6 @@ public sealed class StringIdentityTests
 
         var match = builder.Build().MatchDetailedToArray(["config", "feature", "enabled"]).Single();
 
-        ShouldEqual(match.PatternId, "feature-enabled");
-        ShouldEqual(match.RegistrationOrder, 0);
     }
 }
 
@@ -243,7 +241,6 @@ public sealed class StringPattrnIndexBuilderFacadeTests
 
         ShouldSequenceEqual(index.MatchToArray("//api//USERS/"), ["users"]);
         var detailed = index.MatchDetailedToArray("api/users").Single();
-        ShouldEqual(detailed.PatternId, "users");
     }
 
     [Test]
@@ -264,7 +261,6 @@ public sealed class StringPattrnIndexBuilderFacadeTests
         var match = index.MatchDetailedToArray("market.NASDAQ.MSFT.QUOTE").Single();
 
         ShouldEqual(match.Value, "handler");
-        ShouldEqual(match.PatternId, "market-handler");
         ShouldSequenceEqual(match.Captures.Select(capture => capture.Name).ToArray(), ["exchange", "symbol"]);
         ShouldSequenceEqual(match.Captures[0].Values, ["NASDAQ"]);
         ShouldSequenceEqual(match.Captures[1].Values, ["MSFT", "QUOTE"]);

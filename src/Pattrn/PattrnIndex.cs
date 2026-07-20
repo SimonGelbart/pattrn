@@ -9,7 +9,7 @@ namespace Pattrn;
 /// <typeparam name="TSegment">The segment type used by registered patterns and incoming paths.</typeparam>
 /// <typeparam name="TValue">The value type returned when a registered pattern matches.</typeparam>
 /// <remarks>
-/// Instances are created by <see cref="PattrnIndexBuilder{TSegment, TValue}.Build"/> and are safe for concurrent readers.
+/// Instances are created by <see cref="PattrnIndexBuilder{TSegment, TValue}.Build(MatchOptions)"/> and are safe for concurrent readers.
 /// </remarks>
 /// <example>
 /// <code>
@@ -24,6 +24,131 @@ namespace Pattrn;
 public sealed class PattrnIndex<TSegment, TValue>
     where TSegment : notnull
 {
+    /// <summary>Compiles the canonical registrations into an immutable index.</summary>
+    public static PattrnIndex<TSegment, TValue> Compile(
+        IReadOnlyList<PattrnRegistration<TSegment, TValue>> registrations,
+        PattrnCompileOptions? options = null,
+        IEqualityComparer<TSegment>? segmentComparer = null,
+        IEqualityComparer<TValue>? valueComparer = null)
+    {
+        var result = CompileWithDiagnostics(registrations, options, segmentComparer, valueComparer);
+        if (!result.TryGetIndex(out var index))
+        {
+            throw new PattrnCompilationException(result.Report);
+        }
+
+        return index!;
+    }
+
+    /// <summary>Compiles canonical registrations and returns stable structural diagnostics.</summary>
+    public static PattrnCompileResult<TSegment, TValue> CompileWithDiagnostics(
+        IReadOnlyList<PattrnRegistration<TSegment, TValue>> registrations,
+        PattrnCompileOptions? options = null,
+        IEqualityComparer<TSegment>? segmentComparer = null,
+        IEqualityComparer<TValue>? valueComparer = null)
+    {
+        ArgumentNullException.ThrowIfNull(registrations);
+        options ??= PattrnCompileOptions.Default;
+        if (!Enum.IsDefined(options.DuplicatePatternPolicy))
+        {
+            throw new ArgumentOutOfRangeException(nameof(options), "Unknown duplicate pattern policy.");
+        }
+
+        var segmentEquality = segmentComparer ?? EqualityComparer<TSegment>.Default;
+        var valueEquality = valueComparer ?? EqualityComparer<TValue>.Default;
+        var snapshot = registrations.ToArray();
+        var diagnostics = new List<PattrnDiagnostic>();
+        var ids = new HashSet<RegistrationId>();
+        var patterns = new List<ImmutableArray<PatternSegment<TSegment>>>();
+
+        for (var registrationIndex = 0; registrationIndex < snapshot.Length; registrationIndex++)
+        {
+            var registration = snapshot[registrationIndex] ?? throw new ArgumentException("Registrations cannot contain null entries.", nameof(registrations));
+            if (registration.Id.Value == Guid.Empty)
+            {
+                diagnostics.Add(new("PTRN0001", PattrnDiagnosticSeverity.Error, "Registration identity must not be empty.", registration.Id));
+            }
+            else if (!ids.Add(registration.Id))
+            {
+                diagnostics.Add(new("PTRN0002", PattrnDiagnosticSeverity.Error, "Registration identity is duplicated.", registration.Id));
+            }
+
+            var duplicateIndex = patterns.FindIndex(pattern => SamePattern(pattern, registration.Pattern, segmentEquality));
+            if (duplicateIndex >= 0 && options.DuplicatePatternPolicy != DuplicatePatternPolicy.Allow)
+            {
+                diagnostics.Add(new(
+                    "PTRN0003",
+                    options.DuplicatePatternPolicy == DuplicatePatternPolicy.Warn ? PattrnDiagnosticSeverity.Warning : PattrnDiagnosticSeverity.Error,
+                    "The canonical pattern is duplicated.",
+                    registration.Id));
+            }
+            patterns.Add(registration.Pattern);
+
+            var captureNames = new HashSet<string>(StringComparer.Ordinal);
+            for (var segmentIndex = 0; segmentIndex < registration.Pattern.Length; segmentIndex++)
+            {
+                var segment = registration.Pattern[segmentIndex];
+                if (segment.IsCatchAll && segmentIndex != registration.Pattern.Length - 1)
+                {
+                    diagnostics.Add(new("PTRN0004", PattrnDiagnosticSeverity.Error, "Catch-all segments must be terminal.", registration.Id, segmentIndex));
+                }
+
+                if (segment.ParameterName is not null && !captureNames.Add(segment.ParameterName))
+                {
+                    diagnostics.Add(new("PTRN0004", PattrnDiagnosticSeverity.Error, "Capture names must be unique within a pattern.", registration.Id, segmentIndex));
+                }
+            }
+        }
+
+        PattrnIndex<TSegment, TValue>? index = null;
+        if (!diagnostics.Any(d => d.Severity == PattrnDiagnosticSeverity.Error))
+        {
+            var builder = PattrnIndexBuilder<TSegment, TValue>.Create(segmentEquality, valueEquality)
+                .UseDuplicatePatternRegistrationBehavior(DuplicatePatternRegistrationBehavior.Append);
+            try
+            {
+                foreach (var registration in snapshot)
+                {
+                    builder.AddPattern(registration.Pattern, registration.Value);
+                }
+
+                var report = new PattrnDiagnosticReport(diagnostics);
+                if (!report.HasWarnings || !options.TreatWarningsAsErrors)
+                {
+                    index = builder.Build();
+                }
+            }
+            catch (ArgumentException exception)
+            {
+                diagnostics.Add(new("PTRN0004", PattrnDiagnosticSeverity.Error, exception.Message));
+            }
+        }
+
+        var finalReport = new PattrnDiagnosticReport(diagnostics);
+        if (finalReport.HasWarnings && options.TreatWarningsAsErrors)
+        {
+            index = null;
+        }
+
+        return new PattrnCompileResult<TSegment, TValue>(index, finalReport);
+    }
+
+    private static bool SamePattern(
+        ImmutableArray<PatternSegment<TSegment>> left,
+        ImmutableArray<PatternSegment<TSegment>> right,
+        IEqualityComparer<TSegment> comparer)
+    {
+        if (left.Length != right.Length) return false;
+        for (var i = 0; i < left.Length; i++)
+        {
+            left[i].Deconstruct(out var leftKind, out var leftLiteral, out var leftName);
+            right[i].Deconstruct(out var rightKind, out var rightLiteral, out var rightName);
+            if (leftKind != rightKind || (leftKind == PatternSegmentKind.Literal && !comparer.Equals(leftLiteral, rightLiteral)) ||
+                !string.Equals(leftName, rightName, StringComparison.Ordinal)) return false;
+        }
+        return true;
+    }
+
     private readonly CompiledNode[] _nodes;
     private readonly CompiledChild<TSegment>[] _children;
     private readonly int[] _childLookupSlots;
@@ -310,11 +435,8 @@ public sealed class PattrnIndex<TSegment, TValue>
             matches[i] = new PatternMatch<TValue>(
                 values[i],
                 detail.Kind,
-                detail.Score,
                 captureStart: 0,
                 captureCount: 0,
-                detail.PatternId,
-                detail.RegistrationOrder,
                 consumedSegmentCount: path.Length,
                 patternSegmentCount: detail.PatternSegmentCount);
         }
@@ -571,10 +693,7 @@ public sealed class PattrnIndex<TSegment, TValue>
                 match.Kind,
                 match.PatternSegmentCount,
                 match.ConsumedSegmentCount,
-                [.. matchCaptures],
-                match.PatternId,
-                match.RegistrationOrder,
-                match.Specificity);
+                [.. matchCaptures]);
         }
 
         return results;
@@ -606,11 +725,8 @@ public sealed class PattrnIndex<TSegment, TValue>
             matches[i] = new PatternMatch<TValue>(
                 values[i],
                 detail.Kind,
-                detail.Score,
                 captureStart: 0,
                 captureCount: 0,
-                detail.PatternId,
-                detail.RegistrationOrder,
                 consumedSegmentCount: path.Length,
                 patternSegmentCount: detail.PatternSegmentCount);
         }
@@ -643,10 +759,7 @@ public sealed class PattrnIndex<TSegment, TValue>
                 detail.Kind,
                 detail.PatternSegmentCount,
                 path.Length,
-                [],
-                detail.PatternId,
-                detail.RegistrationOrder,
-                detail.Score);
+                []);
         }
 
         return results;

@@ -368,13 +368,11 @@ public sealed class DetailedMatchTests
         {
             Captures = [new PatternCapture<string>("path", ["a"], 1)]
         };
-        var changedMetadata = second with { RegistrationOrder = second.RegistrationOrder + 1 };
 
         ShouldBeTrue(first.Equals(second), "Expected content-equal detailed matches to compare equal.");
         ShouldBeTrue(first == second, "Expected equality operator to use content equality.");
         ShouldEqual(first.GetHashCode(), second.GetHashCode());
         ShouldBeFalse(first.Equals(changedCapture), "Expected changed capture content to make detailed matches unequal.");
-        ShouldBeFalse(first.Equals(changedMetadata), "Expected changed metadata to make detailed matches unequal.");
     }
 
 }

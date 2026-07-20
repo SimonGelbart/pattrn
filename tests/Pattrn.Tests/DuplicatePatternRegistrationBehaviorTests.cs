@@ -119,7 +119,6 @@ public sealed class DuplicatePatternRegistrationBehaviorTests
         var matches = preserving.MatchDetailedToArray(["orders", "42"]);
 
         ShouldEqual(matches.Length, 2);
-        ShouldSequenceEqual(matches.Select(match => match.RegistrationOrder), [0, 1]);
         ShouldSequenceEqual(matches[0].Captures, [new PatternCapture<string>("id", "42", 1)]);
         ShouldSequenceEqual(matches[1].Captures, [new PatternCapture<string>("orderId", "42", 1)]);
     }

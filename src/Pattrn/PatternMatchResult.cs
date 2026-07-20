@@ -21,30 +21,11 @@ public readonly record struct PatternMatchDetailed<TSegment, TValue>(
         int patternSegmentCount,
         int consumedSegmentCount,
         ImmutableArray<PatternCapture<TSegment>> captures,
-        string? patternId,
-        int registrationOrder,
-        int specificity)
+        string? patternId = null,
+        int registrationOrder = -1,
+        int specificity = 0)
         : this(value, kind, patternSegmentCount, consumedSegmentCount, captures)
-    {
-        PatternId = patternId;
-        RegistrationOrder = registrationOrder;
-        Specificity = specificity;
-    }
-
-    /// <summary>
-    /// Gets the optional caller-provided pattern identity associated with the matched registration.
-    /// </summary>
-    public string? PatternId { get; init; }
-
-    /// <summary>
-    /// Gets the zero-based order assigned when the registration was accepted by the builder.
-    /// </summary>
-    public int RegistrationOrder { get; init; } = -1;
-
-    /// <summary>
-    /// Gets the specificity score assigned to the pattern.
-    /// </summary>
-    public int Specificity { get; init; }
+    { }
 
     /// <inheritdoc />
     public bool Equals(PatternMatchDetailed<TSegment, TValue> other)
@@ -53,13 +34,10 @@ public readonly record struct PatternMatchDetailed<TSegment, TValue>(
             || Kind != other.Kind
             || PatternSegmentCount != other.PatternSegmentCount
             || ConsumedSegmentCount != other.ConsumedSegmentCount
-            || !string.Equals(PatternId, other.PatternId, StringComparison.Ordinal)
-            || RegistrationOrder != other.RegistrationOrder
-            || Specificity != other.Specificity)
+            )
         {
             return false;
         }
-
         if (Captures.IsDefault || other.Captures.IsDefault)
         {
             return Captures.IsDefault == other.Captures.IsDefault;
@@ -84,9 +62,7 @@ public readonly record struct PatternMatchDetailed<TSegment, TValue>(
             }
         }
 
-        hash.Add(PatternId, StringComparer.Ordinal);
-        hash.Add(RegistrationOrder);
-        hash.Add(Specificity);
+
         return hash.ToHashCode();
     }
 }

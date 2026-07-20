@@ -94,8 +94,6 @@ Named parameters and catch-alls are exposed through detailed matches:
 
 ```csharp
 var detailed = index.MatchDetailedToArray(["orders", "123"]);
-var matchPatternId = detailed[0].PatternId;
-var registrationOrder = detailed[0].RegistrationOrder;
 var id = detailed[0].Captures.Single(capture => capture.Name == "id").Value;
 ```
 

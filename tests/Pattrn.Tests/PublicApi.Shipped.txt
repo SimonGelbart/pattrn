@@ -1,3 +1,4 @@
+struct Pattrn.DuplicatePatternPolicy
 struct Pattrn.DuplicatePatternRegistrationBehavior
 struct Pattrn.DuplicateValueMatchMode
 struct Pattrn.MatchOptions
@@ -68,10 +69,7 @@ struct Pattrn.PatternMatchDetailed<TSegment, TValue>
   System.Collections.Immutable.ImmutableArray<Pattrn.PatternCapture<TSegment>> Captures { get; set; }
   int ConsumedSegmentCount { get; set; }
   Pattrn.PatternMatchKind Kind { get; set; }
-  string PatternId { get; set; }
   int PatternSegmentCount { get; set; }
-  int RegistrationOrder { get; set; }
-  int Specificity { get; set; }
   TValue Value { get; set; }
   bool Equals(Pattrn.PatternMatchDetailed<TSegment, TValue> other)
   bool Equals(object obj)
@@ -92,15 +90,12 @@ class Pattrn.PatternMatchExplanation<TSegment, TValue>
   System.Collections.Generic.IReadOnlyList<Pattrn.PatternRejectedCandidate> RejectedCandidates { get; }
 struct Pattrn.PatternMatchKind
 struct Pattrn.PatternMatch<TValue>
-  .ctor(TValue value, Pattrn.PatternMatchKind kind, int specificity, int captureStart, int captureCount, string patternId = null, int registrationOrder = -1, int consumedSegmentCount = 0, int patternSegmentCount = 0)
+  .ctor(TValue value, Pattrn.PatternMatchKind kind, int captureStart, int captureCount, int consumedSegmentCount = 0, int patternSegmentCount = 0)
   int CaptureCount { get; }
   int CaptureStart { get; }
   int ConsumedSegmentCount { get; }
   Pattrn.PatternMatchKind Kind { get; }
-  string PatternId { get; }
   int PatternSegmentCount { get; }
-  int RegistrationOrder { get; }
-  int Specificity { get; }
   TValue Value { get; }
   bool Equals(Pattrn.PatternMatch<TValue> other)
   bool Equals(object obj)
@@ -134,6 +129,48 @@ struct Pattrn.PatternSegment<TSegment>
   static bool op_Inequality(Pattrn.PatternSegment<TSegment> left, Pattrn.PatternSegment<TSegment> right)
   string ToString()
   void Deconstruct(out Pattrn.PatternSegmentKind kind, out TSegment literalValue, out string parameterName)
+class Pattrn.PattrnCompilationException
+  .ctor(Pattrn.PattrnDiagnosticReport report)
+  Pattrn.PattrnDiagnosticReport Report { get; }
+class Pattrn.PattrnCompileOptions
+  .ctor()
+  static Pattrn.PattrnCompileOptions Default { get; }
+  Pattrn.DuplicatePatternPolicy DuplicatePatternPolicy { get; set; }
+  bool TreatWarningsAsErrors { get; set; }
+  Pattrn.PattrnCompileOptions <Clone>$()
+  bool Equals(Pattrn.PattrnCompileOptions other)
+  bool Equals(object obj)
+  int GetHashCode()
+  static bool op_Equality(Pattrn.PattrnCompileOptions left, Pattrn.PattrnCompileOptions right)
+  static bool op_Inequality(Pattrn.PattrnCompileOptions left, Pattrn.PattrnCompileOptions right)
+  string ToString()
+class Pattrn.PattrnCompileResult<TSegment, TValue>
+  Pattrn.PattrnDiagnosticReport Report { get; }
+  bool Succeeded { get; }
+  bool TryGetIndex(out Pattrn.PattrnIndex<TSegment, TValue> index)
+class Pattrn.PattrnDiagnostic
+  .ctor(string Code, Pattrn.PattrnDiagnosticSeverity Severity, string Message, System.Nullable<Pattrn.RegistrationId> RegistrationId = default, System.Nullable<int> PatternSegmentIndex = default)
+  string Code { get; set; }
+  string Message { get; set; }
+  System.Nullable<int> PatternSegmentIndex { get; set; }
+  System.Nullable<Pattrn.RegistrationId> RegistrationId { get; set; }
+  Pattrn.PattrnDiagnosticSeverity Severity { get; set; }
+  Pattrn.PattrnDiagnostic <Clone>$()
+  bool Equals(Pattrn.PattrnDiagnostic other)
+  bool Equals(object obj)
+  int GetHashCode()
+  static bool op_Equality(Pattrn.PattrnDiagnostic left, Pattrn.PattrnDiagnostic right)
+  static bool op_Inequality(Pattrn.PattrnDiagnostic left, Pattrn.PattrnDiagnostic right)
+  string ToString()
+  void Deconstruct(out string Code, out Pattrn.PattrnDiagnosticSeverity Severity, out string Message, out System.Nullable<Pattrn.RegistrationId> RegistrationId, out System.Nullable<int> PatternSegmentIndex)
+class Pattrn.PattrnDiagnosticReport
+  .ctor(System.Collections.Generic.IEnumerable<Pattrn.PattrnDiagnostic> diagnostics)
+  System.Collections.Immutable.ImmutableArray<Pattrn.PattrnDiagnostic> Diagnostics { get; }
+  bool HasErrors { get; }
+  bool HasWarnings { get; }
+struct Pattrn.PattrnDiagnosticSeverity
+class Pattrn.PattrnIndexBuilderCanonicalExtensions
+  static Pattrn.RegistrationId Add<TSegment, TValue>(Pattrn.PattrnIndexBuilder<TSegment, TValue> builder, System.Collections.Generic.IReadOnlyList<Pattrn.PatternSegment<TSegment>> pattern, TValue value, string name = null)
 class Pattrn.PattrnIndexBuilder<TSegment, TValue>
   Pattrn.DuplicatePatternRegistrationBehavior DuplicatePatternRegistrationBehavior { get; }
   int MatchCountUpperBound { get; }
@@ -144,10 +181,14 @@ class Pattrn.PattrnIndexBuilder<TSegment, TValue>
   System.Collections.Generic.IEqualityComparer<TValue> ValueComparer { get; }
   TSegment WildcardSegment { get; }
   Pattrn.PatternDiagnostic<TSegment>[] GetDiagnostics()
+  Pattrn.PattrnCompileResult<TSegment, TValue> BuildWithDiagnostics(Pattrn.PattrnCompileOptions options = null)
+  Pattrn.PattrnIndex<TSegment, TValue> Build()
   Pattrn.PattrnIndex<TSegment, TValue> Build(Pattrn.MatchOptions options = default)
+  Pattrn.PattrnIndex<TSegment, TValue> Build(Pattrn.PattrnCompileOptions options)
   Pattrn.PattrnIndexBuilder<TSegment, TValue> Add(System.Collections.Generic.IEnumerable<TSegment> pattern, TValue value, string patternId = null)
   Pattrn.PattrnIndexBuilder<TSegment, TValue> Add(System.ReadOnlyMemory<TSegment> pattern, TValue value, string patternId = null)
   Pattrn.PattrnIndexBuilder<TSegment, TValue> Add(System.ReadOnlySpan<TSegment> pattern, TValue value, string patternId = null)
+  Pattrn.PattrnIndexBuilder<TSegment, TValue> Add(TSegment[] pattern, TValue value, string patternId = null)
   Pattrn.PattrnIndexBuilder<TSegment, TValue> AddPattern(System.Collections.Generic.IEnumerable<Pattrn.PatternSegment<TSegment>> pattern, TValue value, string patternId = null)
   Pattrn.PattrnIndexBuilder<TSegment, TValue> AddPattern(System.ReadOnlyMemory<Pattrn.PatternSegment<TSegment>> pattern, TValue value, string patternId = null)
   Pattrn.PattrnIndexBuilder<TSegment, TValue> AddPattern(System.ReadOnlySpan<Pattrn.PatternSegment<TSegment>> pattern, TValue value, string patternId = null)
@@ -160,18 +201,22 @@ class Pattrn.PattrnIndexBuilder<TSegment, TValue>
   Pattrn.PattrnIndexBuilder<TSegment, TValue> UseDuplicatePatternRegistrationBehavior(Pattrn.DuplicatePatternRegistrationBehavior behavior)
   Pattrn.PattrnIndexBuilder<TSegment, TValue> ValidateOnBuild(Pattrn.PatternDiagnosticSeverity minimumSeverity = Warning)
   Pattrn.PattrnIndexBuilder<TSegment, TValue> ValidateOnBuild(System.Func<Pattrn.PatternDiagnostic<TSegment>, bool> rejectDiagnostic)
+  Pattrn.RegistrationId Add(Pattrn.PattrnRegistration<TSegment, TValue> registration)
+  System.Collections.Immutable.ImmutableArray<Pattrn.PattrnRegistration<TSegment, TValue>> ToRegistrations()
   bool Contains(System.Collections.Generic.IEnumerable<TSegment> pattern)
   bool Contains(System.ReadOnlyMemory<TSegment> pattern)
   bool Contains(System.ReadOnlySpan<TSegment> pattern)
   bool ContainsPattern(System.Collections.Generic.IEnumerable<Pattrn.PatternSegment<TSegment>> pattern)
   bool ContainsPattern(System.ReadOnlyMemory<Pattrn.PatternSegment<TSegment>> pattern)
   bool ContainsPattern(System.ReadOnlySpan<Pattrn.PatternSegment<TSegment>> pattern)
+  bool Remove(Pattrn.RegistrationId id)
   bool Remove(System.Collections.Generic.IEnumerable<TSegment> pattern, TValue value)
   bool Remove(System.ReadOnlyMemory<TSegment> pattern, TValue value)
   bool Remove(System.ReadOnlySpan<TSegment> pattern, TValue value)
   bool RemovePattern(System.Collections.Generic.IEnumerable<Pattrn.PatternSegment<TSegment>> pattern, TValue value)
   bool RemovePattern(System.ReadOnlyMemory<Pattrn.PatternSegment<TSegment>> pattern, TValue value)
   bool RemovePattern(System.ReadOnlySpan<Pattrn.PatternSegment<TSegment>> pattern, TValue value)
+  bool Replace(Pattrn.PattrnRegistration<TSegment, TValue> updatedRegistration)
   int RemoveAll(System.Collections.Generic.IEnumerable<TSegment> pattern)
   int RemoveAll(System.ReadOnlyMemory<TSegment> pattern)
   int RemoveAll(System.ReadOnlySpan<TSegment> pattern)
@@ -211,6 +256,32 @@ class Pattrn.PattrnIndex<TSegment, TValue>
   int GetMatchCountUpperBound(System.ReadOnlySpan<TSegment> path)
   int GetPrefixMatchCountUpperBound(System.ReadOnlySpan<TSegment> path)
   int MatchDetailed(System.ReadOnlySpan<TSegment> path, System.Span<Pattrn.PatternMatch<TValue>> matches, System.Span<Pattrn.PatternCaptureSlice<TSegment>> captures, out int capturesWritten)
+  static Pattrn.PattrnCompileResult<TSegment, TValue> CompileWithDiagnostics(System.Collections.Generic.IReadOnlyList<Pattrn.PattrnRegistration<TSegment, TValue>> registrations, Pattrn.PattrnCompileOptions options = null, System.Collections.Generic.IEqualityComparer<TSegment> segmentComparer = null, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+  static Pattrn.PattrnIndex<TSegment, TValue> Compile(System.Collections.Generic.IReadOnlyList<Pattrn.PattrnRegistration<TSegment, TValue>> registrations, Pattrn.PattrnCompileOptions options = null, System.Collections.Generic.IEqualityComparer<TSegment> segmentComparer = null, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
   static Pattrn.PattrnIndexBuilder<TSegment, TValue> Builder(System.Collections.Generic.IEqualityComparer<TSegment> segmentComparer = null, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
   static Pattrn.PattrnIndexBuilder<TSegment, TValue> Builder(TSegment wildcardSegment, System.Collections.Generic.IEqualityComparer<TSegment> segmentComparer = null, System.Collections.Generic.IEqualityComparer<TValue> valueComparer = null)
+class Pattrn.PattrnRegistration<TSegment, TValue>
+  .ctor(Pattrn.RegistrationId id, System.Collections.Generic.IReadOnlyList<Pattrn.PatternSegment<TSegment>> pattern, TValue value, string name = null)
+  Pattrn.RegistrationId Id { get; }
+  string Name { get; }
+  System.Collections.Immutable.ImmutableArray<Pattrn.PatternSegment<TSegment>> Pattern { get; }
+  TValue Value { get; }
+  Pattrn.PattrnRegistration<TSegment, TValue> <Clone>$()
+  bool Equals(Pattrn.PattrnRegistration<TSegment, TValue> other)
+  bool Equals(object obj)
+  int GetHashCode()
+  static Pattrn.PattrnRegistration<TSegment, TValue> Create(System.Collections.Generic.IReadOnlyList<Pattrn.PatternSegment<TSegment>> pattern, TValue value, string name = null)
+  static bool op_Equality(Pattrn.PattrnRegistration<TSegment, TValue> left, Pattrn.PattrnRegistration<TSegment, TValue> right)
+  static bool op_Inequality(Pattrn.PattrnRegistration<TSegment, TValue> left, Pattrn.PattrnRegistration<TSegment, TValue> right)
+  string ToString()
 struct Pattrn.PrefixMatchMode
+struct Pattrn.RegistrationId
+  .ctor(System.Guid value)
+  System.Guid Value { get; }
+  bool Equals(Pattrn.RegistrationId other)
+  bool Equals(object obj)
+  int GetHashCode()
+  static Pattrn.RegistrationId New()
+  static bool op_Equality(Pattrn.RegistrationId left, Pattrn.RegistrationId right)
+  static bool op_Inequality(Pattrn.RegistrationId left, Pattrn.RegistrationId right)
+  string ToString()
