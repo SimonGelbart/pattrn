@@ -12,10 +12,10 @@ public sealed class ExplainabilitySeparationTests
             .AddPattern(
                 [PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("id")],
                 "handler",
-                patternId: "orders-by-id")
+                name: "orders-by-id")
             .Build();
 
-        var hotMatches = index.MatchToArray(["orders", "123"]);
+        var hotMatches = index.MatchValuesToArray(["orders", "123"]);
         var explanation = index.Explain(["orders", "123"]);
 
         ShouldSequenceEqual(hotMatches, ["handler"]);

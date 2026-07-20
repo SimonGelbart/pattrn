@@ -18,7 +18,7 @@ public sealed class StringDetailedSliceTests
                 "handler")
             .Build();
         const string path = "market.NASDAQ.MSFT.QUOTE";
-        var matches = new PatternMatch<string>[index.GetMatchCountUpperBound(path)];
+        var matches = new PatternMatchDetailedSlice<string>[index.GetMatchCountUpperBound(path)];
         var captures = new PatternCaptureSlice<string>[index.GetCaptureCountUpperBound(path)];
 
         var matchCount = index.MatchDetailed(path, matches, captures, out var captureCount);

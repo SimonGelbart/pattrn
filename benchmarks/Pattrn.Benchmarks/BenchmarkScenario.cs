@@ -27,7 +27,6 @@ public enum BuilderBenchmarkScenario
 {
     BuildLargeExact,
     BuildLargeParameters,
-    GetDiagnosticsClean,
-    GetDiagnosticsAmbiguous,
-    ValidateOnBuild
+    CompileDiagnosticsClean,
+    CompileDiagnosticsDuplicate
 }

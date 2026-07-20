@@ -59,7 +59,7 @@ public static class RoutePattrnIndexExtensions
         var segments = RoutePattern.RentSplitPath(path, out var count);
         try
         {
-            if (index.TryMatch(segments.AsSpan(0, count), destination, out var written))
+            if (index.TryMatchValues(segments.AsSpan(0, count), destination, out var written))
             {
                 return written;
             }
@@ -85,7 +85,7 @@ public static class RoutePattrnIndexExtensions
         var segments = RoutePattern.RentSplitPath(path, out var count);
         try
         {
-            return index.TryMatch(segments.AsSpan(0, count), destination, out written);
+            return index.TryMatchValues(segments.AsSpan(0, count), destination, out written);
         }
         finally
         {
@@ -104,7 +104,7 @@ public static class RoutePattrnIndexExtensions
         var segments = RoutePattern.RentSplitPath(path, out var count);
         try
         {
-            return index.MatchToArray(segments.AsSpan(0, count));
+            return index.MatchValuesToArray(segments.AsSpan(0, count));
         }
         finally
         {
@@ -118,7 +118,7 @@ public static class RoutePattrnIndexExtensions
     public static int MatchRouteDetailed<TValue>(
         this PattrnIndex<string, TValue> index,
         string path,
-        Span<PatternMatch<TValue>> matches,
+        Span<PatternMatchDetailedSlice<TValue>> matches,
         Span<PatternCaptureSlice<string>> captures,
         out int capturesWritten)
     {
@@ -140,7 +140,7 @@ public static class RoutePattrnIndexExtensions
     public static bool TryMatchRouteDetailed<TValue>(
         this PattrnIndex<string, TValue> index,
         string path,
-        Span<PatternMatch<TValue>> matches,
+        Span<PatternMatchDetailedSlice<TValue>> matches,
         Span<PatternCaptureSlice<string>> captures,
         out int matchesWritten,
         out int capturesWritten)

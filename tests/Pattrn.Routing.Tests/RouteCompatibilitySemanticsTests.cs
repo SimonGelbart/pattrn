@@ -54,7 +54,7 @@ public sealed class RouteCompatibilitySemanticsTests
     {
         var index = PattrnIndex<string, string>
             .Builder()
-            .AddRoute("/orders/{id?}", "orders", patternId: "orders-optional-id")
+            .AddRoute("/orders/{id?}", "orders", name: "orders-optional-id")
             .Build(MatchOptions.PreserveDuplicates);
 
         var rootMatches = index.MatchRouteDetailedToArray("/orders");
@@ -73,7 +73,7 @@ public sealed class RouteIdentityTests
     {
         var index = PattrnIndex<string, string>
             .Builder()
-            .AddRoute("/orders/{id}", "handler", patternId: "orders-by-id")
+            .AddRoute("/orders/{id}", "handler", name: "orders-by-id")
             .Build();
 
         var match = index.MatchDetailedToArray(["orders", "123"]).Single();

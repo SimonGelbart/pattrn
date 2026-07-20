@@ -19,12 +19,15 @@ static void RunCoreSmoke()
         .AddPattern([Literal("files"), CatchAll("path")], "catch-all", "catch-all")
         .Build();
 
-    RequireContains(index.MatchToArray(["market", "NASDAQ", "MSFT"]), "literal", "literal match");
+    var exactResult = index.MatchToArray(["market", "NASDAQ", "MSFT"]).Single(match => match.Value == "literal");
+    Require(exactResult.RegistrationId.Value != Guid.Empty, "result registration identity");
+    Require(exactResult.ConsumedSegmentCount == 3, "result consumed depth");
+    RequireContains(index.MatchValuesToArray(["market", "NASDAQ", "MSFT"]), "literal", "literal match");
 
     var parameterMatch = index.MatchDetailedToArray(["orders", "42"]).Single(match => match.Value == "parameter");
     Require(parameterMatch.Captures.Single(capture => capture.Name == "id").Value == "42", "parameter capture");
 
-    RequireContains(index.MatchToArray(["market", "NASDAQ", "AAPL"]), "wildcard", "wildcard match");
+    RequireContains(index.MatchValuesToArray(["market", "NASDAQ", "AAPL"]), "wildcard", "wildcard match");
 
     var catchAllMatch = index.MatchDetailedToArray(["files", "a", "b", "c.txt"]).Single(match => match.Value == "catch-all");
     Require(catchAllMatch.Captures.Length == 1, "catch-all capture count");
@@ -43,7 +46,7 @@ static void RunStringsSmoke()
         .Add("market.NASDAQ.*", "string-wildcard")
         .Build();
 
-    RequireContains(defaultIndex.MatchToArray("market.NASDAQ.MSFT"), "string-wildcard", "string tokenized match");
+    RequireContains(defaultIndex.MatchValuesToArray("market.NASDAQ.MSFT"), "string-wildcard", "string tokenized match");
 
     var options = new StringNormalizationOptions('/')
     {
@@ -57,7 +60,7 @@ static void RunStringsSmoke()
         .AddPattern([Literal("api"), Parameter("resource")], "normalized", "normalized")
         .Build();
 
-    RequireContains(normalizedIndex.MatchToArray("// API / Users /"), "normalized", "normalized string match");
+    RequireContains(normalizedIndex.MatchValuesToArray("// API / Users /"), "normalized", "normalized string match");
 }
 
 static void RunDependencyInjectionSmoke()
@@ -71,13 +74,13 @@ static void RunDependencyInjectionSmoke()
     using var provider = services.BuildServiceProvider(validateScopes: true);
 
     var defaultIndex = provider.GetRequiredService<PattrnIndex<string, string>>();
-    RequireContains(defaultIndex.MatchToArray(["di", "service"]), "default-di", "default DI match");
+    RequireContains(defaultIndex.MatchValuesToArray(["di", "service"]), "default-di", "default DI match");
 
     var namedIndex = provider.GetRequiredKeyedService<PattrnIndex<string, string>>("named");
-    RequireContains(namedIndex.MatchToArray(["named", "service"]), "named-di", "keyed DI match");
+    RequireContains(namedIndex.MatchValuesToArray(["named", "service"]), "named-di", "keyed DI match");
 
     var pattrnProvider = provider.GetRequiredService<IPattrnProvider<string, string>>();
-    RequireContains(pattrnProvider.GetRequired("named").MatchToArray(["named", "provider"]), "named-di", "provider DI match");
+    RequireContains(pattrnProvider.GetRequired("named").MatchValuesToArray(["named", "provider"]), "named-di", "provider DI match");
 }
 
 static PatternSegment<string> Literal(string value) => PatternSegment<string>.Literal(value);

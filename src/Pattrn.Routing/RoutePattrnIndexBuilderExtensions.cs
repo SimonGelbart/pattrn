@@ -12,16 +12,16 @@ public static class RoutePattrnIndexBuilderExtensions
     /// <param name="builder">The builder to mutate.</param>
     /// <param name="pattern">The route-like pattern template.</param>
     /// <param name="value">The value returned when the pattern matches.</param>
-    /// <param name="patternId">An optional caller-provided identity for this registration.</param>
+    /// <param name="name">An optional descriptive name for this registration.</param>
     /// <returns>The current builder, allowing fluent registration chains.</returns>
     public static PattrnIndexBuilder<string, TValue> AddRoute<TValue>(
         this PattrnIndexBuilder<string, TValue> builder,
         string pattern,
         TValue value,
-        string? patternId = null)
+        string? name = null)
     {
         ArgumentNullException.ThrowIfNull(builder);
-        return builder.AddRoute(RoutePattern.ParseTemplate(pattern), value, patternId);
+        return builder.AddRoute(RoutePattern.ParseTemplate(pattern), value, name);
     }
 
     /// <summary>
@@ -31,24 +31,24 @@ public static class RoutePattrnIndexBuilderExtensions
     /// <param name="builder">The builder to mutate.</param>
     /// <param name="template">The parsed route template.</param>
     /// <param name="value">The value returned when the template matches.</param>
-    /// <param name="patternId">An optional caller-provided identity for this route template registration.</param>
+    /// <param name="name">An optional descriptive name shared by expanded route registrations.</param>
     /// <returns>The current builder, allowing fluent registration chains.</returns>
     /// <remarks>
-    /// Optional/defaulted suffix expansions are registered with the same <paramref name="patternId"/> so detailed core matches remain linked to the caller's route identity.
+    /// Optional/defaulted suffix expansions are registered with the same <paramref name="name"/> for diagnostics and explanation.
     /// Use <see cref="RouteTemplate.ExpandDetailed"/> when a caller also needs to inspect which optional/defaulted parameters were omitted by each generated structural pattern.
     /// </remarks>
     public static PattrnIndexBuilder<string, TValue> AddRoute<TValue>(
         this PattrnIndexBuilder<string, TValue> builder,
         RouteTemplate template,
         TValue value,
-        string? patternId = null)
+        string? name = null)
     {
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentNullException.ThrowIfNull(template);
 
         foreach (var expansion in template.ExpandDetailed())
         {
-            builder.AddPattern(expansion.Pattern, value, patternId);
+            builder.AddPattern(expansion.Pattern, value, name);
         }
 
         return builder;
@@ -112,7 +112,10 @@ public static class RoutePattrnIndexBuilderExtensions
         var removed = false;
         foreach (var expansion in template.ExpandDetailed())
         {
-            removed |= builder.RemovePattern(expansion.Pattern, value);
+            var registration = builder.ToRegistrations().FirstOrDefault(candidate =>
+                candidate.Pattern.AsSpan().SequenceEqual(expansion.Pattern)
+                && builder.ValueComparer.Equals(candidate.Value, value));
+            removed |= registration is not null && builder.Remove(registration.Id);
         }
 
         return removed;
@@ -142,7 +145,16 @@ public static class RoutePattrnIndexBuilderExtensions
         var removed = 0;
         foreach (var expansion in template.ExpandDetailed())
         {
-            removed += builder.RemoveAllPattern(expansion.Pattern);
+            var ids = builder.ToRegistrations()
+                .Where(candidate => candidate.Pattern.AsSpan().SequenceEqual(expansion.Pattern))
+                .Select(candidate => candidate.Id)
+                .ToArray();
+            foreach (var id in ids)
+            {
+                builder.Remove(id);
+            }
+
+            removed += ids.Length;
         }
 
         return removed;

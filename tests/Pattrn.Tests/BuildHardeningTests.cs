@@ -13,7 +13,7 @@ public sealed class BuildHardeningTests
         builder.Add(pattern, "deep");
         var index = builder.Build();
 
-        ShouldSequenceEqual(index.MatchToArray(pattern), ["deep"]);
+        ShouldSequenceEqual(index.MatchValuesToArray(pattern), ["deep"]);
     }
 
     [Test]
@@ -26,7 +26,7 @@ public sealed class BuildHardeningTests
         builder.Add(pattern, "deep-wildcard");
         var index = builder.Build();
 
-        ShouldSequenceEqual(index.MatchToArray(path), ["deep-wildcard"]);
+        ShouldSequenceEqual(index.MatchValuesToArray(path), ["deep-wildcard"]);
     }
 
     [Test]
@@ -34,15 +34,17 @@ public sealed class BuildHardeningTests
     {
         var builder = PattrnIndex<string, string>.Builder("*");
 
-        builder.Add(["root", "child"], "value");
+        var id = builder.Add(
+            (IReadOnlyList<PatternSegment<string>>)[PatternSegment<string>.Literal("root"), PatternSegment<string>.Literal("child")],
+            "value");
 
-        ShouldBeTrue(builder.Remove(["root", "child"], "value"), "Expected registration to be removed.");
+        ShouldBeTrue(builder.Remove(id), "Expected registration to be removed.");
         ShouldBeFalse(builder.Contains(["root", "child"]), "Expected pattern to be pruned.");
         ShouldEqual(builder.PatternCount, 0);
         ShouldEqual(builder.RegistrationCount, 0);
 
         var index = builder.Build();
-        ShouldEqual(index.MatchToArray(["root", "child"]).Length, 0);
+        ShouldEqual(index.MatchValuesToArray(["root", "child"]).Length, 0);
     }
 
     private static string[] CreateSegments(string prefix, int count)

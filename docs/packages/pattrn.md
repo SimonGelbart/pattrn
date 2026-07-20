@@ -49,7 +49,7 @@ var index = PattrnIndex<string, string>
             PatternSegment<string>.Literal("MSFT")
         ],
         "exact-msft",
-        patternId: "market-nasdaq-msft")
+        name: "market-nasdaq-msft")
     .AddPattern(
         [
             PatternSegment<string>.Literal("market"),
@@ -59,7 +59,7 @@ var index = PattrnIndex<string, string>
         "any-nasdaq")
     .Build();
 
-var matches = index.MatchToArray(["market", "NASDAQ", "MSFT"]);
+var matches = index.MatchValuesToArray(["market", "NASDAQ", "MSFT"]);
 ```
 
 For hot paths, prefer caller-provided buffers:
@@ -67,7 +67,7 @@ For hot paths, prefer caller-provided buffers:
 ```csharp
 var path = new[] { "market", "NASDAQ", "MSFT" };
 var buffer = new string[index.GetMatchCountUpperBound(path)];
-var matched = index.TryMatch(path, buffer, out var written);
+var matched = index.TryMatchValues(path, buffer, out var written);
 ```
 
 ## Generic pattern segments
@@ -87,7 +87,7 @@ builder.AddPattern(
     "order-handler");
 
 var index = builder.Build();
-var matches = index.MatchToArray(["orders", "123"]);
+var matches = index.MatchValuesToArray(["orders", "123"]);
 ```
 
 Named parameters and catch-alls are exposed through detailed matches:
@@ -137,7 +137,7 @@ var index = StringPattrnIndexBuilder
     .Add("market.NASDAQ.*", "client-a")
     .Build();
 
-var matches = index.MatchToArray("market.NASDAQ.MSFT");
+var matches = index.MatchValuesToArray("market.NASDAQ.MSFT");
 ```
 
 String helpers allocate because they split strings into segments. Keep hot paths on the core span APIs. Use `StringNormalizationOptions` and the string-path facade when a string domain needs explicit separators, case-insensitive matching, trimming, empty-segment handling, or custom segment normalization.

@@ -25,7 +25,7 @@ var index = StringPattrnIndexBuilder
     .Add("market.NASDAQ.*", "client-a")
     .Build();
 
-var matches = index.MatchToArray("market.NASDAQ.MSFT");
+var matches = index.MatchValuesToArray("market.NASDAQ.MSFT");
 ```
 
 Slash-separated paths are the default, and explicit `StringNormalizationOptions` can be supplied when needed:
@@ -36,7 +36,7 @@ var index = StringPattrnIndexBuilder
     .Add("market/NASDAQ/MSFT", "client-a")
     .Build();
 
-var matches = index.MatchToArray("market/NASDAQ/MSFT");
+var matches = index.MatchValuesToArray("market/NASDAQ/MSFT");
 ```
 
 The older extension methods remain available when callers want to work directly with `PattrnIndexBuilder<string, TValue>` and `PattrnIndex<string, TValue>`:
@@ -67,7 +67,7 @@ var index = options.CreateStringBuilder<string>()
     .Add("/ API / Users /", "users")
     .Build();
 
-var matches = index.MatchToArray("//api//USERS/");
+var matches = index.MatchValuesToArray("//api//USERS/");
 ```
 
 The options object can control:
@@ -94,7 +94,7 @@ var index = StringPattrnIndexBuilder
             PatternSegment<string>.CatchAll("symbol")
         ],
         "handler",
-        patternId: "market-handler")
+        name: "market-handler")
     .Build();
 
 var detailed = index.MatchDetailedToArray("market.NASDAQ.MSFT.QUOTE");
@@ -111,7 +111,7 @@ The caller-buffer `MatchDetailed(...)` and `TryMatchDetailed(...)` methods retur
 ```csharp
 const string path = "market.NASDAQ.MSFT.QUOTE";
 var segments = index.Options.Split(path);
-var matches = new PatternMatch<string>[index.CoreIndex.GetMatchCountUpperBound(segments)];
+var matches = new PatternMatchDetailedSlice<string>[index.CoreIndex.GetMatchCountUpperBound(segments)];
 var captures = new PatternCaptureSlice<string>[index.CoreIndex.GetCaptureCountUpperBound(segments)];
 
 var matchCount = index.CoreIndex.MatchDetailed(segments, matches, captures, out var captureCount);

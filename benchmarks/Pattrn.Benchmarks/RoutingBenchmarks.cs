@@ -12,7 +12,7 @@ public class RoutingBenchmarks
     private string[] _preSplitPath = [];
     private string[] _splitDestination = [];
     private int[] _valueDestination = [];
-    private PatternMatch<int>[] _matchDestination = [];
+    private PatternMatchDetailedSlice<int>[] _matchDestination = [];
     private PatternCaptureSlice<string>[] _captureDestination = [];
 
     [Params(
@@ -50,7 +50,7 @@ public class RoutingBenchmarks
         _preSplitPath = RoutePattern.SplitPath(_path);
         _splitDestination = new string[Math.Max(1, RoutePattern.GetPathSegmentCount(_path))];
         _valueDestination = new int[Math.Max(1, _index.GetMatchCountUpperBound(_preSplitPath))];
-        _matchDestination = new PatternMatch<int>[Math.Max(1, _index.GetMatchCountUpperBound(_preSplitPath))];
+        _matchDestination = new PatternMatchDetailedSlice<int>[Math.Max(1, _index.GetMatchCountUpperBound(_preSplitPath))];
         _captureDestination = new PatternCaptureSlice<string>[Math.Max(1, _index.GetCaptureCountUpperBound(_preSplitPath))];
     }
 
@@ -81,14 +81,14 @@ public class RoutingBenchmarks
     [Benchmark]
     public int RouteIndex_MatchPreSplitToSpan()
     {
-        return _index.TryMatch(_preSplitPath, _valueDestination, out var written) ? written : -1;
+        return _index.TryMatchValues(_preSplitPath, _valueDestination, out var written) ? written : -1;
     }
 
     [Benchmark]
     public int RouteIndex_MatchRouteWithCallerBufferToSpan()
     {
         var written = RoutePattern.SplitPath(_path, _splitDestination);
-        return _index.TryMatch(_splitDestination.AsSpan(0, written), _valueDestination, out var matches) ? matches : -1;
+        return _index.TryMatchValues(_splitDestination.AsSpan(0, written), _valueDestination, out var matches) ? matches : -1;
     }
 
     [Benchmark]

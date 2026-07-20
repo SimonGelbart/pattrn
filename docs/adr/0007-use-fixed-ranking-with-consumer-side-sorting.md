@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Superseded by [ADR 0010](0010-canonical-registrations-and-explicit-match-families.md)
 
 ## Date
 

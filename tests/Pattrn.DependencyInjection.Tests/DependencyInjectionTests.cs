@@ -36,7 +36,7 @@ public sealed class DependencyInjectionTests
         using var provider = services.BuildServiceProvider();
 
         var index = provider.GetRequiredService<PattrnIndex<string, string>>();
-        var matches = index.MatchToArray(["market", "NASDAQ", "MSFT"]);
+        var matches = index.MatchValuesToArray(["market", "NASDAQ", "MSFT"]);
 
         await Assert.That(matches).IsEquivalentTo(["client-a", "client-b"]);
     }
@@ -48,20 +48,20 @@ public sealed class DependencyInjectionTests
 
         services.AddPattrnIndex<string, string>(registration => registration
             .UseWildcard("*")
-            .UseMatchOptions(MatchOptions.Prefix)
+            .UseMatchOptions(MatchOptions.Default)
             .UseSegmentComparer(StringComparer.OrdinalIgnoreCase)
             .UseValueComparer(StringComparer.OrdinalIgnoreCase)
             .Configure(builder => builder
                 .Add(["market"], "CLIENT-A")
-                .Add(["MARKET"], "client-a")));
+                .Add(["MARKET", "*"], "client-a")));
 
         using var provider = services.BuildServiceProvider();
 
         var index = provider.GetRequiredService<PattrnIndex<string, string>>();
-        var matches = index.MatchPrefixToArray(["MARKET", "NASDAQ", "MSFT"]);
+        var matches = index.MatchPrefixValuesToArray(["MARKET", "NASDAQ", "MSFT"]);
 
-        await Assert.That(index.Options).IsEqualTo(MatchOptions.Prefix);
-        await Assert.That(matches).IsEquivalentTo(["CLIENT-A"]);
+        await Assert.That(index.Options).IsEqualTo(MatchOptions.Default);
+        await Assert.That(matches).IsEquivalentTo(["client-a"]);
     }
 
     [Test]
@@ -79,7 +79,7 @@ public sealed class DependencyInjectionTests
         var keyedIndex = provider.GetRequiredKeyedService<PattrnIndex<string, string>>("market-data");
 
         await Assert.That(ReferenceEquals(namedProviderIndex, keyedIndex)).IsTrue();
-        await Assert.That(namedProviderIndex.MatchToArray(["market", "NASDAQ", "MSFT"])).IsEquivalentTo(["client-a"]);
+        await Assert.That(namedProviderIndex.MatchValuesToArray(["market", "NASDAQ", "MSFT"])).IsEquivalentTo(["client-a"]);
     }
 
     [Test]
@@ -97,7 +97,7 @@ public sealed class DependencyInjectionTests
         using var provider = services.BuildServiceProvider();
 
         var index = provider.GetRequiredService<PattrnIndex<string, string>>();
-        var matches = index.MatchToArray(["market", "NASDAQ", "MSFT"]);
+        var matches = index.MatchValuesToArray(["market", "NASDAQ", "MSFT"]);
 
         await Assert.That(matches).IsEquivalentTo(["client-a"]);
     }
@@ -119,8 +119,8 @@ public sealed class DependencyInjectionTests
         using var provider = services.BuildServiceProvider();
         var indexProvider = provider.GetRequiredService<IPattrnProvider<string, string>>();
 
-        await Assert.That(indexProvider.GetRequired("admin").MatchToArray(["admin", "users"])).IsEquivalentTo(["admin-handler"]);
-        await Assert.That(indexProvider.GetRequired("public").MatchToArray(["public", "home"])).IsEquivalentTo(["public-handler"]);
+        await Assert.That(indexProvider.GetRequired("admin").MatchValuesToArray(["admin", "users"])).IsEquivalentTo(["admin-handler"]);
+        await Assert.That(indexProvider.GetRequired("public").MatchValuesToArray(["public", "home"])).IsEquivalentTo(["public-handler"]);
     }
 
     [Test]
@@ -172,8 +172,8 @@ public sealed class DependencyInjectionTests
         using var provider = services.BuildServiceProvider();
         var index = provider.GetRequiredService<PattrnIndex<string, string>>();
 
-        await Assert.That(index.MatchToArray(["market", "MSFT"])).IsEquivalentTo(["explicit-wildcard"]);
-        await Assert.That(index.MatchToArray(["market", "*"])).IsEquivalentTo(["literal-star", "explicit-wildcard"]);
+        await Assert.That(index.MatchValuesToArray(["market", "MSFT"])).IsEquivalentTo(["explicit-wildcard"]);
+        await Assert.That(index.MatchValuesToArray(["market", "*"])).IsEquivalentTo(["literal-star", "explicit-wildcard"]);
     }
 
     [Test]

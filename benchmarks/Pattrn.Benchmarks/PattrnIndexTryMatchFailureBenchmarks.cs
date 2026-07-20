@@ -33,7 +33,7 @@ public class PattrnIndexTryMatchFailureBenchmarks
         var builder = PattrnIndex<string, int>.Builder("*");
         var options = Scenario switch
         {
-            BenchmarkScenario.PrefixExactOnly or BenchmarkScenario.PrefixWildcard => MatchOptions.Prefix,
+            BenchmarkScenario.PrefixExactOnly or BenchmarkScenario.PrefixWildcard => MatchOptions.Default,
             BenchmarkScenario.DuplicateHeavyPreserveDuplicates => MatchOptions.PreserveDuplicates,
             _ => MatchOptions.Default
         };
@@ -95,7 +95,7 @@ public class PattrnIndexTryMatchFailureBenchmarks
         _valueDestination = new int[Math.Max(1, _index.GetMatchCountUpperBound(_path))];
         _insufficientValueDestination = [];
 
-        if (!_index.TryMatch(_path, _valueDestination, out var expectedCount))
+        if (!_index.TryMatchValues(_path, _valueDestination, out var expectedCount))
         {
             throw new InvalidOperationException("Expected benchmark destination to hold all matches.");
         }
@@ -104,7 +104,7 @@ public class PattrnIndexTryMatchFailureBenchmarks
             throw new InvalidOperationException("TryMatch failure benchmark scenario must produce more matches than the insufficient destination can hold.");
         }
 
-        var succeeded = _index.TryMatch(_path, _insufficientValueDestination, out var written);
+        var succeeded = _index.TryMatchValues(_path, _insufficientValueDestination, out var written);
         if (succeeded || written != 0)
         {
             throw new InvalidOperationException("TryMatch failure benchmark scenario must fail and report zero written values.");
@@ -114,7 +114,7 @@ public class PattrnIndexTryMatchFailureBenchmarks
     [Benchmark]
     public int Trie_TryMatchToSpan_InsufficientDestination()
     {
-        var succeeded = _index.TryMatch(_path, _insufficientValueDestination, out var written);
+        var succeeded = _index.TryMatchValues(_path, _insufficientValueDestination, out var written);
         return succeeded ? written : -1;
     }
 

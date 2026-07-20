@@ -50,6 +50,79 @@ internal sealed class CompiledIndex<TSegment, TValue>
         return builder.ToIndex();
     }
 
+    internal static CompiledIndex<TSegment, TValue> FromRegistrations(
+        IReadOnlyList<PattrnRegistration<TSegment, TValue>> registrations,
+        IEqualityComparer<TSegment> segmentComparer,
+        IEqualityComparer<TValue> valueComparer,
+        bool deduplicateValues)
+    {
+        ArgumentNullException.ThrowIfNull(registrations);
+        var root = new BuilderNode<TSegment, TValue>(segmentComparer);
+        for (var registrationOrder = 0; registrationOrder < registrations.Count; registrationOrder++)
+        {
+            AddRegistration(root, registrations[registrationOrder], segmentComparer, registrationOrder);
+        }
+
+        return FromBuilder(root, segmentComparer, valueComparer, deduplicateValues);
+    }
+
+    private static void AddRegistration(
+        BuilderNode<TSegment, TValue> root,
+        PattrnRegistration<TSegment, TValue> registration,
+        IEqualityComparer<TSegment> segmentComparer,
+        int registrationOrder)
+    {
+        var node = root;
+        var captures = new List<CaptureDescriptor>();
+        var score = 0;
+
+        for (var i = 0; i < registration.Pattern.Length; i++)
+        {
+            var segment = registration.Pattern[i];
+            switch (segment.Kind)
+            {
+                case PatternSegmentKind.Literal:
+                    node = node.GetOrAddChild(segment.LiteralValue);
+                    score += 100;
+                    break;
+                case PatternSegmentKind.Parameter:
+                    node.WildcardChild ??= new BuilderNode<TSegment, TValue>(segmentComparer);
+                    node = node.WildcardChild;
+                    captures.Add(new CaptureDescriptor(segment.ParameterName!, i));
+                    score += 50;
+                    break;
+                case PatternSegmentKind.Wildcard:
+                    node.WildcardChild ??= new BuilderNode<TSegment, TValue>(segmentComparer);
+                    node = node.WildcardChild;
+                    score += 10;
+                    break;
+                case PatternSegmentKind.CatchAll:
+                    node.CatchAllChild ??= new BuilderNode<TSegment, TValue>(segmentComparer);
+                    node = node.CatchAllChild;
+                    if (segment.ParameterName is not null)
+                    {
+                        captures.Add(new CaptureDescriptor(segment.ParameterName, i, isCatchAll: true));
+                    }
+
+                    score += 1;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(registration));
+            }
+        }
+
+        var metadata = new BuilderRegistrationMetadata(
+            [.. captures],
+            score,
+            registrationOrder,
+            registration.Id,
+            registration.Name);
+        node.Values ??= [];
+        node.Metadata ??= [];
+        node.Values.Add(registration.Value);
+        node.Metadata.Add(metadata);
+    }
+
     private sealed class Builder
     {
         private const int ChildLookupThreshold = 8;
@@ -296,11 +369,10 @@ internal sealed class CompiledIndex<TSegment, TValue>
             _valueDetails.Add(new CompiledValueDetail(
                 firstCapture,
                 captureCount,
-                metadata.Kind,
                 metadata.Score,
-                metadata.PatternId,
                 metadata.RegistrationOrder,
-                metadata.PatternSegmentCount));
+                metadata.RegistrationId,
+                metadata.Name));
         }
 
         private static BuilderRegistrationMetadata GetMetadata(List<BuilderRegistrationMetadata>? metadata, int index)

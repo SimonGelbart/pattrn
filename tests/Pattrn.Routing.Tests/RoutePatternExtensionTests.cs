@@ -45,7 +45,6 @@ public sealed class RoutePatternExtensionTests
 
         ShouldEqual(matches.Length, 1);
         ShouldEqual(matches[0].Value, "file-handler");
-        ShouldEqual(matches[0].Kind, PatternMatchKind.CatchAll);
         ShouldEqual(matches[0].Captures.Length, 1);
         ShouldEqual(matches[0].Captures[0], new PatternCapture<string>("path", ["a", "b", "c.txt"], 1));
     }

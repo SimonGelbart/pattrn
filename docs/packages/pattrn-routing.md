@@ -78,8 +78,8 @@ using Pattrn.Routing;
 
 var builder = PattrnIndex<string, string>.Builder();
 
-builder.AddRoute("/orders/{id:int}", "order-handler", patternId: "orders-by-id");
-builder.AddRoute("/files/{*path}", "file-handler", patternId: "files-catch-all");
+builder.AddRoute("/orders/{id:int}", "order-handler", name: "orders-by-id");
+builder.AddRoute("/files/{*path}", "file-handler", name: "files-catch-all");
 
 var index = builder.Build();
 ```
@@ -87,7 +87,7 @@ var index = builder.Build();
 `AddRoute(...)` compiles route templates into explicit generic pattern segments. Optional/defaulted suffix parameters are expanded into multiple registrations:
 
 ```csharp
-builder.AddRoute("/orders/{id?}", "orders", patternId: "orders-optional-id");
+builder.AddRoute("/orders/{id?}", "orders", name: "orders-optional-id");
 ```
 
 This registers structural patterns for both `/orders` and `/orders/{id}` while preserving the supplied pattern identity on each expansion. Parsed templates can be reused when a caller wants metadata and registration from the same parse operation:
@@ -95,7 +95,7 @@ This registers structural patterns for both `/orders` and `/orders/{id}` while p
 ```csharp
 var template = RoutePattern.ParseTemplate("/archive/{year:int}/{month:int=6}/{day:int?}");
 
-builder.AddRoute(template, "archive-handler", patternId: "archive-template");
+builder.AddRoute(template, "archive-handler", name: "archive-template");
 ```
 
 ## Inspecting optional/defaulted expansion metadata
@@ -193,7 +193,7 @@ var template = RoutePattern.ParseTemplate("/orders/{id:int:min(1)}");
 
 var index = PattrnIndex<string, string>
     .Builder()
-    .AddRoute("/orders/{id:int:min(1)}", "handler", patternId: "orders-by-id")
+    .AddRoute("/orders/{id:int:min(1)}", "handler", name: "orders-by-id")
     .Build();
 
 var match = index.MatchRouteDetailedToArray("/orders/42")[0];
@@ -253,7 +253,7 @@ var segments = new string[segmentCount];
 var written = RoutePattern.SplitPath(path, segments);
 
 var destination = new Handler[index.GetMatchCountUpperBound(segments.AsSpan(0, written))];
-var matched = index.TryMatch(segments.AsSpan(0, written), destination, out var matches);
+var matched = index.TryMatchValues(segments.AsSpan(0, written), destination, out var matches);
 ```
 
 `TrySplitPath(...)` is available when a caller wants to avoid exceptions for too-small buffers. On failure, it reports `written = 0` and does not write partial segments.
@@ -276,7 +276,7 @@ var pattern = RoutePattern.Parse("/orders/{id:int}");
 builder.AddPattern(pattern, handler);
 
 var pathSegments = RoutePattern.SplitPath("/orders/123");
-var values = index.MatchToArray(pathSegments);
+var values = index.MatchValuesToArray(pathSegments);
 ```
 
 The generic core remains the allocation-conscious hot path. A future dedicated routing index could avoid per-segment string materialization, but that would be a separate package-level design decision rather than a core matcher change.

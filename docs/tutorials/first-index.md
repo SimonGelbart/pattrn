@@ -29,7 +29,7 @@ builder
             PatternSegment<string>.Literal("MSFT")
         ],
         "exact-msft",
-        patternId: "market-nasdaq-msft")
+        name: "market-nasdaq-msft")
     .AddPattern(
         [
             PatternSegment<string>.Literal("market"),
@@ -37,7 +37,7 @@ builder
             PatternSegment<string>.Wildcard()
         ],
         "any-nasdaq",
-        patternId: "market-nasdaq-any");
+        name: "market-nasdaq-any");
 ```
 
 A literal segment must match exactly. A wildcard segment matches one segment. The core does not parse route templates, filesystem globs, URLs, or dotted strings.
@@ -53,7 +53,7 @@ The builder is mutable. The built index is immutable and safe for concurrent rea
 ## 4. Match segmented input
 
 ```csharp
-var matches = index.MatchToArray(["market", "NASDAQ", "MSFT"]);
+var matches = index.MatchValuesToArray(["market", "NASDAQ", "MSFT"]);
 ```
 
 The result contains the values from matching registrations. Use the reference docs for the full matching, duplicate, and ranking contracts.

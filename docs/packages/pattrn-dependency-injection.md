@@ -19,7 +19,7 @@ services.AddPattrnIndex<string, string>(registration => registration
     .Configure(builder => builder.Add(["market", "NASDAQ"], "client-a")));
 ```
 
-Use `MatchPrefixToArray` or `TryMatchPrefix` on the resolved index when the application needs prefix matches. `UseMatchOptions(MatchOptions.Prefix)` remains relevant to detailed and explanation traversal, but does not change the exact value-only methods.
+Use `MatchPrefixValuesToArray` or `TryMatchPrefixValues` on the resolved index when the application needs value-only prefix matches. Use the result-record methods when registration identity and consumed depth are needed. `MatchOptions` only controls duplicate-value handling.
 
 The compiled index is registered as a singleton concrete `PattrnIndex<TSegment, TValue>`:
 

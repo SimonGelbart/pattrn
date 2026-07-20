@@ -55,7 +55,7 @@ internal ref struct SpanMatchWriter<TValue>
 
         foreach (var value in values)
         {
-            Add(value);
+            AddValue(value);
             if (!_succeeded)
             {
                 return;
@@ -93,7 +93,7 @@ internal ref struct SpanMatchWriter<TValue>
         return true;
     }
 
-    private void Add(TValue value)
+    internal void AddValue(TValue value)
     {
         if (_deduplicateValues)
         {
