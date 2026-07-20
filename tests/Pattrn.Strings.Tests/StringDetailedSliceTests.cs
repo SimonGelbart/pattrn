@@ -1,11 +1,11 @@
-using static Pattrn.Tests.TestAssertions;
+using TUnit.Assertions.Enums;
 
 namespace Pattrn.Strings.Tests;
 
 public sealed class StringDetailedSliceTests
 {
     [Test]
-    public void CallerBufferDetailedCapturesReferenceNormalizedSegments()
+    public async Task CallerBufferDetailedCapturesReferenceNormalizedSegments()
     {
         var index = StringPattrnIndexBuilder
             .CreateDotted<string>()
@@ -24,12 +24,11 @@ public sealed class StringDetailedSliceTests
         var matchCount = index.MatchDetailed(path, matches, captures, out var captureCount);
         var segments = index.Options.Split(path);
 
-        ShouldEqual(matchCount, 1);
-        ShouldEqual(captureCount, 2);
-        ShouldEqual(captures[0], new PatternCaptureSlice<string>("exchange", 1, 1));
-        ShouldEqual(captures[1], new PatternCaptureSlice<string>("symbol", 2, 2));
-        ShouldSequenceEqual(
-            segments.AsSpan(captures[1].StartSegmentIndex, captures[1].SegmentCount).ToArray(),
-            ["MSFT", "QUOTE"]);
+        await Assert.That(matchCount).IsEqualTo(1);
+        await Assert.That(captureCount).IsEqualTo(2);
+        await Assert.That(captures[0]).IsEqualTo(new PatternCaptureSlice<string>("exchange", 1, 1));
+        await Assert.That(captures[1]).IsEqualTo(new PatternCaptureSlice<string>("symbol", 2, 2));
+        await Assert.That(segments.AsSpan(captures[1].StartSegmentIndex, captures[1].SegmentCount).ToArray())
+            .IsEquivalentTo(["MSFT", "QUOTE"], CollectionOrdering.Matching);
     }
 }

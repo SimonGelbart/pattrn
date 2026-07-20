@@ -1,24 +1,22 @@
-using static Pattrn.Routing.Tests.TestAssertions;
-
 namespace Pattrn.Routing.Tests;
 
 public sealed class RoutingPerformanceSmokeTests
 {
     [Test]
-    public void PreSplitRouteMatchingToCallerProvidedBuffer_DoesNotAllocate()
+    public async Task PreSplitRouteMatchingToCallerProvidedBuffer_DoesNotAllocate()
     {
         var state = CreateValueMatchState();
 
         var succeeded = state.Index.TryMatchValues(state.PathSegments, state.Values, out var written);
-        ShouldBeTrue(succeeded, "Expected TryMatch to succeed when the destination is large enough.");
-        ShouldEqual(written, 1);
-        ShouldEqual(state.Values[0], 1);
+        await Assert.That(succeeded).IsTrue().Because("Expected TryMatch to succeed when the destination is large enough.");
+        await Assert.That(written).IsEqualTo(1);
+        await Assert.That(state.Values[0]).IsEqualTo(1);
 
         var measured = GetAllocatedBytes(static state => state.Index.TryMatchValues(state.PathSegments, state.Values, out var written) ? written : -1, state);
 
-        ShouldEqual(measured.Result, 1);
-        ShouldEqual(state.Values[0], 1);
-        ShouldEqual(measured.Allocated, 0L);
+        await Assert.That(measured.Result).IsEqualTo(1);
+        await Assert.That(state.Values[0]).IsEqualTo(1);
+        await Assert.That(measured.Allocated).IsEqualTo(0L);
     }
 
     private static ValueMatchState CreateValueMatchState()

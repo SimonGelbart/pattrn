@@ -1,191 +1,205 @@
-using static Pattrn.Routing.Tests.TestAssertions;
+using TUnit.Assertions.Enums;
 
 namespace Pattrn.Routing.Tests;
 
 public sealed class RoutePatternTests
 {
     [Test]
-    public void ParseConvertsRouteTemplateToGenericPatternSegments()
+    public async Task ParseConvertsRouteTemplateToGenericPatternSegments()
     {
         var pattern = RoutePattern.Parse("/customers/{customerId}/orders/{orderId}");
 
-        ShouldEqual(pattern.Length, 4);
-        ShouldEqual(pattern[0], PatternSegment<string>.Literal("customers"));
-        ShouldEqual(pattern[1], PatternSegment<string>.Parameter("customerId"));
-        ShouldEqual(pattern[2], PatternSegment<string>.Literal("orders"));
-        ShouldEqual(pattern[3], PatternSegment<string>.Parameter("orderId"));
+        await Assert.That(pattern.Length).IsEqualTo(4);
+        await Assert.That(pattern[0]).IsEqualTo(PatternSegment<string>.Literal("customers"));
+        await Assert.That(pattern[1]).IsEqualTo(PatternSegment<string>.Parameter("customerId"));
+        await Assert.That(pattern[2]).IsEqualTo(PatternSegment<string>.Literal("orders"));
+        await Assert.That(pattern[3]).IsEqualTo(PatternSegment<string>.Parameter("orderId"));
     }
 
     [Test]
-    public void ParseConvertsTerminalCatchAllToGenericPatternSegment()
+    public async Task ParseConvertsTerminalCatchAllToGenericPatternSegment()
     {
         var pattern = RoutePattern.Parse("/files/{*path}");
 
-        ShouldEqual(pattern.Length, 2);
-        ShouldEqual(pattern[0], PatternSegment<string>.Literal("files"));
-        ShouldEqual(pattern[1], PatternSegment<string>.CatchAll("path"));
+        await Assert.That(pattern.Length).IsEqualTo(2);
+        await Assert.That(pattern[0]).IsEqualTo(PatternSegment<string>.Literal("files"));
+        await Assert.That(pattern[1]).IsEqualTo(PatternSegment<string>.CatchAll("path"));
     }
 
     [Test]
-    public void ParseTreatsStarAsLiteralNotCoreWildcardToken()
+    public async Task ParseTreatsStarAsLiteralNotCoreWildcardToken()
     {
         var pattern = RoutePattern.Parse("/files/*");
 
-        ShouldEqual(pattern.Length, 2);
-        ShouldEqual(pattern[1], PatternSegment<string>.Literal("*"));
+        await Assert.That(pattern.Length).IsEqualTo(2);
+        await Assert.That(pattern[1]).IsEqualTo(PatternSegment<string>.Literal("*"));
     }
 
     [Test]
-    public void ParseSupportsRootPattern()
+    public async Task ParseSupportsRootPattern()
     {
-        ShouldSequenceEqual(RoutePattern.Parse("/"), []);
-        ShouldSequenceEqual(RoutePattern.Parse(""), []);
+        await Assert.That(RoutePattern.Parse("/")).IsEquivalentTo(Array.Empty<PatternSegment<string>>(), CollectionOrdering.Matching);
+        await Assert.That(RoutePattern.Parse("")).IsEquivalentTo(Array.Empty<PatternSegment<string>>(), CollectionOrdering.Matching);
     }
 
     [Test]
-    public void SplitPathSupportsRootPath()
+    public async Task SplitPathSupportsRootPath()
     {
-        ShouldSequenceEqual(RoutePattern.SplitPath("/"), []);
-        ShouldSequenceEqual(RoutePattern.SplitPath(""), []);
+        await Assert.That(RoutePattern.SplitPath("/")).IsEquivalentTo(Array.Empty<string>(), CollectionOrdering.Matching);
+        await Assert.That(RoutePattern.SplitPath("")).IsEquivalentTo(Array.Empty<string>(), CollectionOrdering.Matching);
     }
 
     [Test]
-    public void SplitPathTrimsOneLeadingAndTrailingSlash()
+    public async Task SplitPathTrimsOneLeadingAndTrailingSlash()
     {
-        ShouldSequenceEqual(RoutePattern.SplitPath("/orders/123/"), ["orders", "123"]);
-        ShouldSequenceEqual(RoutePattern.SplitPath("orders/123"), ["orders", "123"]);
+        await Assert.That(RoutePattern.SplitPath("/orders/123/")).IsEquivalentTo(["orders", "123"], CollectionOrdering.Matching);
+        await Assert.That(RoutePattern.SplitPath("orders/123")).IsEquivalentTo(["orders", "123"], CollectionOrdering.Matching);
     }
 
 
     [Test]
-    public void GetPathSegmentCountCountsTrimmedSegments()
+    public async Task GetPathSegmentCountCountsTrimmedSegments()
     {
-        ShouldEqual(RoutePattern.GetPathSegmentCount("/orders/123/"), 2);
-        ShouldEqual(RoutePattern.GetPathSegmentCount("/"), 0);
-        ShouldEqual(RoutePattern.GetPathSegmentCount(""), 0);
+        await Assert.That(RoutePattern.GetPathSegmentCount("/orders/123/")).IsEqualTo(2);
+        await Assert.That(RoutePattern.GetPathSegmentCount("/")).IsEqualTo(0);
+        await Assert.That(RoutePattern.GetPathSegmentCount("")).IsEqualTo(0);
     }
 
     [Test]
-    public void SplitPathCanWriteToCallerProvidedSpan()
+    public async Task SplitPathCanWriteToCallerProvidedSpan()
     {
         var destination = new string[2];
 
         var written = RoutePattern.SplitPath("/orders/123/", destination);
 
-        ShouldEqual(written, 2);
-        ShouldSequenceEqual(destination, ["orders", "123"]);
+        await Assert.That(written).IsEqualTo(2);
+        await Assert.That(destination).IsEquivalentTo(["orders", "123"], CollectionOrdering.Matching);
     }
 
     [Test]
-    public void SplitPathThrowsWhenDestinationSpanIsTooSmall()
+    public async Task SplitPathThrowsWhenDestinationSpanIsTooSmall()
     {
         var destination = new string[1];
 
-        ShouldThrow<ArgumentException>(() => RoutePattern.SplitPath("/orders/123", destination));
+        await Assert.That(() => RoutePattern.SplitPath("/orders/123", destination)).Throws<ArgumentException>();
     }
 
     [Test]
-    public void TrySplitPathReturnsFalseWithoutWritingWhenDestinationSpanIsTooSmall()
+    public async Task TrySplitPathReturnsFalseWithoutWritingWhenDestinationSpanIsTooSmall()
     {
         var destination = new[] { "existing" };
 
         var success = RoutePattern.TrySplitPath("/orders/123", destination, out var written);
 
-        ShouldBeFalse(success, "Expected split to fail when the destination is too small.");
-        ShouldEqual(written, 0);
-        ShouldEqual(destination[0], "existing");
+        await Assert.That(success).IsFalse().Because("Expected split to fail when the destination is too small.");
+        await Assert.That(written).IsEqualTo(0);
+        await Assert.That(destination[0]).IsEqualTo("existing");
     }
 
     [Test]
-    public void TrySplitPathWritesSegmentsWhenDestinationSpanIsLargeEnough()
+    public async Task TrySplitPathWritesSegmentsWhenDestinationSpanIsLargeEnough()
     {
         var destination = new string[3];
 
         var success = RoutePattern.TrySplitPath("/files/a/b", destination, out var written);
 
-        ShouldBeTrue(success, "Expected split to succeed.");
-        ShouldEqual(written, 3);
-        ShouldSequenceEqual(destination, ["files", "a", "b"]);
+        await Assert.That(success).IsTrue().Because("Expected split to succeed.");
+        await Assert.That(written).IsEqualTo(3);
+        await Assert.That(destination).IsEquivalentTo(["files", "a", "b"], CollectionOrdering.Matching);
     }
 
     [Test]
-    public void ParsePreservesConstraintsButCompilesStructuralParameter()
+    public async Task ParsePreservesConstraintsButCompilesStructuralParameter()
     {
         var pattern = RoutePattern.Parse("/orders/{id:int:min(1)}");
 
-        ShouldEqual(pattern.Length, 2);
-        ShouldEqual(pattern[0], PatternSegment<string>.Literal("orders"));
-        ShouldEqual(pattern[1], PatternSegment<string>.Parameter("id"));
+        await Assert.That(pattern.Length).IsEqualTo(2);
+        await Assert.That(pattern[0]).IsEqualTo(PatternSegment<string>.Literal("orders"));
+        await Assert.That(pattern[1]).IsEqualTo(PatternSegment<string>.Parameter("id"));
 
         var template = RoutePattern.ParseTemplate("/orders/{id:int:min(1)}");
         var parameter = template.Segments[1].Parameter!;
-        ShouldEqual(parameter.Name, "id");
-        ShouldEqual(parameter.Constraints.Count, 2);
-        ShouldEqual(parameter.Constraints[0].Name, "int");
-        ShouldEqual(parameter.Constraints[1].Name, "min");
-        ShouldEqual(parameter.Constraints[1].Argument, "1");
+        await Assert.That(parameter.Name).IsEqualTo("id");
+        await Assert.That(parameter.Constraints.Count).IsEqualTo(2);
+        await Assert.That(parameter.Constraints[0].Name).IsEqualTo("int");
+        await Assert.That(parameter.Constraints[1].Name).IsEqualTo("min");
+        await Assert.That(parameter.Constraints[1].Argument).IsEqualTo("1");
     }
 
     [Test]
-    public void ParseTemplatePreservesOptionalAndDefaultMetadata()
+    public async Task ParseTemplatePreservesOptionalAndDefaultMetadata()
     {
         var template = RoutePattern.ParseTemplate("/archive/{year:int}/{month:int?}");
 
-        ShouldEqual(template.Text, "/archive/{year:int}/{month:int?}");
-        ShouldEqual(template.Segments.Count, 3);
-        ShouldBeFalse(template.Segments[1].Parameter!.IsOptional, "Year should be required.");
-        ShouldBeTrue(template.Segments[2].Parameter!.IsOptional, "Month should be optional.");
-        ShouldBeTrue(template.HasOptionalSegments, "Template should report optional segments.");
+        await Assert.That(template.Text).IsEqualTo("/archive/{year:int}/{month:int?}");
+        await Assert.That(template.Segments.Count).IsEqualTo(3);
+        await Assert.That(template.Segments[1].Parameter!.IsOptional).IsFalse().Because("Year should be required.");
+        await Assert.That(template.Segments[2].Parameter!.IsOptional).IsTrue().Because("Month should be optional.");
+        await Assert.That(template.HasOptionalSegments).IsTrue().Because("Template should report optional segments.");
 
         var defaulted = RoutePattern.ParseTemplate("/reports/{format=json}");
-        ShouldEqual(defaulted.Segments[1].Parameter!.DefaultValue, "json");
-        ShouldBeTrue(defaulted.Segments[1].Parameter!.HasDefaultValue, "Default metadata should be preserved.");
+        await Assert.That(defaulted.Segments[1].Parameter!.DefaultValue).IsEqualTo("json");
+        await Assert.That(defaulted.Segments[1].Parameter!.HasDefaultValue).IsTrue().Because("Default metadata should be preserved.");
     }
 
     [Test]
-    public void ExpandCreatesVariantsForOptionalSuffixParameters()
+    public async Task ExpandCreatesVariantsForOptionalSuffixParameters()
     {
         var expanded = RoutePattern.Expand("/archive/{year:int}/{month:int?}");
 
-        ShouldEqual(expanded.Length, 2);
-        ShouldSequenceEqual(expanded[0], [PatternSegment<string>.Literal("archive"), PatternSegment<string>.Parameter("year")]);
-        ShouldSequenceEqual(expanded[1], [PatternSegment<string>.Literal("archive"), PatternSegment<string>.Parameter("year"), PatternSegment<string>.Parameter("month")]);
+        await Assert.That(expanded.Length).IsEqualTo(2);
+        await Assert.That(expanded[0].Length).IsEqualTo(2);
+        await Assert.That(expanded[0][0]).IsEqualTo(PatternSegment<string>.Literal("archive"));
+        await Assert.That(expanded[0][1]).IsEqualTo(PatternSegment<string>.Parameter("year"));
+        await Assert.That(expanded[1].Length).IsEqualTo(3);
+        await Assert.That(expanded[1][0]).IsEqualTo(PatternSegment<string>.Literal("archive"));
+        await Assert.That(expanded[1][1]).IsEqualTo(PatternSegment<string>.Parameter("year"));
+        await Assert.That(expanded[1][2]).IsEqualTo(PatternSegment<string>.Parameter("month"));
     }
 
 
     [Test]
-    public void ExpandDetailedKeepsExpansionMetadataLinkedToOriginalTemplate()
+    public async Task ExpandDetailedKeepsExpansionMetadataLinkedToOriginalTemplate()
     {
         var template = RoutePattern.ParseTemplate("/archive/{year:int}/{month:int=6}/{day:int?}");
 
         var expansions = template.ExpandDetailed();
 
-        ShouldEqual(expansions.Length, 3);
-        ShouldEqual(expansions[0].Template, template);
-        ShouldEqual(expansions[0].ExpansionIndex, 0);
-        ShouldEqual(expansions[0].IncludedSegmentCount, 2);
-        ShouldBeFalse(expansions[0].IsFullTemplate, "The shortest expansion omits optional/defaulted suffix parameters.");
-        ShouldSequenceEqual(expansions[0].Pattern, [PatternSegment<string>.Literal("archive"), PatternSegment<string>.Parameter("year")]);
-        ShouldEqual(expansions[0].OmittedParameters.Count, 2);
-        ShouldEqual(expansions[0].OmittedParameters[0].Name, "month");
-        ShouldEqual(expansions[0].OmittedParameters[0].DefaultValue, "6");
-        ShouldEqual(expansions[0].OmittedParameters[1].Name, "day");
+        await Assert.That(expansions.Length).IsEqualTo(3);
+        await Assert.That(expansions[0].Template).IsEqualTo(template);
+        await Assert.That(expansions[0].ExpansionIndex).IsEqualTo(0);
+        await Assert.That(expansions[0].IncludedSegmentCount).IsEqualTo(2);
+        await Assert.That(expansions[0].IsFullTemplate).IsFalse().Because("The shortest expansion omits optional/defaulted suffix parameters.");
+        await Assert.That(expansions[0].Pattern.Length).IsEqualTo(2);
+        await Assert.That(expansions[0].Pattern[0]).IsEqualTo(PatternSegment<string>.Literal("archive"));
+        await Assert.That(expansions[0].Pattern[1]).IsEqualTo(PatternSegment<string>.Parameter("year"));
+        await Assert.That(expansions[0].OmittedParameters.Count).IsEqualTo(2);
+        await Assert.That(expansions[0].OmittedParameters[0].Name).IsEqualTo("month");
+        await Assert.That(expansions[0].OmittedParameters[0].DefaultValue).IsEqualTo("6");
+        await Assert.That(expansions[0].OmittedParameters[1].Name).IsEqualTo("day");
 
-        ShouldEqual(expansions[1].ExpansionIndex, 1);
-        ShouldEqual(expansions[1].IncludedSegmentCount, 3);
-        ShouldSequenceEqual(expansions[1].Pattern, [PatternSegment<string>.Literal("archive"), PatternSegment<string>.Parameter("year"), PatternSegment<string>.Parameter("month")]);
-        ShouldEqual(expansions[1].OmittedParameters.Count, 1);
-        ShouldEqual(expansions[1].OmittedParameters[0].Name, "day");
+        await Assert.That(expansions[1].ExpansionIndex).IsEqualTo(1);
+        await Assert.That(expansions[1].IncludedSegmentCount).IsEqualTo(3);
+        await Assert.That(expansions[1].Pattern.Length).IsEqualTo(3);
+        await Assert.That(expansions[1].Pattern[0]).IsEqualTo(PatternSegment<string>.Literal("archive"));
+        await Assert.That(expansions[1].Pattern[1]).IsEqualTo(PatternSegment<string>.Parameter("year"));
+        await Assert.That(expansions[1].Pattern[2]).IsEqualTo(PatternSegment<string>.Parameter("month"));
+        await Assert.That(expansions[1].OmittedParameters.Count).IsEqualTo(1);
+        await Assert.That(expansions[1].OmittedParameters[0].Name).IsEqualTo("day");
 
-        ShouldEqual(expansions[2].ExpansionIndex, 2);
-        ShouldEqual(expansions[2].IncludedSegmentCount, 4);
-        ShouldBeTrue(expansions[2].IsFullTemplate, "The final expansion includes the full template.");
-        ShouldSequenceEqual(expansions[2].Pattern, [PatternSegment<string>.Literal("archive"), PatternSegment<string>.Parameter("year"), PatternSegment<string>.Parameter("month"), PatternSegment<string>.Parameter("day")]);
-        ShouldEqual(expansions[2].OmittedParameters.Count, 0);
+        await Assert.That(expansions[2].ExpansionIndex).IsEqualTo(2);
+        await Assert.That(expansions[2].IncludedSegmentCount).IsEqualTo(4);
+        await Assert.That(expansions[2].IsFullTemplate).IsTrue().Because("The final expansion includes the full template.");
+        await Assert.That(expansions[2].Pattern.Length).IsEqualTo(4);
+        await Assert.That(expansions[2].Pattern[0]).IsEqualTo(PatternSegment<string>.Literal("archive"));
+        await Assert.That(expansions[2].Pattern[1]).IsEqualTo(PatternSegment<string>.Parameter("year"));
+        await Assert.That(expansions[2].Pattern[2]).IsEqualTo(PatternSegment<string>.Parameter("month"));
+        await Assert.That(expansions[2].Pattern[3]).IsEqualTo(PatternSegment<string>.Parameter("day"));
+        await Assert.That(expansions[2].OmittedParameters.Count).IsEqualTo(0);
     }
 
     [Test]
-    public void AddRouteUsesSamePatternIdentityForExpandedOptionalVariants()
+    public async Task AddRouteUsesSamePatternIdentityForExpandedOptionalVariants()
     {
         var builder = PattrnIndex<string, string>.Builder();
         builder.AddRoute("/archive/{year:int}/{month:int=6}/{day:int?}", "archive", name: "archive-template");
@@ -194,109 +208,113 @@ public sealed class RoutePatternTests
         var shortMatches = index.MatchDetailedToArray(RoutePattern.SplitPath("/archive/2026"));
         var fullMatches = index.MatchDetailedToArray(RoutePattern.SplitPath("/archive/2026/7/14"));
 
-        ShouldEqual(shortMatches.Length, 1);
-        ShouldEqual(shortMatches[0].Captures.Length, 1);
-        ShouldEqual(shortMatches[0].Captures[0].Name, "year");
+        await Assert.That(shortMatches.Length).IsEqualTo(1);
+        await Assert.That(shortMatches[0].Captures.Length).IsEqualTo(1);
+        await Assert.That(shortMatches[0].Captures[0].Name).IsEqualTo("year");
 
-        ShouldEqual(fullMatches.Length, 1);
-        ShouldEqual(fullMatches[0].Captures.Length, 3);
-        ShouldEqual(fullMatches[0].Captures[2].Name, "day");
+        await Assert.That(fullMatches.Length).IsEqualTo(1);
+        await Assert.That(fullMatches[0].Captures.Length).IsEqualTo(3);
+        await Assert.That(fullMatches[0].Captures[2].Name).IsEqualTo("day");
     }
 
     [Test]
-    public void TryParseTemplateReturnsDiagnosticsForUnsupportedSyntax()
+    public async Task TryParseTemplateReturnsDiagnosticsForUnsupportedSyntax()
     {
         var success = RoutePattern.TryParseTemplate("/orders/{id?}/items", out var template, out var diagnostics);
 
-        ShouldBeFalse(success, "Expected parse to fail when optional parameters are not a suffix.");
-        ShouldEqual(template, null);
-        ShouldEqual(diagnostics.Length, 1);
-        ShouldEqual(diagnostics[0].Code, "ROUTE014");
-        ShouldEqual(diagnostics[0].SegmentIndex, 1);
+        await Assert.That(success).IsFalse().Because("Expected parse to fail when optional parameters are not a suffix.");
+        await Assert.That(template).IsNull();
+        await Assert.That(diagnostics.Length).IsEqualTo(1);
+        await Assert.That(diagnostics[0].Code).IsEqualTo("ROUTE014");
+        await Assert.That(diagnostics[0].SegmentIndex).IsEqualTo(1);
     }
 
     [Test]
-    public void TryParseTemplateRejectsInvalidCaptureNamesWithRoute015()
+    [Arguments("/orders/{order-id}", 1)]
+    [Arguments("/{9id}", 0)]
+    [Arguments("/{id.name}", 0)]
+    [Arguments("/files/{*path-name}", 1)]
+    [Arguments("/{\uD801}", 0)]
+    [Arguments("/{\uDC00}", 0)]
+    public async Task TryParseTemplateRejectsInvalidCaptureNamesWithRoute015(string pattern, int segmentIndex)
     {
-        AssertRoute015("/orders/{order-id}", 1);
-        AssertRoute015("/{9id}", 0);
-        AssertRoute015("/{id.name}", 0);
-        AssertRoute015("/files/{*path-name}", 1);
-        AssertRoute015("/{\uD801}", 0);
-        AssertRoute015("/{\uDC00}", 0);
+        var success = RouteTemplate.TryParse(pattern, out var template, out var diagnostics);
+
+        await Assert.That(success).IsFalse().Because("Expected route template parsing to reject invalid capture name.");
+        await Assert.That(template).IsNull();
+        await Assert.That(diagnostics.Length).IsEqualTo(1);
+        await Assert.That(diagnostics[0].Code).IsEqualTo("ROUTE015");
+        await Assert.That(diagnostics[0].SegmentIndex).IsEqualTo(segmentIndex);
+
+        success = RoutePattern.TryParseTemplate(pattern, out template, out diagnostics);
+
+        await Assert.That(success).IsFalse().Because("Expected route pattern parsing to reject invalid capture name.");
+        await Assert.That(template).IsNull();
+        await Assert.That(diagnostics.Length).IsEqualTo(1);
+        await Assert.That(diagnostics[0].Code).IsEqualTo("ROUTE015");
+        await Assert.That(diagnostics[0].SegmentIndex).IsEqualTo(segmentIndex);
     }
 
     [Test]
-    public void SupplementaryPlaneParameterNameParsesCompilesAndExpands()
+    public async Task SupplementaryPlaneParameterNameParsesCompilesAndExpands()
     {
         var success = RoutePattern.TryParseTemplate("/orders/{𐐀id}", out var template, out var diagnostics);
 
-        ShouldBeTrue(success, "Expected supplementary-plane letter parameter name to parse.");
-        ShouldEqual(diagnostics.Length, 0);
-        ShouldEqual(template!.Compile()[1], PatternSegment<string>.Parameter("𐐀id"));
-        ShouldSequenceEqual(RoutePattern.Expand("/orders/{𐐀id}")[0], [PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("𐐀id")]);
-        ShouldSequenceEqual(RoutePattern.ExpandDetailed("/orders/{𐐀id}")[0].Pattern, [PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("𐐀id")]);
+        await Assert.That(success).IsTrue().Because("Expected supplementary-plane letter parameter name to parse.");
+        await Assert.That(diagnostics.Length).IsEqualTo(0);
+        await Assert.That(template!.Compile()[1]).IsEqualTo(PatternSegment<string>.Parameter("𐐀id"));
+
+        var expanded = RoutePattern.Expand("/orders/{𐐀id}")[0];
+        await Assert.That(expanded.Length).IsEqualTo(2);
+        await Assert.That(expanded[0]).IsEqualTo(PatternSegment<string>.Literal("orders"));
+        await Assert.That(expanded[1]).IsEqualTo(PatternSegment<string>.Parameter("𐐀id"));
+
+        var detailedPattern = RoutePattern.ExpandDetailed("/orders/{𐐀id}")[0].Pattern;
+        await Assert.That(detailedPattern.Length).IsEqualTo(2);
+        await Assert.That(detailedPattern[0]).IsEqualTo(PatternSegment<string>.Literal("orders"));
+        await Assert.That(detailedPattern[1]).IsEqualTo(PatternSegment<string>.Parameter("𐐀id"));
     }
 
     [Test]
-    public void InvalidCaptureNamesThrowFromParseApis()
+    public async Task InvalidCaptureNamesThrowFromParseApis()
     {
-        ShouldThrow<ArgumentException>(() => RouteTemplate.Parse("/orders/{order-id}"));
-        ShouldThrow<ArgumentException>(() => RoutePattern.Parse("/orders/{order-id}"));
+        await Assert.That(() => RouteTemplate.Parse("/orders/{order-id}")).Throws<ArgumentException>();
+        await Assert.That(() => RoutePattern.Parse("/orders/{order-id}")).Throws<ArgumentException>();
     }
 
     [Test]
-    public void AddRouteRejectsInvalidCaptureNamesBeforeMutatingBuilder()
+    public async Task AddRouteRejectsInvalidCaptureNamesBeforeMutatingBuilder()
     {
         var builder = PattrnIndex<string, string>.Builder();
         builder.AddRoute("/orders/{id}", "existing");
         var patternCount = builder.PatternCount;
         var registrationCount = builder.RegistrationCount;
 
-        ShouldThrow<ArgumentException>(() => builder.AddRoute("/orders/{order-id}", "invalid"));
+        await Assert.That(() => builder.AddRoute("/orders/{order-id}", "invalid")).Throws<ArgumentException>();
 
-        ShouldEqual(builder.PatternCount, patternCount);
-        ShouldEqual(builder.RegistrationCount, registrationCount);
+        await Assert.That(builder.PatternCount).IsEqualTo(patternCount);
+        await Assert.That(builder.RegistrationCount).IsEqualTo(registrationCount);
     }
 
     [Test]
-    public void SuccessfulParseCompilesAndExpandsWithoutCaptureNameException()
+    public async Task SuccessfulParseCompilesAndExpandsWithoutCaptureNameException()
     {
         var template = RoutePattern.ParseTemplate("/archive/{year}/{month=07}/{day?}");
 
-        ShouldEqual(template.Compile().Length, 4);
-        ShouldEqual(template.Expand().Length, 3);
-        ShouldEqual(template.ExpandDetailed().Length, 3);
-    }
-
-    private static void AssertRoute015(string pattern, int segmentIndex)
-    {
-        var success = RouteTemplate.TryParse(pattern, out var template, out var diagnostics);
-
-        ShouldBeFalse(success, "Expected route template parsing to reject invalid capture name.");
-        ShouldEqual(template, null);
-        ShouldEqual(diagnostics.Length, 1);
-        ShouldEqual(diagnostics[0].Code, "ROUTE015");
-        ShouldEqual(diagnostics[0].SegmentIndex, segmentIndex);
-
-        success = RoutePattern.TryParseTemplate(pattern, out template, out diagnostics);
-
-        ShouldBeFalse(success, "Expected route pattern parsing to reject invalid capture name.");
-        ShouldEqual(template, null);
-        ShouldEqual(diagnostics.Length, 1);
-        ShouldEqual(diagnostics[0].Code, "ROUTE015");
-        ShouldEqual(diagnostics[0].SegmentIndex, segmentIndex);
+        await Assert.That(template.Compile().Length).IsEqualTo(4);
+        await Assert.That(template.Expand().Length).IsEqualTo(3);
+        await Assert.That(template.ExpandDetailed().Length).IsEqualTo(3);
     }
 
     [Test]
-    public void ParseRejectsInvalidRouteSyntax()
+    public async Task ParseRejectsInvalidRouteSyntax()
     {
-        ShouldThrow<ArgumentException>(() => RoutePattern.Parse("/orders/{}"));
-        ShouldThrow<ArgumentException>(() => RoutePattern.Parse("/orders/{ }"));
-        ShouldThrow<ArgumentException>(() => RoutePattern.Parse("/files/{*path}/tail"));
-        ShouldThrow<ArgumentException>(() => RoutePattern.Parse("/orders//{id}"));
-        ShouldThrow<ArgumentException>(() => RoutePattern.Parse("//orders/{id}"));
-        ShouldThrow<ArgumentException>(() => RoutePattern.Parse("/orders/{id}//"));
-        ShouldThrow<ArgumentException>(() => RoutePattern.Parse("/orders/{id?}/items"));
+        await Assert.That(() => RoutePattern.Parse("/orders/{}")).Throws<ArgumentException>();
+        await Assert.That(() => RoutePattern.Parse("/orders/{ }")).Throws<ArgumentException>();
+        await Assert.That(() => RoutePattern.Parse("/files/{*path}/tail")).Throws<ArgumentException>();
+        await Assert.That(() => RoutePattern.Parse("/orders//{id}")).Throws<ArgumentException>();
+        await Assert.That(() => RoutePattern.Parse("//orders/{id}")).Throws<ArgumentException>();
+        await Assert.That(() => RoutePattern.Parse("/orders/{id}//")).Throws<ArgumentException>();
+        await Assert.That(() => RoutePattern.Parse("/orders/{id?}/items")).Throws<ArgumentException>();
     }
 }

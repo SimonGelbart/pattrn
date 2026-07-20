@@ -1,23 +1,23 @@
-using static Pattrn.Routing.Tests.TestAssertions;
+using TUnit.Assertions.Enums;
 
 namespace Pattrn.Routing.Tests;
 
 public sealed class RoutePatternExtensionTests
 {
     [Test]
-    public void AddRouteRegistersRouteTemplateWithoutRouteSyntaxInCore()
+    public async Task AddRouteRegistersRouteTemplateWithoutRouteSyntaxInCore()
     {
         var builder = PattrnIndex<string, string>.Builder("*");
         builder.AddRoute("/orders/{id}", "order-handler");
 
         var index = builder.Build();
 
-        ShouldSequenceEqual(index.MatchRouteToArray("/orders/123"), ["order-handler"]);
-        ShouldSequenceEqual(index.MatchRouteToArray("/customers/123"), []);
+        await Assert.That(index.MatchRouteToArray("/orders/123")).IsEquivalentTo(["order-handler"], CollectionOrdering.Matching);
+        await Assert.That(index.MatchRouteToArray("/customers/123")).IsEquivalentTo(Array.Empty<string>(), CollectionOrdering.Matching);
     }
 
     [Test]
-    public void MatchRouteDetailedReturnsNamedParameterCaptures()
+    public async Task MatchRouteDetailedReturnsNamedParameterCaptures()
     {
         var index = PattrnIndex<string, string>
             .Builder("*")
@@ -26,15 +26,15 @@ public sealed class RoutePatternExtensionTests
 
         var matches = index.MatchRouteDetailedToArray("/customers/42/orders/99");
 
-        ShouldEqual(matches.Length, 1);
-        ShouldEqual(matches[0].Value, "handler");
-        ShouldEqual(matches[0].Captures.Length, 2);
-        ShouldEqual(matches[0].Captures[0], new PatternCapture<string>("customerId", "42", 1));
-        ShouldEqual(matches[0].Captures[1], new PatternCapture<string>("orderId", "99", 3));
+        await Assert.That(matches.Length).IsEqualTo(1);
+        await Assert.That(matches[0].Value).IsEqualTo("handler");
+        await Assert.That(matches[0].Captures.Length).IsEqualTo(2);
+        await Assert.That(matches[0].Captures[0]).IsEqualTo(new PatternCapture<string>("customerId", "42", 1));
+        await Assert.That(matches[0].Captures[1]).IsEqualTo(new PatternCapture<string>("orderId", "99", 3));
     }
 
     [Test]
-    public void MatchRouteDetailedReturnsCatchAllCapturesAsSegments()
+    public async Task MatchRouteDetailedReturnsCatchAllCapturesAsSegments()
     {
         var index = PattrnIndex<string, string>
             .Builder("*")
@@ -43,38 +43,38 @@ public sealed class RoutePatternExtensionTests
 
         var matches = index.MatchRouteDetailedToArray("/files/a/b/c.txt");
 
-        ShouldEqual(matches.Length, 1);
-        ShouldEqual(matches[0].Value, "file-handler");
-        ShouldEqual(matches[0].Captures.Length, 1);
-        ShouldEqual(matches[0].Captures[0], new PatternCapture<string>("path", ["a", "b", "c.txt"], 1));
+        await Assert.That(matches.Length).IsEqualTo(1);
+        await Assert.That(matches[0].Value).IsEqualTo("file-handler");
+        await Assert.That(matches[0].Captures.Length).IsEqualTo(1);
+        await Assert.That(matches[0].Captures[0]).IsEqualTo(new PatternCapture<string>("path", ["a", "b", "c.txt"], 1));
     }
 
     [Test]
-    public void ContainsAndRemoveRouteUseRouteTemplateSemantics()
+    public async Task ContainsAndRemoveRouteUseRouteTemplateSemantics()
     {
         var builder = PattrnIndex<string, string>.Builder("*");
 
         builder.AddRoute("/orders/{id}", "handler");
 
-        ShouldBeTrue(builder.ContainsRoute("/orders/{id}"), "Expected route registration to exist.");
-        ShouldBeTrue(builder.RemoveRoute("/orders/{id}", "handler"), "Expected route registration to be removed.");
-        ShouldBeFalse(builder.ContainsRoute("/orders/{id}"), "Expected route registration to be gone.");
+        await Assert.That(builder.ContainsRoute("/orders/{id}")).IsTrue().Because("Expected route registration to exist.");
+        await Assert.That(builder.RemoveRoute("/orders/{id}", "handler")).IsTrue().Because("Expected route registration to be removed.");
+        await Assert.That(builder.ContainsRoute("/orders/{id}")).IsFalse().Because("Expected route registration to be gone.");
     }
 
     [Test]
-    public void RemoveAllRouteRemovesEveryRegistrationForTemplate()
+    public async Task RemoveAllRouteRemovesEveryRegistrationForTemplate()
     {
         var builder = PattrnIndex<string, string>.Builder("*");
 
         builder.AddRoute("/orders/{id}", "a");
         builder.AddRoute("/orders/{id}", "b");
 
-        ShouldEqual(builder.RemoveAllRoute("/orders/{id}"), 2);
-        ShouldEqual(builder.RegistrationCount, 0);
+        await Assert.That(builder.RemoveAllRoute("/orders/{id}")).IsEqualTo(2);
+        await Assert.That(builder.RegistrationCount).IsEqualTo(0);
     }
 
     [Test]
-    public void MatchRouteCanWriteToDestinationSpan()
+    public async Task MatchRouteCanWriteToDestinationSpan()
     {
         var index = PattrnIndex<string, int>
             .Builder("*")
@@ -83,8 +83,9 @@ public sealed class RoutePatternExtensionTests
 
         Span<int> destination = stackalloc int[1];
         var written = index.MatchRoute("/orders/123", destination);
+        var matchedValue = destination[0];
 
-        ShouldEqual(written, 1);
-        ShouldEqual(destination[0], 1);
+        await Assert.That(written).IsEqualTo(1);
+        await Assert.That(matchedValue).IsEqualTo(1);
     }
 }

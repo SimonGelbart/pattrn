@@ -1,11 +1,11 @@
-using static Pattrn.Tests.TestAssertions;
+using TUnit.Assertions.Enums;
 
 namespace Pattrn.Strings.Tests;
 
 public sealed class StringExtensionTests
 {
     [Test]
-    public void DottedHelpersAddAndMatchStringPaths()
+    public async Task DottedHelpersAddAndMatchStringPaths()
     {
         var builder = PattrnIndexBuilder<string, string>.Create("*");
         builder.AddDotted("market.NASDAQ.MSFT", "exact");
@@ -13,34 +13,34 @@ public sealed class StringExtensionTests
 
         var index = builder.Build();
 
-        ShouldSetEqual(index.MatchDottedToArray("market.NASDAQ.MSFT"), ["exact", "wildcard"]);
+        await Assert.That(index.MatchDottedToArray("market.NASDAQ.MSFT")).IsEquivalentTo(["exact", "wildcard"]);
     }
 
     [Test]
-    public void DottedHelpersSupportCustomSeparator()
+    public async Task DottedHelpersSupportCustomSeparator()
     {
         var builder = PattrnIndexBuilder<string, string>.Create("*");
         builder.AddDotted("market/NASDAQ/*", "wildcard", separator: '/');
 
         var index = builder.Build();
 
-        ShouldSequenceEqual(index.MatchDottedToArray("market/NASDAQ/MSFT", separator: '/'), ["wildcard"]);
+        await Assert.That(index.MatchDottedToArray("market/NASDAQ/MSFT", separator: '/')).IsEquivalentTo(["wildcard"], CollectionOrdering.Matching);
     }
 
     [Test]
-    public void DottedRemoveRemovesOneRegistration()
+    public async Task DottedRemoveRemovesOneRegistration()
     {
         var builder = PattrnIndexBuilder<string, string>.Create("*");
         builder.AddDotted("market.NASDAQ.*", "client");
 
         var removed = builder.RemoveDotted("market.NASDAQ.*", "client");
 
-        ShouldBeTrue(removed, "Expected dotted registration to be removed.");
-        ShouldEqual(builder.Build().MatchDottedToArray("market.NASDAQ.MSFT").Length, 0);
+        await Assert.That(removed).IsTrue().Because("Expected dotted registration to be removed.");
+        await Assert.That(builder.Build().MatchDottedToArray("market.NASDAQ.MSFT").Length).IsEqualTo(0);
     }
 
     [Test]
-    public void DottedMatchCanWriteToDestinationSpan()
+    public async Task DottedMatchCanWriteToDestinationSpan()
     {
         var builder = PattrnIndexBuilder<string, int>.Create("*");
         builder.AddDotted("market.NASDAQ.MSFT", 1);
@@ -49,13 +49,14 @@ public sealed class StringExtensionTests
         Span<int> destination = stackalloc int[2];
 
         var written = index.MatchDotted("market.NASDAQ.MSFT", destination);
+        var matchedValues = destination[..written].ToArray();
 
-        ShouldEqual(written, 2);
-        ShouldSetEqual(destination[..written].ToArray(), [1, 2]);
+        await Assert.That(written).IsEqualTo(2);
+        await Assert.That(matchedValues).IsEquivalentTo([1, 2]);
     }
 
     [Test]
-    public void CaseInsensitiveFacadeContainsAndRemovesCanonicalRegistration()
+    public async Task CaseInsensitiveFacadeContainsAndRemovesCanonicalRegistration()
     {
         var options = new StringNormalizationOptions('/')
         {
@@ -64,39 +65,39 @@ public sealed class StringExtensionTests
         var builder = StringPattrnIndexBuilder.Create<string>(options)
             .Add("Market/NASDAQ", "handler");
 
-        ShouldBeTrue(builder.Contains("market/nasdaq"), "Expected comparer-aware containment.");
-        ShouldBeTrue(builder.Remove("market/nasdaq", "handler"), "Expected comparer-aware removal.");
-        ShouldBeFalse(builder.Contains("market/nasdaq"), "Expected registration to be removed.");
+        await Assert.That(builder.Contains("market/nasdaq")).IsTrue().Because("Expected comparer-aware containment.");
+        await Assert.That(builder.Remove("market/nasdaq", "handler")).IsTrue().Because("Expected comparer-aware removal.");
+        await Assert.That(builder.Contains("market/nasdaq")).IsFalse().Because("Expected registration to be removed.");
     }
 }
 
 public sealed class StringExtensionValidationTests
 {
     [Test]
-    public void DottedHelpersRejectEmptyPathBecauseCoreSpanApisRepresentEmptyPathsExplicitly()
+    public async Task DottedHelpersRejectEmptyPathBecauseCoreSpanApisRepresentEmptyPathsExplicitly()
     {
         var builder = PattrnIndex<string, string>.Builder("*");
 
-        var exception = ShouldThrow<ArgumentException>(() => builder.AddDotted("", "value"));
-
-        ShouldEqual(exception.ParamName, "pattern");
+        await Assert.That(() => builder.AddDotted("", "value"))
+            .Throws<ArgumentException>()
+            .WithParameterName("pattern");
     }
 
     [Test]
-    public void DottedHelpersRejectEmptySegments()
+    public async Task DottedHelpersRejectEmptySegments()
     {
         var builder = PattrnIndex<string, string>.Builder("*");
 
-        var exception = ShouldThrow<ArgumentException>(() => builder.AddDotted("market..MSFT", "value"));
-
-        ShouldEqual(exception.ParamName, "pattern");
+        await Assert.That(() => builder.AddDotted("market..MSFT", "value"))
+            .Throws<ArgumentException>()
+            .WithParameterName("pattern");
     }
 }
 
 public sealed class SeparatedStringExtensionTests
 {
     [Test]
-    public void AddSeparatedSupportsFluentChains()
+    public async Task AddSeparatedSupportsFluentChains()
     {
         var builder = PattrnIndex<string, string>.Builder("*");
 
@@ -104,12 +105,12 @@ public sealed class SeparatedStringExtensionTests
             .AddSeparated("market/NASDAQ/MSFT", "exact", '/')
             .AddSeparated("market/NASDAQ/*", "wildcard", '/');
 
-        ShouldBeTrue(ReferenceEquals(builder, returned), "Expected separated string add helper to return the same builder.");
-        ShouldSetEqual(builder.Build().MatchSeparatedToArray("market/NASDAQ/MSFT", '/'), ["exact", "wildcard"]);
+        await Assert.That(ReferenceEquals(builder, returned)).IsTrue().Because("Expected separated string add helper to return the same builder.");
+        await Assert.That(builder.Build().MatchSeparatedToArray("market/NASDAQ/MSFT", '/')).IsEquivalentTo(["exact", "wildcard"]);
     }
 
     [Test]
-    public void DottedAddSupportsFluentChains()
+    public async Task DottedAddSupportsFluentChains()
     {
         var builder = PattrnIndex<string, string>.Builder("*");
 
@@ -117,24 +118,24 @@ public sealed class SeparatedStringExtensionTests
             .AddDotted("market.NASDAQ.MSFT", "exact")
             .AddDotted("market.NASDAQ.*", "wildcard");
 
-        ShouldBeTrue(ReferenceEquals(builder, returned), "Expected dotted add helper to return the same builder.");
-        ShouldSetEqual(builder.Build().MatchDottedToArray("market.NASDAQ.MSFT"), ["exact", "wildcard"]);
+        await Assert.That(ReferenceEquals(builder, returned)).IsTrue().Because("Expected dotted add helper to return the same builder.");
+        await Assert.That(builder.Build().MatchDottedToArray("market.NASDAQ.MSFT")).IsEquivalentTo(["exact", "wildcard"]);
     }
 
     [Test]
-    public void SeparatedHelpersCanRemoveAndInspectPatterns()
+    public async Task SeparatedHelpersCanRemoveAndInspectPatterns()
     {
         var builder = PattrnIndex<string, string>.Builder("*")
             .AddSeparated("market/NASDAQ/MSFT", "client-1", '/')
             .AddSeparated("market/NASDAQ/MSFT", "client-2", '/');
 
-        ShouldBeTrue(builder.ContainsSeparated("market/NASDAQ/MSFT", '/'), "Expected separated helper to find registered pattern.");
-        ShouldEqual(builder.RemoveAllSeparated("market/NASDAQ/MSFT", '/'), 2);
-        ShouldBeFalse(builder.ContainsSeparated("market/NASDAQ/MSFT", '/'), "Expected separated helper to observe removed pattern.");
+        await Assert.That(builder.ContainsSeparated("market/NASDAQ/MSFT", '/')).IsTrue().Because("Expected separated helper to find registered pattern.");
+        await Assert.That(builder.RemoveAllSeparated("market/NASDAQ/MSFT", '/')).IsEqualTo(2);
+        await Assert.That(builder.ContainsSeparated("market/NASDAQ/MSFT", '/')).IsFalse().Because("Expected separated helper to observe removed pattern.");
     }
 
     [Test]
-    public void TryMatchDottedReturnsFalseWhenDestinationIsTooSmall()
+    public async Task TryMatchDottedReturnsFalseWhenDestinationIsTooSmall()
     {
         var index = PattrnIndex<string, int>
             .Builder("*")
@@ -145,12 +146,12 @@ public sealed class SeparatedStringExtensionTests
 
         var succeeded = index.TryMatchDotted("market.NASDAQ.MSFT", destination, out var written);
 
-        ShouldBeFalse(succeeded, "Expected dotted TryMatch to fail without throwing.");
-        ShouldEqual(written, 0);
+        await Assert.That(succeeded).IsFalse().Because("Expected dotted TryMatch to fail without throwing.");
+        await Assert.That(written).IsEqualTo(0);
     }
 
     [Test]
-    public void TryMatchSeparatedReturnsTrueWhenDestinationIsLargeEnough()
+    public async Task TryMatchSeparatedReturnsTrueWhenDestinationIsLargeEnough()
     {
         var index = PattrnIndex<string, int>
             .Builder("*")
@@ -159,10 +160,11 @@ public sealed class SeparatedStringExtensionTests
         Span<int> destination = stackalloc int[1];
 
         var succeeded = index.TryMatchSeparated("market/NASDAQ/MSFT", destination, out var written, '/');
+        var matchedValue = destination[0];
 
-        ShouldBeTrue(succeeded, "Expected separated TryMatch to succeed.");
-        ShouldEqual(written, 1);
-        ShouldEqual(destination[0], 1);
+        await Assert.That(succeeded).IsTrue().Because("Expected separated TryMatch to succeed.");
+        await Assert.That(written).IsEqualTo(1);
+        await Assert.That(matchedValue).IsEqualTo(1);
     }
 }
 
@@ -182,7 +184,7 @@ public sealed class StringIdentityTests
 public sealed class StringNormalizationOptionsTests
 {
     [Test]
-    public void OptionsCanCreateCaseInsensitiveStringBuilder()
+    public async Task OptionsCanCreateCaseInsensitiveStringBuilder()
     {
         var options = new StringNormalizationOptions('/')
         {
@@ -192,11 +194,11 @@ public sealed class StringNormalizationOptionsTests
             .AddSeparated("API/Users", "value", options)
             .Build();
 
-        ShouldSequenceEqual(index.MatchSeparatedToArray("api/users", options), ["value"]);
+        await Assert.That(index.MatchSeparatedToArray("api/users", options)).IsEquivalentTo(["value"], CollectionOrdering.Matching);
     }
 
     [Test]
-    public void OptionsCanIgnoreEmptySegmentsTrimAndNormalizeSegments()
+    public async Task OptionsCanIgnoreEmptySegmentsTrimAndNormalizeSegments()
     {
         var options = new StringNormalizationOptions('/')
         {
@@ -208,21 +210,21 @@ public sealed class StringNormalizationOptionsTests
             .AddSeparated("/ API / Users /", "value", options)
             .Build();
 
-        ShouldSequenceEqual(index.MatchSeparatedToArray("//api//USERS/", options), ["value"]);
+        await Assert.That(index.MatchSeparatedToArray("//api//USERS/", options)).IsEquivalentTo(["value"], CollectionOrdering.Matching);
     }
 
     [Test]
-    public void DefaultOptionsKeepRejectingEmptySegments()
+    public async Task DefaultOptionsKeepRejectingEmptySegments()
     {
         var options = StringNormalizationOptions.Dotted;
 
-        var exception = ShouldThrow<ArgumentException>(() => options.Split("market..MSFT", "pattern"));
-
-        ShouldEqual(exception.ParamName, "pattern");
+        await Assert.That(() => options.Split("market..MSFT", "pattern"))
+            .Throws<ArgumentException>()
+            .WithParameterName("pattern");
     }
 
     [Test]
-    public void TokenizedBuilderFactoryUsesOptionsComparer()
+    public async Task TokenizedBuilderFactoryUsesOptionsComparer()
     {
         var options = new StringNormalizationOptions('.')
         {
@@ -232,14 +234,14 @@ public sealed class StringNormalizationOptionsTests
             .AddSeparated("market.NASDAQ.*", "value", options)
             .Build();
 
-        ShouldSequenceEqual(index.MatchSeparatedToArray("MARKET.nasdaq.msft", options), ["value"]);
+        await Assert.That(index.MatchSeparatedToArray("MARKET.nasdaq.msft", options)).IsEquivalentTo(["value"], CollectionOrdering.Matching);
     }
 }
 
 public sealed class StringPattrnIndexBuilderFacadeTests
 {
     [Test]
-    public void FacadeBuildsAndMatchesSlashSeparatedPathsWithoutRepeatingOptions()
+    public async Task FacadeBuildsAndMatchesSlashSeparatedPathsWithoutRepeatingOptions()
     {
         var options = new StringNormalizationOptions('/')
         {
@@ -254,12 +256,12 @@ public sealed class StringPattrnIndexBuilderFacadeTests
             .Add("/ API / Users /", "users", name: "users")
             .Build();
 
-        ShouldSequenceEqual(index.MatchValuesToArray("//api//USERS/"), ["users"]);
+        await Assert.That(index.MatchValuesToArray("//api//USERS/")).IsEquivalentTo(["users"], CollectionOrdering.Matching);
         var detailed = index.MatchDetailedToArray("api/users").Single();
     }
 
     [Test]
-    public void FacadeSupportsExplicitPatternSegmentsWithoutWildcardTokens()
+    public async Task FacadeSupportsExplicitPatternSegmentsWithoutWildcardTokens()
     {
         var index = StringPattrnIndexBuilder
             .CreateDotted<string>()
@@ -275,25 +277,25 @@ public sealed class StringPattrnIndexBuilderFacadeTests
 
         var match = index.MatchDetailedToArray("market.NASDAQ.MSFT.QUOTE").Single();
 
-        ShouldEqual(match.Value, "handler");
-        ShouldSequenceEqual(match.Captures.Select(capture => capture.Name).ToArray(), ["exchange", "symbol"]);
-        ShouldSequenceEqual(match.Captures[0].Values, ["NASDAQ"]);
-        ShouldSequenceEqual(match.Captures[1].Values, ["MSFT", "QUOTE"]);
+        await Assert.That(match.Value).IsEqualTo("handler");
+        await Assert.That(match.Captures.Select(capture => capture.Name).ToArray()).IsEquivalentTo(["exchange", "symbol"], CollectionOrdering.Matching);
+        await Assert.That(match.Captures[0].Values).IsEquivalentTo(["NASDAQ"], CollectionOrdering.Matching);
+        await Assert.That(match.Captures[1].Values).IsEquivalentTo(["MSFT", "QUOTE"], CollectionOrdering.Matching);
     }
 
     [Test]
-    public void FacadeTokenizedBuilderKeepsWildcardConvenienceOptIn()
+    public async Task FacadeTokenizedBuilderKeepsWildcardConvenienceOptIn()
     {
         var index = StringPattrnIndexBuilder
             .CreateTokenized<string>('.', "*")
             .Add("market.NASDAQ.*", "wildcard")
             .Build();
 
-        ShouldSequenceEqual(index.MatchValuesToArray("market.NASDAQ.MSFT"), ["wildcard"]);
+        await Assert.That(index.MatchValuesToArray("market.NASDAQ.MSFT")).IsEquivalentTo(["wildcard"], CollectionOrdering.Matching);
     }
 
     [Test]
-    public void OptionsCanCreateStringBuilderFacade()
+    public async Task OptionsCanCreateStringBuilderFacade()
     {
         var options = new StringNormalizationOptions('.')
         {
@@ -303,20 +305,20 @@ public sealed class StringPattrnIndexBuilderFacadeTests
             .Add("Market.NASDAQ.MSFT", "value")
             .Build();
 
-        ShouldSequenceEqual(index.MatchValuesToArray("market.nasdaq.msft"), ["value"]);
+        await Assert.That(index.MatchValuesToArray("market.nasdaq.msft")).IsEquivalentTo(["value"], CollectionOrdering.Matching);
     }
 
     [Test]
-    public void FacadeForwardsMutationHelpersToCoreBuilder()
+    public async Task FacadeForwardsMutationHelpersToCoreBuilder()
     {
         var builder = StringPattrnIndexBuilder
             .CreateSlash<string>()
             .Add("market/NASDAQ/MSFT", "one")
             .Add("market/NASDAQ/MSFT", "two");
 
-        ShouldBeTrue(builder.Contains("market/NASDAQ/MSFT"), "Expected facade to find normalized registration.");
-        ShouldBeTrue(builder.Remove("market/NASDAQ/MSFT", "one"), "Expected facade to remove one registration.");
-        ShouldEqual(builder.RemoveAll("market/NASDAQ/MSFT"), 1);
-        ShouldBeFalse(builder.Contains("market/NASDAQ/MSFT"), "Expected facade to observe removed registration.");
+        await Assert.That(builder.Contains("market/NASDAQ/MSFT")).IsTrue().Because("Expected facade to find normalized registration.");
+        await Assert.That(builder.Remove("market/NASDAQ/MSFT", "one")).IsTrue().Because("Expected facade to remove one registration.");
+        await Assert.That(builder.RemoveAll("market/NASDAQ/MSFT")).IsEqualTo(1);
+        await Assert.That(builder.Contains("market/NASDAQ/MSFT")).IsFalse().Because("Expected facade to observe removed registration.");
     }
 }

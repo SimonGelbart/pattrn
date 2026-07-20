@@ -1,11 +1,9 @@
-using static Pattrn.Tests.TestAssertions;
-
 namespace Pattrn.Tests;
 
 public sealed class BuilderDiagnosticTests
 {
     [Test]
-    public void CompileWithDiagnosticsReportsStableDuplicatePatternWarning()
+    public async Task CompileWithDiagnosticsReportsStableDuplicatePatternWarning()
     {
         var first = PattrnRegistration<string, string>.Create([PatternSegment<string>.Literal("orders")], "a");
         var second = PattrnRegistration<string, string>.Create([PatternSegment<string>.Literal("orders")], "b");
@@ -14,17 +12,17 @@ public sealed class BuilderDiagnosticTests
             [first, second],
             new PattrnCompileOptions { DuplicatePatternPolicy = DuplicatePatternPolicy.Warn });
 
-        ShouldBeFalse(result.Report.HasErrors, "Warnings should not prevent compilation.");
-        ShouldBeTrue(result.Report.HasWarnings, "Expected a duplicate-pattern warning.");
+        await Assert.That(result.Report.HasErrors).IsFalse().Because("Warnings should not prevent compilation.");
+        await Assert.That(result.Report.HasWarnings).IsTrue().Because("Expected a duplicate-pattern warning.");
         var diagnostic = result.Report.Diagnostics.Single();
-        ShouldEqual(diagnostic.Code, "PTRN1003");
-        ShouldEqual(diagnostic.Severity, PattrnDiagnosticSeverity.Warning);
-        ShouldEqual(diagnostic.RegistrationId, second.Id);
-        ShouldEqual(diagnostic.PatternSegmentIndex, null);
+        await Assert.That(diagnostic.Code).IsEqualTo("PTRN1003");
+        await Assert.That(diagnostic.Severity).IsEqualTo(PattrnDiagnosticSeverity.Warning);
+        await Assert.That(diagnostic.RegistrationId).IsEqualTo(second.Id);
+        await Assert.That(diagnostic.PatternSegmentIndex).IsNull();
     }
 
     [Test]
-    public void DuplicatePatternRejectsWithoutProducingAnIndex()
+    public async Task DuplicatePatternRejectsWithoutProducingAnIndex()
     {
         var registrations = new[]
         {
@@ -34,13 +32,13 @@ public sealed class BuilderDiagnosticTests
 
         var result = PattrnIndex<string, string>.CompileWithDiagnostics(registrations);
 
-        ShouldBeTrue(result.Report.HasErrors, "The default duplicate policy should reject duplicates.");
-        ShouldBeFalse(result.TryGetIndex(out _), "Rejected compilation must not expose a partial index.");
-        ShouldEqual(result.Report.Diagnostics.Single().Code, "PTRN1003");
+        await Assert.That(result.Report.HasErrors).IsTrue().Because("The default duplicate policy should reject duplicates.");
+        await Assert.That(result.TryGetIndex(out _)).IsFalse().Because("Rejected compilation must not expose a partial index.");
+        await Assert.That(result.Report.Diagnostics.Single().Code).IsEqualTo("PTRN1003");
     }
 
     [Test]
-    public void StructuralDiagnosticsCarryRegistrationAndSegmentAttribution()
+    public async Task StructuralDiagnosticsCarryRegistrationAndSegmentAttribution()
     {
         var registration = PattrnRegistration<string, string>.Create(
             [PatternSegment<string>.CatchAll("path"), PatternSegment<string>.Literal("tail")],
@@ -49,14 +47,14 @@ public sealed class BuilderDiagnosticTests
         var result = PattrnIndex<string, string>.CompileWithDiagnostics([registration], new PattrnCompileOptions { DuplicatePatternPolicy = DuplicatePatternPolicy.Allow });
 
         var diagnostic = result.Report.Diagnostics.Single();
-        ShouldEqual(diagnostic.Code, "PTRN1004");
-        ShouldEqual(diagnostic.Severity, PattrnDiagnosticSeverity.Error);
-        ShouldEqual(diagnostic.RegistrationId, registration.Id);
-        ShouldEqual(diagnostic.PatternSegmentIndex, 0);
+        await Assert.That(diagnostic.Code).IsEqualTo("PTRN1004");
+        await Assert.That(diagnostic.Severity).IsEqualTo(PattrnDiagnosticSeverity.Error);
+        await Assert.That(diagnostic.RegistrationId).IsEqualTo(registration.Id);
+        await Assert.That(diagnostic.PatternSegmentIndex).IsEqualTo(0);
     }
 
     [Test]
-    public void TreatWarningsAsErrorsSuppressesIndexButKeepsWarningSeverity()
+    public async Task TreatWarningsAsErrorsSuppressesIndexButKeepsWarningSeverity()
     {
         var registrations = new[]
         {
@@ -68,8 +66,8 @@ public sealed class BuilderDiagnosticTests
             registrations,
             new PattrnCompileOptions { DuplicatePatternPolicy = DuplicatePatternPolicy.Warn, TreatWarningsAsErrors = true });
 
-        ShouldBeTrue(result.Report.HasWarnings, "The report retains warning severity.");
-        ShouldBeFalse(result.Report.HasErrors, "Warning escalation must not rewrite diagnostic severity.");
-        ShouldBeFalse(result.TryGetIndex(out _), "Escalated warnings must suppress the index.");
+        await Assert.That(result.Report.HasWarnings).IsTrue().Because("The report retains warning severity.");
+        await Assert.That(result.Report.HasErrors).IsFalse().Because("Warning escalation must not rewrite diagnostic severity.");
+        await Assert.That(result.TryGetIndex(out _)).IsFalse().Because("Escalated warnings must suppress the index.");
     }
 }

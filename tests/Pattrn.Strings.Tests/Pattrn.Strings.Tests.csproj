@@ -16,7 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Pattrn.Tests\TestAssertions.cs" Link="TestAssertions.cs" />
     <None Update="PublicApi.Shipped.txt" CopyToOutputDirectory="Always" />
   </ItemGroup>
 </Project>

@@ -1,11 +1,9 @@
-using static Pattrn.Tests.TestAssertions;
-
 namespace Pattrn.Tests;
 
 public sealed class ConcurrencyTests
 {
     [Test]
-    public void CompiledIndexSupportsConcurrentReaders()
+    public async Task CompiledIndexSupportsConcurrentReaders()
     {
         var builder = PattrnIndexBuilder<string, string>.Create("*");
         builder.Add(["market", "NASDAQ", "MSFT"], "exact");
@@ -22,6 +20,6 @@ public sealed class ConcurrencyTests
             }
         });
 
-        ShouldEqual(index.MatchValuesToArray(["market", "NASDAQ", "MSFT"]).Length, 3);
+        await Assert.That(index.MatchValuesToArray(["market", "NASDAQ", "MSFT"]).Length).IsEqualTo(3);
     }
 }

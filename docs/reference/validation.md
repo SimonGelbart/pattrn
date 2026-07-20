@@ -22,6 +22,10 @@ The current CI workflow uses `actions/setup-dotnet` with `global-json-file: glob
 
 SDK selection is controlled by the root `global.json` `sdk` section. The repository currently pins the .NET SDK feature band and allows roll-forward to a later .NET 10 feature band so local development and CI use a compatible .NET 10 SDK while remaining pre-beta-friendly.
 
+## Testing style
+
+.NET tests use direct TUnit assertions, and every assertion chain must be awaited. Ordered collection assertions use `CollectionOrdering.Matching`; unordered equivalence uses TUnit's default collection ordering. Python benchmark-tool tests remain Python `unittest` tests.
+
 ## Pull request validation expectations
 
 Use the smallest validation set that matches the change:

@@ -1,12 +1,11 @@
 using System.Reflection;
-using static Pattrn.Tests.TestAssertions;
 
 namespace Pattrn.Strings.Tests;
 
 public sealed class PublicApiSnapshotTests
 {
     [Test]
-    public void PublicApiMatchesShippedSnapshot()
+    public async Task PublicApiMatchesShippedSnapshot()
     {
         var actual = string.Join(Environment.NewLine, GetPublicApi()) + Environment.NewLine;
         var snapshotPath = Path.Combine(AppContext.BaseDirectory, "PublicApi.Shipped.txt");
@@ -25,7 +24,8 @@ public sealed class PublicApiSnapshotTests
         var expected = File.ReadAllText(snapshotPath).ReplaceLineEndings();
         actual = actual.ReplaceLineEndings();
 
-        ShouldEqual(actual, expected, "The strings public API changed. Review the change, then update PublicApi.Shipped.txt intentionally.");
+        await Assert.That(actual).IsEqualTo(expected)
+            .Because("The strings public API changed. Review the change, then update PublicApi.Shipped.txt intentionally.");
     }
 
     private static IReadOnlyList<string> GetPublicApi()

@@ -1,12 +1,12 @@
 using System.Xml.Linq;
-using static Pattrn.Tests.TestAssertions;
+using TUnit.Assertions.Enums;
 
 namespace Pattrn.Tests;
 
 public sealed class PackageMetadataTests
 {
     [Test]
-    public void PackageMetadataIsCentralizedAndUsesRepositoryMetadata()
+    public async Task PackageMetadataIsCentralizedAndUsesRepositoryMetadata()
     {
         var root = FindRepositoryRoot();
         var directoryBuildProps = XDocument.Load(Path.Combine(root.FullName, "Directory.Build.props"));
@@ -15,10 +15,10 @@ public sealed class PackageMetadataTests
         var repositoryUrl = directoryBuildProps.Descendants("RepositoryUrl").SingleOrDefault()?.Value;
         var publishRepositoryUrl = directoryBuildProps.Descendants("PublishRepositoryUrl").SingleOrDefault()?.Value;
 
-        ShouldEqual(packageVersion, "0.1.0-alpha.1", "The pre-beta package version should be centralized.");
-        ShouldEqual(repositoryType, "git", "Package metadata should point at the real Git repository.");
-        ShouldEqual(repositoryUrl, "https://github.com/SimonGelbart/pattrn", "Package metadata should use the public repository URL.");
-        ShouldEqual(publishRepositoryUrl, "true", "NuGet packages should publish repository metadata.");
+        await Assert.That(packageVersion).IsEqualTo("0.1.0-alpha.1").Because("The pre-beta package version should be centralized.");
+        await Assert.That(repositoryType).IsEqualTo("git").Because("Package metadata should point at the real Git repository.");
+        await Assert.That(repositoryUrl).IsEqualTo("https://github.com/SimonGelbart/pattrn").Because("Package metadata should use the public repository URL.");
+        await Assert.That(publishRepositoryUrl).IsEqualTo("true").Because("NuGet packages should publish repository metadata.");
 
         var packageProjects = new[]
         {
@@ -33,16 +33,16 @@ public sealed class PackageMetadataTests
             var document = XDocument.Load(projectPath);
             var license = document.Descendants("PackageLicenseExpression").SingleOrDefault()?.Value;
 
-            ShouldEqual(license, "MIT", $"{projectPath} should use the MIT SPDX license expression.");
-            ShouldEqual(document.Descendants("Version").SingleOrDefault()?.Value, null, $"{projectPath} should inherit the centralized version.");
-            ShouldEqual(document.Descendants("RepositoryType").SingleOrDefault()?.Value, null, $"{projectPath} should inherit centralized repository metadata.");
-            ShouldEqual(document.Descendants("RepositoryUrl").SingleOrDefault()?.Value, null, $"{projectPath} should inherit centralized repository metadata.");
+            await Assert.That(license).IsEqualTo("MIT").Because($"{projectPath} should use the MIT SPDX license expression.");
+            await Assert.That(document.Descendants("Version").SingleOrDefault()?.Value).IsNull().Because($"{projectPath} should inherit the centralized version.");
+            await Assert.That(document.Descendants("RepositoryType").SingleOrDefault()?.Value).IsNull().Because($"{projectPath} should inherit centralized repository metadata.");
+            await Assert.That(document.Descendants("RepositoryUrl").SingleOrDefault()?.Value).IsNull().Because($"{projectPath} should inherit centralized repository metadata.");
         }
     }
 
 
     [Test]
-    public void PackageProjectsUsePackageScopedReadmes()
+    public async Task PackageProjectsUsePackageScopedReadmes()
     {
         var root = FindRepositoryRoot();
         var expected = new Dictionary<string, string>
@@ -58,21 +58,21 @@ public sealed class PackageMetadataTests
             var document = XDocument.Load(pair.Key);
             var readmeFile = document.Descendants("PackageReadmeFile").SingleOrDefault()?.Value;
 
-            ShouldEqual(readmeFile, "README.md", $"{pair.Key} should pack a README.md file for NuGet.");
-            ShouldBeTrue(File.Exists(pair.Value), $"Missing expected package README source: {pair.Value}");
+            await Assert.That(readmeFile).IsEqualTo("README.md").Because($"{pair.Key} should pack a README.md file for NuGet.");
+            await Assert.That(File.Exists(pair.Value)).IsTrue().Because($"Missing expected package README source: {pair.Value}");
 
             var noneItems = document.Descendants("None").ToArray();
             var packsExpectedReadme = noneItems.Any(item =>
                 string.Equals(item.Attribute("Pack")?.Value, "true", StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(item.Attribute("PackagePath")?.Value, pair.Value.EndsWith("README.md", StringComparison.OrdinalIgnoreCase) ? @"\" : "README.md", StringComparison.Ordinal));
 
-            ShouldBeTrue(packsExpectedReadme, $"{pair.Key} should pack the expected README source for NuGet.");
+            await Assert.That(packsExpectedReadme).IsTrue().Because($"{pair.Key} should pack the expected README source for NuGet.");
         }
     }
 
 
     [Test]
-    public void SourceDistributionDoesNotContainGeneratedOrTemporaryArtifacts()
+    public async Task SourceDistributionDoesNotContainGeneratedOrTemporaryArtifacts()
     {
         var root = FindRepositoryRoot();
         var ignoredDirectoryNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -89,7 +89,8 @@ public sealed class PackageMetadataTests
             .Select(directory => Path.GetRelativePath(root.FullName, directory.FullName))
             .ToArray();
 
-        ShouldSequenceEqual(generatedDirectories, Array.Empty<string>(), "Source distribution should not include BenchmarkDotNet.Artifacts directories.");
+        await Assert.That(generatedDirectories).IsEquivalentTo(Array.Empty<string>(), CollectionOrdering.Matching)
+            .Because("Source distribution should not include BenchmarkDotNet.Artifacts directories.");
 
         var temporaryFiles = root.EnumerateFiles("*", SearchOption.AllDirectories)
             .Where(file => !file.FullName.Split(Path.DirectorySeparatorChar).Any(ignoredDirectoryNames.Contains))
@@ -99,7 +100,8 @@ public sealed class PackageMetadataTests
             .Select(file => Path.GetRelativePath(root.FullName, file.FullName))
             .ToArray();
 
-        ShouldSequenceEqual(temporaryFiles, Array.Empty<string>(), "Source distribution should not include temporary files or raw logs.");
+        await Assert.That(temporaryFiles).IsEquivalentTo(Array.Empty<string>(), CollectionOrdering.Matching)
+            .Because("Source distribution should not include temporary files or raw logs.");
     }
 
     private static DirectoryInfo FindRepositoryRoot()
