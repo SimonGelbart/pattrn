@@ -1,11 +1,11 @@
-using static Pattrn.Tests.TestAssertions;
+using TUnit.Assertions.Enums;
 
 namespace Pattrn.Tests;
 
 public sealed class ExplainabilitySeparationTests
 {
     [Test]
-    public void ExplainReturnsAcceptedDetailedMatchesWithoutChangingHotPathResults()
+    public async Task ExplainReturnsAcceptedDetailedMatchesWithoutChangingHotPathResults()
     {
         var index = PattrnIndex<string, string>
             .Builder()
@@ -18,16 +18,16 @@ public sealed class ExplainabilitySeparationTests
         var hotMatches = index.MatchValuesToArray(["orders", "123"]);
         var explanation = index.Explain(["orders", "123"]);
 
-        ShouldSequenceEqual(hotMatches, ["handler"]);
-        ShouldBeTrue(explanation.HasMatches, "Explanation should report accepted matches.");
-        ShouldEqual(explanation.MatchCount, 1);
-        ShouldEqual(explanation.Matches[0].Value, "handler");
-        ShouldEqual(explanation.Matches[0].Captures[0], new PatternCapture<string>("id", "123", 1));
-        ShouldSequenceEqual(explanation.Path, ["orders", "123"]);
+        await Assert.That(hotMatches).IsEquivalentTo(["handler"], CollectionOrdering.Matching);
+        await Assert.That(explanation.HasMatches).IsTrue().Because("Explanation should report accepted matches.");
+        await Assert.That(explanation.MatchCount).IsEqualTo(1);
+        await Assert.That(explanation.Matches[0].Value).IsEqualTo("handler");
+        await Assert.That(explanation.Matches[0].Captures[0]).IsEqualTo(new PatternCapture<string>("id", "123", 1));
+        await Assert.That(explanation.Path).IsEquivalentTo(["orders", "123"], CollectionOrdering.Matching);
     }
 
     [Test]
-    public void ExplainDoesNotCollectRejectedCandidatesByDefault()
+    public async Task ExplainDoesNotCollectRejectedCandidatesByDefault()
     {
         var index = PattrnIndex<string, string>
             .Builder()
@@ -36,13 +36,13 @@ public sealed class ExplainabilitySeparationTests
 
         var explanation = index.Explain(["customers", "42"]);
 
-        ShouldBeFalse(explanation.HasMatches, "The path should not match.");
-        ShouldEqual(explanation.RejectedCandidates.Count, 0);
-        ShouldBeFalse(explanation.ExplanationOptions.IncludeRejectedCandidates, "Rejected-candidate diagnostics should be opt-in.");
+        await Assert.That(explanation.HasMatches).IsFalse().Because("The path should not match.");
+        await Assert.That(explanation.RejectedCandidates.Count).IsEqualTo(0);
+        await Assert.That(explanation.ExplanationOptions.IncludeRejectedCandidates).IsFalse().Because("Rejected-candidate diagnostics should be opt-in.");
     }
 
     [Test]
-    public void ExplainCanCollectRejectedCandidatesWhenRequested()
+    public async Task ExplainCanCollectRejectedCandidatesWhenRequested()
     {
         var index = PattrnIndex<string, string>
             .Builder()
@@ -51,16 +51,16 @@ public sealed class ExplainabilitySeparationTests
 
         var explanation = index.Explain(["customers", "42"], PatternExplanationOptions.IncludeRejections);
 
-        ShouldBeFalse(explanation.HasMatches, "The path should not match.");
-        ShouldBeTrue(explanation.ExplanationOptions.IncludeRejectedCandidates, "Explanation should record the requested diagnostic option.");
-        ShouldEqual(explanation.RejectedCandidates.Count, 1);
-        ShouldEqual(explanation.RejectedCandidates[0].PathDepth, 0);
-        ShouldEqual(explanation.RejectedCandidates[0].ReasonKind, PatternRejectedCandidateReasonKind.LiteralMismatch);
-        ShouldBeFalse(string.IsNullOrWhiteSpace(explanation.RejectedCandidates[0].Reason), "Human-readable reason text should remain populated.");
+        await Assert.That(explanation.HasMatches).IsFalse().Because("The path should not match.");
+        await Assert.That(explanation.ExplanationOptions.IncludeRejectedCandidates).IsTrue().Because("Explanation should record the requested diagnostic option.");
+        await Assert.That(explanation.RejectedCandidates.Count).IsEqualTo(1);
+        await Assert.That(explanation.RejectedCandidates[0].PathDepth).IsEqualTo(0);
+        await Assert.That(explanation.RejectedCandidates[0].ReasonKind).IsEqualTo(PatternRejectedCandidateReasonKind.LiteralMismatch);
+        await Assert.That(string.IsNullOrWhiteSpace(explanation.RejectedCandidates[0].Reason)).IsFalse().Because("Human-readable reason text should remain populated.");
     }
 
     [Test]
-    public void ExplainReportsEndOfInputRejectionWhenPathStopsBeforeTerminalRegistration()
+    public async Task ExplainReportsEndOfInputRejectionWhenPathStopsBeforeTerminalRegistration()
     {
         var index = PattrnIndex<string, string>
             .Builder()
@@ -69,15 +69,15 @@ public sealed class ExplainabilitySeparationTests
 
         var explanation = index.Explain(["orders"], new PatternExplanationOptions(includeRejectedCandidates: true));
 
-        ShouldBeFalse(explanation.HasMatches, "The shorter path should not match in exact mode.");
-        ShouldEqual(explanation.RejectedCandidates.Count, 1);
-        ShouldEqual(explanation.RejectedCandidates[0].PathDepth, 1);
-        ShouldEqual(explanation.RejectedCandidates[0].ReasonKind, PatternRejectedCandidateReasonKind.PathTooShort);
-        ShouldBeFalse(string.IsNullOrWhiteSpace(explanation.RejectedCandidates[0].Reason), "Human-readable reason text should remain populated.");
+        await Assert.That(explanation.HasMatches).IsFalse().Because("The shorter path should not match in exact mode.");
+        await Assert.That(explanation.RejectedCandidates.Count).IsEqualTo(1);
+        await Assert.That(explanation.RejectedCandidates[0].PathDepth).IsEqualTo(1);
+        await Assert.That(explanation.RejectedCandidates[0].ReasonKind).IsEqualTo(PatternRejectedCandidateReasonKind.PathTooShort);
+        await Assert.That(string.IsNullOrWhiteSpace(explanation.RejectedCandidates[0].Reason)).IsFalse().Because("Human-readable reason text should remain populated.");
     }
 
     [Test]
-    public void ExplainReportsBranchMismatchReasonKindForWildcardIndexes()
+    public async Task ExplainReportsBranchMismatchReasonKindForWildcardIndexes()
     {
         var index = PattrnIndex<string, string>
             .Builder()
@@ -86,19 +86,24 @@ public sealed class ExplainabilitySeparationTests
 
         var explanation = index.Explain(["customers", "42"], PatternExplanationOptions.IncludeRejections);
 
-        ShouldBeFalse(explanation.HasMatches, "The path should not match.");
-        ShouldEqual(explanation.RejectedCandidates.Count, 1);
-        ShouldEqual(explanation.RejectedCandidates[0].PathDepth, 0);
-        ShouldEqual(explanation.RejectedCandidates[0].ReasonKind, PatternRejectedCandidateReasonKind.BranchNotMatched);
-        ShouldBeFalse(string.IsNullOrWhiteSpace(explanation.RejectedCandidates[0].Reason), "Human-readable reason text should remain populated.");
+        await Assert.That(explanation.HasMatches).IsFalse().Because("The path should not match.");
+        await Assert.That(explanation.RejectedCandidates.Count).IsEqualTo(1);
+        await Assert.That(explanation.RejectedCandidates[0].PathDepth).IsEqualTo(0);
+        await Assert.That(explanation.RejectedCandidates[0].ReasonKind).IsEqualTo(PatternRejectedCandidateReasonKind.BranchNotMatched);
+        await Assert.That(string.IsNullOrWhiteSpace(explanation.RejectedCandidates[0].Reason)).IsFalse().Because("Human-readable reason text should remain populated.");
     }
 
     [Test]
-    public void RejectedCandidateReasonKindNumericValuesAreStable()
+    public async Task RejectedCandidateReasonKindNumericValuesAreStable()
     {
-        ShouldEqual((int)PatternRejectedCandidateReasonKind.None, 0);
-        ShouldEqual((int)PatternRejectedCandidateReasonKind.LiteralMismatch, 1);
-        ShouldEqual((int)PatternRejectedCandidateReasonKind.PathTooShort, 5);
-        ShouldEqual((int)PatternRejectedCandidateReasonKind.BranchNotMatched, 7);
+        var none = (int)PatternRejectedCandidateReasonKind.None;
+        var literalMismatch = (int)PatternRejectedCandidateReasonKind.LiteralMismatch;
+        var pathTooShort = (int)PatternRejectedCandidateReasonKind.PathTooShort;
+        var branchNotMatched = (int)PatternRejectedCandidateReasonKind.BranchNotMatched;
+
+        await Assert.That(none).IsEqualTo(0);
+        await Assert.That(literalMismatch).IsEqualTo(1);
+        await Assert.That(pathTooShort).IsEqualTo(5);
+        await Assert.That(branchNotMatched).IsEqualTo(7);
     }
 }

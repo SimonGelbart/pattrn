@@ -132,12 +132,11 @@ public sealed class DependencyInjectionTests
             .UseWildcard("*")
             .Configure(builder => builder.Add(["a"], "a")));
 
-        var exception = Capture<InvalidOperationException>(() =>
-            services.AddPattrnIndex<string, string>(registration => registration
+        await Assert.That(() => services.AddPattrnIndex<string, string>(registration => registration
                 .UseWildcard("*")
-                .Configure(builder => builder.Add(["b"], "b"))));
-
-        await Assert.That(exception.Message.Contains("already registered", StringComparison.Ordinal)).IsTrue();
+                .Configure(builder => builder.Add(["b"], "b"))))
+            .Throws<InvalidOperationException>()
+            .WithMessageContaining("already registered", StringComparison.Ordinal);
     }
 
     [Test]
@@ -149,12 +148,11 @@ public sealed class DependencyInjectionTests
             .UseWildcard("*")
             .Configure(builder => builder.Add(["a"], "a")));
 
-        var exception = Capture<InvalidOperationException>(() =>
-            services.AddPattrnIndex<string, string>("routes", registration => registration
+        await Assert.That(() => services.AddPattrnIndex<string, string>("routes", registration => registration
                 .UseWildcard("*")
-                .Configure(builder => builder.Add(["b"], "b"))));
-
-        await Assert.That(exception.Message.Contains("already registered", StringComparison.Ordinal)).IsTrue();
+                .Configure(builder => builder.Add(["b"], "b"))))
+            .Throws<InvalidOperationException>()
+            .WithMessageContaining("already registered", StringComparison.Ordinal);
     }
 
     [Test]
@@ -189,22 +187,6 @@ public sealed class DependencyInjectionTests
         var index = provider.GetRequiredService<PattrnIndex<string, string>>();
 
         await Assert.That(index.MatchDetailedToArray(["orders", "123"]).Single().Captures.Single().Value).IsEqualTo("123");
-    }
-
-
-    private static TException Capture<TException>(Action action)
-        where TException : Exception
-    {
-        try
-        {
-            action();
-        }
-        catch (TException exception)
-        {
-            return exception;
-        }
-
-        throw new InvalidOperationException($"Expected exception of type {typeof(TException).FullName}.");
     }
 
     private sealed record RouteRegistration(string[] Pattern, string Value);

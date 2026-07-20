@@ -1,11 +1,9 @@
-using static Pattrn.Routing.Tests.TestAssertions;
-
 namespace Pattrn.Routing.Tests;
 
 public sealed class RouteConstraintValidationTests
 {
     [Test]
-    public void ValidateConstraintsAcceptsBuiltInScalarConstraints()
+    public async Task ValidateConstraintsAcceptsBuiltInScalarConstraints()
     {
         var template = RoutePattern.ParseTemplate("/orders/{id:int:min(1):max(99)}/{code:alpha:length(3)}");
         var index = PattrnIndex<string, string>
@@ -17,12 +15,12 @@ public sealed class RouteConstraintValidationTests
 
         var result = template.ValidateConstraints(match);
 
-        ShouldBeTrue(result.IsValid, "Expected all built-in route constraints to accept the captures.");
-        ShouldEqual(result.Failures.Count, 0);
+        await Assert.That(result.IsValid).IsTrue().Because("Expected all built-in route constraints to accept the captures.");
+        await Assert.That(result.Failures.Count).IsEqualTo(0);
     }
 
     [Test]
-    public void ValidateConstraintsRejectsStructurallyMatchedButInvalidCapture()
+    public async Task ValidateConstraintsRejectsStructurallyMatchedButInvalidCapture()
     {
         var template = RoutePattern.ParseTemplate("/orders/{id:int:min(10)}");
         var index = PattrnIndex<string, string>
@@ -34,18 +32,18 @@ public sealed class RouteConstraintValidationTests
 
         var result = template.ValidateConstraints(match);
 
-        ShouldBeFalse(result.IsValid, "Expected route-layer constraints to reject the structural match.");
-        ShouldEqual(result.Failures.Count, 2);
-        ShouldEqual(result.Failures[0].Code, "ROUTECONSTRAINT003");
-        ShouldEqual(result.Failures[0].ParameterName, "id");
-        ShouldEqual(result.Failures[0].Constraint.Name, "int");
-        ShouldEqual(result.Failures[0].Value, "abc");
-        ShouldEqual(result.Failures[0].TemplateSegmentIndex, 1);
-        ShouldEqual(result.Failures[0].PathSegmentIndex, 1);
+        await Assert.That(result.IsValid).IsFalse().Because("Expected route-layer constraints to reject the structural match.");
+        await Assert.That(result.Failures.Count).IsEqualTo(2);
+        await Assert.That(result.Failures[0].Code).IsEqualTo("ROUTECONSTRAINT003");
+        await Assert.That(result.Failures[0].ParameterName).IsEqualTo("id");
+        await Assert.That(result.Failures[0].Constraint.Name).IsEqualTo("int");
+        await Assert.That(result.Failures[0].Value).IsEqualTo("abc");
+        await Assert.That(result.Failures[0].TemplateSegmentIndex).IsEqualTo(1);
+        await Assert.That(result.Failures[0].PathSegmentIndex).IsEqualTo(1);
     }
 
     [Test]
-    public void ValidateConstraintsSkipsOmittedOptionalParameter()
+    public async Task ValidateConstraintsSkipsOmittedOptionalParameter()
     {
         var template = RoutePattern.ParseTemplate("/archive/{year:int}/{month:int?}");
         var index = PattrnIndex<string, string>
@@ -57,11 +55,11 @@ public sealed class RouteConstraintValidationTests
 
         var result = template.ValidateConstraints(match);
 
-        ShouldBeTrue(result.IsValid, "Expected omitted optional constrained segment to be accepted.");
+        await Assert.That(result.IsValid).IsTrue().Because("Expected omitted optional constrained segment to be accepted.");
     }
 
     [Test]
-    public void ValidateConstraintsRejectsUnknownConstraintByDefault()
+    public async Task ValidateConstraintsRejectsUnknownConstraintByDefault()
     {
         var template = RoutePattern.ParseTemplate("/orders/{id:tenant}");
         var index = PattrnIndex<string, string>
@@ -73,25 +71,25 @@ public sealed class RouteConstraintValidationTests
 
         var result = template.ValidateConstraints(match);
 
-        ShouldBeFalse(result.IsValid, "Expected unknown constraints to fail closed by default.");
-        ShouldEqual(result.Failures.Count, 1);
-        ShouldEqual(result.Failures[0].Code, "ROUTECONSTRAINT002");
-        ShouldEqual(result.Failures[0].Constraint.Name, "tenant");
+        await Assert.That(result.IsValid).IsFalse().Because("Expected unknown constraints to fail closed by default.");
+        await Assert.That(result.Failures.Count).IsEqualTo(1);
+        await Assert.That(result.Failures[0].Code).IsEqualTo("ROUTECONSTRAINT002");
+        await Assert.That(result.Failures[0].Constraint.Name).IsEqualTo("tenant");
     }
 
     [Test]
-    public void ValidateConstraintsCanAllowUnknownConstraints()
+    public async Task ValidateConstraintsCanAllowUnknownConstraints()
     {
         var template = RoutePattern.ParseTemplate("/orders/{id:tenant}");
         var captures = new[] { new PatternCapture<string>("id", "acme", 1) };
 
         var result = template.ValidateConstraints(captures, new RouteConstraintValidationOptions { AllowUnknownConstraints = true });
 
-        ShouldBeTrue(result.IsValid, "Expected unknown constraints to be accepted when explicitly allowed.");
+        await Assert.That(result.IsValid).IsTrue().Because("Expected unknown constraints to be accepted when explicitly allowed.");
     }
 
     [Test]
-    public void ValidateConstraintsSupportsCustomValidatorRegistry()
+    public async Task ValidateConstraintsSupportsCustomValidatorRegistry()
     {
         var template = RoutePattern.ParseTemplate("/tenants/{tenant:knownTenant}");
         var captures = new[] { new PatternCapture<string>("tenant", "acme", 1) };
@@ -100,17 +98,17 @@ public sealed class RouteConstraintValidationTests
 
         var result = template.ValidateConstraints(captures, new RouteConstraintValidationOptions { ValidatorRegistry = registry });
 
-        ShouldBeTrue(result.IsValid, "Expected custom tenant validator to accept acme.");
+        await Assert.That(result.IsValid).IsTrue().Because("Expected custom tenant validator to accept acme.");
     }
 
     [Test]
-    public void ValidateConstraintsSupportsRegexConstraint()
+    public async Task ValidateConstraintsSupportsRegexConstraint()
     {
         var template = RoutePattern.ParseTemplate("/products/{sku:regex(^[A-Z]+[0-9]+$)}");
         var good = new[] { new PatternCapture<string>("sku", "ABC12", 1) };
         var bad = new[] { new PatternCapture<string>("sku", "abc12", 1) };
 
-        ShouldBeTrue(template.ValidateConstraints(good).IsValid, "Expected regex route constraint to accept matching SKU.");
-        ShouldBeFalse(template.ValidateConstraints(bad).IsValid, "Expected regex route constraint to reject non-matching SKU.");
+        await Assert.That(template.ValidateConstraints(good).IsValid).IsTrue().Because("Expected regex route constraint to accept matching SKU.");
+        await Assert.That(template.ValidateConstraints(bad).IsValid).IsFalse().Because("Expected regex route constraint to reject non-matching SKU.");
     }
 }

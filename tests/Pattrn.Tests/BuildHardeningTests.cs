@@ -1,11 +1,11 @@
-using static Pattrn.Tests.TestAssertions;
+using TUnit.Assertions.Enums;
 
 namespace Pattrn.Tests;
 
 public sealed class BuildHardeningTests
 {
     [Test]
-    public void BuildHandlesVeryDeepExactPatternWithoutRecursiveCompilerStackGrowth()
+    public async Task BuildHandlesVeryDeepExactPatternWithoutRecursiveCompilerStackGrowth()
     {
         var pattern = CreateSegments("segment", 10_000);
         var builder = PattrnIndex<string, string>.Builder("*");
@@ -13,11 +13,11 @@ public sealed class BuildHardeningTests
         builder.Add(pattern, "deep");
         var index = builder.Build();
 
-        ShouldSequenceEqual(index.MatchValuesToArray(pattern), ["deep"]);
+        await Assert.That(index.MatchValuesToArray(pattern)).IsEquivalentTo(["deep"], CollectionOrdering.Matching);
     }
 
     [Test]
-    public void BuildHandlesVeryDeepWildcardPatternWithoutRecursiveCompilerStackGrowth()
+    public async Task BuildHandlesVeryDeepWildcardPatternWithoutRecursiveCompilerStackGrowth()
     {
         var pattern = CreateRepeatedSegment("*", 10_000);
         var path = CreateSegments("value", 10_000);
@@ -26,11 +26,11 @@ public sealed class BuildHardeningTests
         builder.Add(pattern, "deep-wildcard");
         var index = builder.Build();
 
-        ShouldSequenceEqual(index.MatchValuesToArray(path), ["deep-wildcard"]);
+        await Assert.That(index.MatchValuesToArray(path)).IsEquivalentTo(["deep-wildcard"], CollectionOrdering.Matching);
     }
 
     [Test]
-    public void RemovePrunesLeafChildrenAfterLazyChildDictionaryAllocation()
+    public async Task RemovePrunesLeafChildrenAfterLazyChildDictionaryAllocation()
     {
         var builder = PattrnIndex<string, string>.Builder("*");
 
@@ -38,13 +38,13 @@ public sealed class BuildHardeningTests
             (IReadOnlyList<PatternSegment<string>>)[PatternSegment<string>.Literal("root"), PatternSegment<string>.Literal("child")],
             "value");
 
-        ShouldBeTrue(builder.Remove(id), "Expected registration to be removed.");
-        ShouldBeFalse(builder.Contains(["root", "child"]), "Expected pattern to be pruned.");
-        ShouldEqual(builder.PatternCount, 0);
-        ShouldEqual(builder.RegistrationCount, 0);
+        await Assert.That(builder.Remove(id)).IsTrue().Because("Expected registration to be removed.");
+        await Assert.That(builder.Contains(["root", "child"])).IsFalse().Because("Expected pattern to be pruned.");
+        await Assert.That(builder.PatternCount).IsEqualTo(0);
+        await Assert.That(builder.RegistrationCount).IsEqualTo(0);
 
         var index = builder.Build();
-        ShouldEqual(index.MatchValuesToArray(["root", "child"]).Length, 0);
+        await Assert.That(index.MatchValuesToArray(["root", "child"]).Length).IsEqualTo(0);
     }
 
     private static string[] CreateSegments(string prefix, int count)

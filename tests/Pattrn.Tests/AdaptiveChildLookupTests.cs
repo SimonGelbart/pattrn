@@ -1,11 +1,11 @@
-using static Pattrn.Tests.TestAssertions;
+using TUnit.Assertions.Enums;
 
 namespace Pattrn.Tests;
 
 public sealed class AdaptiveChildLookupTests
 {
     [Test]
-    public void WideExactFanOutMatchesExpectedChild()
+    public async Task WideExactFanOutMatchesExpectedChild()
     {
         var builder = PattrnIndex<string, int>.Builder("*");
 
@@ -16,13 +16,13 @@ public sealed class AdaptiveChildLookupTests
 
         var index = builder.Build();
 
-        ShouldSequenceEqual(index.MatchValuesToArray(["root", "segment-73"]), [73]);
-        ShouldEqual(index.GetMatchCountUpperBound(["root", "segment-73"]), 1);
-        ShouldEqual(index.MatchValuesToArray(["root", "missing"]).Length, 0);
+        await Assert.That(index.MatchValuesToArray(["root", "segment-73"])).IsEquivalentTo([73], CollectionOrdering.Matching);
+        await Assert.That(index.GetMatchCountUpperBound(["root", "segment-73"])).IsEqualTo(1);
+        await Assert.That(index.MatchValuesToArray(["root", "missing"]).Length).IsEqualTo(0);
     }
 
     [Test]
-    public void WideExactFanOutUsesConfiguredSegmentComparer()
+    public async Task WideExactFanOutUsesConfiguredSegmentComparer()
     {
         var builder = PattrnIndex<string, int>.Builder("*", StringComparer.OrdinalIgnoreCase);
 
@@ -33,12 +33,12 @@ public sealed class AdaptiveChildLookupTests
 
         var index = builder.Build();
 
-        ShouldSequenceEqual(index.MatchValuesToArray(["root", "segment-73"]), [73]);
-        ShouldEqual(index.MatchValuesToArray(["root", "missing"]).Length, 0);
+        await Assert.That(index.MatchValuesToArray(["root", "segment-73"])).IsEquivalentTo([73], CollectionOrdering.Matching);
+        await Assert.That(index.MatchValuesToArray(["root", "missing"]).Length).IsEqualTo(0);
     }
 
     [Test]
-    public void WideExactFanOutHandlesHashCollisions()
+    public async Task WideExactFanOutHandlesHashCollisions()
     {
         var builder = PattrnIndex<string, int>.Builder("*", new ConstantHashStringComparer());
 
@@ -49,12 +49,12 @@ public sealed class AdaptiveChildLookupTests
 
         var index = builder.Build();
 
-        ShouldSequenceEqual(index.MatchValuesToArray(["root", "segment-73"]), [73]);
-        ShouldEqual(index.MatchValuesToArray(["root", "missing"]).Length, 0);
+        await Assert.That(index.MatchValuesToArray(["root", "segment-73"])).IsEquivalentTo([73], CollectionOrdering.Matching);
+        await Assert.That(index.MatchValuesToArray(["root", "missing"]).Length).IsEqualTo(0);
     }
 
     [Test]
-    public void WideExactFanOutPreservesWildcardMatching()
+    public async Task WideExactFanOutPreservesWildcardMatching()
     {
         var builder = PattrnIndex<string, string>.Builder("*");
 
@@ -67,8 +67,8 @@ public sealed class AdaptiveChildLookupTests
 
         var index = builder.Build();
 
-        ShouldSetEqual(index.MatchValuesToArray(["root", "segment-73"]), ["exact-73", "wildcard"]);
-        ShouldSequenceEqual(index.MatchValuesToArray(["root", "other"]), ["wildcard"]);
+        await Assert.That(index.MatchValuesToArray(["root", "segment-73"])).IsEquivalentTo(["exact-73", "wildcard"]);
+        await Assert.That(index.MatchValuesToArray(["root", "other"])).IsEquivalentTo(["wildcard"], CollectionOrdering.Matching);
     }
 
     private sealed class ConstantHashStringComparer : IEqualityComparer<string>
@@ -78,4 +78,3 @@ public sealed class AdaptiveChildLookupTests
         public int GetHashCode(string obj) => 42;
     }
 }
-

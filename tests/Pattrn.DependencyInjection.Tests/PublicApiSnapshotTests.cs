@@ -5,7 +5,7 @@ namespace Pattrn.DependencyInjection.Tests;
 public sealed class PublicApiSnapshotTests
 {
     [Test]
-    public void PublicApiMatchesShippedSnapshot()
+    public async Task PublicApiMatchesShippedSnapshot()
     {
         var actual = string.Join(Environment.NewLine, GetPublicApi()) + Environment.NewLine;
         var snapshotPath = Path.Combine(AppContext.BaseDirectory, "PublicApi.Shipped.txt");
@@ -16,18 +16,14 @@ public sealed class PublicApiSnapshotTests
             File.WriteAllText(updateSnapshotPath, actual);
         }
 
-        if (!File.Exists(snapshotPath))
-        {
-            throw new FileNotFoundException("The public API snapshot was not copied to the test output directory.", snapshotPath);
-        }
+        await Assert.That(File.Exists(snapshotPath)).IsTrue()
+            .Because($"The public API snapshot was not copied to the test output directory: {snapshotPath}");
 
         var expected = File.ReadAllText(snapshotPath).ReplaceLineEndings();
         actual = actual.ReplaceLineEndings();
 
-        if (!string.Equals(actual, expected, StringComparison.Ordinal))
-        {
-            throw new InvalidOperationException("The DI public API changed. Review the change, then update PublicApi.Shipped.txt intentionally.");
-        }
+        await Assert.That(actual).IsEqualTo(expected)
+            .Because("The DI public API changed. Review the change, then update PublicApi.Shipped.txt intentionally.");
     }
 
     private static IReadOnlyList<string> GetPublicApi()

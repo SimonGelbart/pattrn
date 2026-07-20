@@ -1,11 +1,11 @@
-using static Pattrn.Routing.Tests.TestAssertions;
+using TUnit.Assertions.Enums;
 
 namespace Pattrn.Routing.Tests;
 
 public sealed class RouteCompatibilitySemanticsTests
 {
     [Test]
-    public void RouteMatchingKeepsLiteralBeforeParameterBeforeCatchAllOrder()
+    public async Task RouteMatchingKeepsLiteralBeforeParameterBeforeCatchAllOrder()
     {
         var index = PattrnIndex<string, string>
             .Builder("*")
@@ -16,11 +16,11 @@ public sealed class RouteCompatibilitySemanticsTests
 
         var matches = index.MatchRouteDetailedToArray("/orders/new");
 
-        ShouldSequenceEqual(matches.Select(match => match.Value), ["literal", "parameter", "catch-all"]);
+        await Assert.That(matches.Select(match => match.Value)).IsEquivalentTo(["literal", "parameter", "catch-all"], CollectionOrdering.Matching);
     }
 
     [Test]
-    public void RouteCapturesKeepSegmentValuesWithoutJoiningOrDecoding()
+    public async Task RouteCapturesKeepSegmentValuesWithoutJoiningOrDecoding()
     {
         var index = PattrnIndex<string, string>
             .Builder("*")
@@ -29,28 +29,29 @@ public sealed class RouteCompatibilitySemanticsTests
 
         var matches = index.MatchRouteDetailedToArray("/files/a/b%20c/d.txt");
 
-        ShouldEqual(matches.Length, 1);
-        ShouldSequenceEqual(
-            matches[0].Captures,
-            [
-                new PatternCapture<string>("path", ["a", "b%20c", "d.txt"], 1)
-            ]);
+        await Assert.That(matches.Length).IsEqualTo(1);
+        await Assert.That(matches[0].Captures.Length).IsEqualTo(1);
+
+        var capture = matches[0].Captures[0];
+        await Assert.That(capture.Name).IsEqualTo("path");
+        await Assert.That(capture.Values).IsEquivalentTo(["a", "b%20c", "d.txt"], CollectionOrdering.Matching);
+        await Assert.That(capture.StartSegmentIndex).IsEqualTo(1);
     }
 
     [Test]
-    public void RouteParserPreservesDeferredConstraintSyntaxWithoutEvaluatingIt()
+    public async Task RouteParserPreservesDeferredConstraintSyntaxWithoutEvaluatingIt()
     {
         var template = RoutePattern.ParseTemplate("/orders/{id:int}");
 
-        ShouldEqual(template.Segments[1].Parameter!.Constraints.Count, 1);
-        ShouldEqual(template.Segments[1].Parameter!.Constraints[0].Name, "int");
+        await Assert.That(template.Segments[1].Parameter!.Constraints.Count).IsEqualTo(1);
+        await Assert.That(template.Segments[1].Parameter!.Constraints[0].Name).IsEqualTo("int");
 
-        ShouldThrow<ArgumentException>(() => RoutePattern.Parse("/files/{*path}/tail"));
-        ShouldThrow<ArgumentException>(() => RoutePattern.Parse("/orders//{id}"));
+        await Assert.That(() => RoutePattern.Parse("/files/{*path}/tail")).Throws<ArgumentException>();
+        await Assert.That(() => RoutePattern.Parse("/orders//{id}")).Throws<ArgumentException>();
     }
 
     [Test]
-    public void OptionalRouteSuffixExpandsIntoMultipleStructuralRegistrations()
+    public async Task OptionalRouteSuffixExpandsIntoMultipleStructuralRegistrations()
     {
         var index = PattrnIndex<string, string>
             .Builder()
@@ -60,16 +61,16 @@ public sealed class RouteCompatibilitySemanticsTests
         var rootMatches = index.MatchRouteDetailedToArray("/orders");
         var itemMatches = index.MatchRouteDetailedToArray("/orders/123");
 
-        ShouldEqual(rootMatches.Length, 1);
-        ShouldEqual(itemMatches.Length, 1);
-        ShouldEqual(itemMatches[0].Captures[0], new PatternCapture<string>("id", "123", 1));
+        await Assert.That(rootMatches.Length).IsEqualTo(1);
+        await Assert.That(itemMatches.Length).IsEqualTo(1);
+        await Assert.That(itemMatches[0].Captures[0]).IsEqualTo(new PatternCapture<string>("id", "123", 1));
     }
 }
 
 public sealed class RouteIdentityTests
 {
     [Test]
-    public void AddRouteFlowsPatternIdentityToDetailedMatches()
+    public async Task AddRouteFlowsPatternIdentityToDetailedMatches()
     {
         var index = PattrnIndex<string, string>
             .Builder()
@@ -78,6 +79,6 @@ public sealed class RouteIdentityTests
 
         var match = index.MatchDetailedToArray(["orders", "123"]).Single();
 
-        ShouldEqual(match.Captures[0], new PatternCapture<string>("id", "123", 1));
+        await Assert.That(match.Captures[0]).IsEqualTo(new PatternCapture<string>("id", "123", 1));
     }
 }
