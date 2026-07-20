@@ -117,7 +117,7 @@ For input `orders/new`, both patterns match. Default match options emit `handler
 
 Duplicate behavior and ranking are separate. Builder duplicate policies decide which structural registrations are accepted. Match duplicate-value mode decides whether equal values are emitted once or repeatedly. Ranking decides the deterministic order of the accepted matches.
 
-See [ranking and specificity](ranking-specificity.md) for the ordering contract.
+See [matching semantics](matching-semantics.md) for the ordering contract.
 
 ## Diagnostics and validation
 

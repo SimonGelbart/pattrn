@@ -45,12 +45,12 @@ The source tree separates documentation content from the Pages implementation:
 - `docs.site.json` curates which canonical Markdown files render as public documentation routes and records route ownership metadata.
 - Top-level curated Astro routes live in `src/pages/**`, including routes for entries marked `render:false` in the manifest. These pages stand in for the generic Markdown renderer without changing the canonical Markdown source.
 - Reusable site primitives live in `src/site/kit/**`. The kit is internal for now; it contains stable docs-rendering helpers and components that may become shared only after another project site adopts the model.
-- Pattrn-specific site implementation lives in `src/site/project/**`. Project-specific landing copy, package descriptions, roadmap wording, benchmark wording, navigation labels, and visual identity stay outside the kit.
+- Pattrn-specific site implementation lives in `src/site/project/**`. Project-specific landing copy, package descriptions, benchmark wording, navigation labels, and visual identity stay outside the kit.
 - Generated HTML and other build output are artifacts only. Do not edit generated output to change the published site.
 
 ## Curated index routes
 
-Top-level routes such as `/docs/`, `/reference/`, `/packages/`, `/adr/`, `/roadmap/`, and `/benchmarks/` remain curated Astro pages.
+Top-level routes such as `/docs/`, `/reference/`, `/packages/`, `/adr/`, and `/benchmarks/` remain curated Astro pages.
 
 These pages should link to internal rendered docs routes when available, and only use source links when a document is intentionally not rendered as a dedicated route.
 

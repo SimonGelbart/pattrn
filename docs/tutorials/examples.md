@@ -1,6 +1,6 @@
 # Examples
 
-These examples show common uses of the current pre-beta Pattrn surface.
+These examples show common uses of the current Pattrn surface.
 
 ## Topic routing
 

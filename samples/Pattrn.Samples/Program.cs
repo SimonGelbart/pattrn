@@ -35,17 +35,17 @@ var prefixSubscriptions = PattrnIndex<string, string>
     .Builder()
     .Add(["market", "NASDAQ"], "all-nasdaq")
     .Add(["market", "NASDAQ", "MSFT"], "exact-msft")
-    .Build(MatchOptions.Prefix);
+    .Build();
 
 Console.WriteLine();
 Console.WriteLine("Prefix matches:");
-foreach (var match in prefixSubscriptions.MatchToArray(["market", "NASDAQ", "MSFT"]))
+foreach (var match in prefixSubscriptions.MatchPrefixToArray(["market", "NASDAQ", "MSFT"]))
 {
     Console.WriteLine($"- {match}");
 }
 
-var destination = new string[prefixSubscriptions.GetMatchCountUpperBound(["market", "NASDAQ", "MSFT"] )];
-if (prefixSubscriptions.TryMatch(["market", "NASDAQ", "MSFT"], destination, out var written))
+var destination = new string[prefixSubscriptions.GetPrefixMatchCountUpperBound(["market", "NASDAQ", "MSFT"] )];
+if (prefixSubscriptions.TryMatchPrefix(["market", "NASDAQ", "MSFT"], destination, out var written))
 {
     Console.WriteLine();
     Console.WriteLine($"Span-based matching wrote {written} value(s).");

@@ -1,21 +1,18 @@
 # Documentation
 
-Pattrn documentation is organized around the current pre-beta product state. Use the newcomer path first; maintainer material is intentionally lower on this page.
+These docs describe the current code and public API. Historical experiments and unused planning records belong in Git history, not in the normal reading path.
 
 ## Start here (new users)
 
-1. [Roadmap](roadmap.md) — current direction and milestone status.
-2. [Build your first Pattrn index](tutorials/first-index.md) — first success path.
-3. [Core package docs](packages/pattrn.md) — install + package selection table (canonical owner).
-4. [Core API](reference/api.md) and [Generic pattern segments](reference/pattern-segments.md) — stable contracts.
-5. [Select a best match](how-to/select-best-match.md) — practical ranking workflow.
-6. [Known limitations](reference/limitations.md) — boundaries and deferred behavior.
+1. [Build your first Pattrn index](tutorials/first-index.md)
+2. [Core package docs](packages/pattrn.md)
+3. [Core API](reference/api.md) and [Matching semantics](reference/matching-semantics.md)
+4. [Select a best match](how-to/select-best-match.md)
+5. [Known limitations](reference/limitations.md)
 
 ## Current product docs
 
 - [Root README](../README.md) for the short product overview and first example.
-- [Project profile](reference/project-profile.md) for durable package/status facts.
-- [Beta readiness checklist](reference/beta-readiness.md) for the pre-beta exit gates.
 - [Validation](reference/validation.md) for CI-first validation policy.
 - [Trimming and Native AOT compatibility](reference/aot-trimming.md) for stable-package support posture and local harness commands.
 - [Benchmarks](reference/benchmarks.md) for evidence policy and benchmark workflow expectations.
@@ -33,21 +30,13 @@ Pattrn documentation is organized around the current pre-beta product state. Use
 - Tutorials: [first index](tutorials/first-index.md), [examples](tutorials/examples.md)
 - How-to: [select a best match](how-to/select-best-match.md)
 - Explanation: [package boundaries](explanation/package-boundaries.md)
-- Reference: [api](reference/api.md), [matching semantics](reference/matching-semantics.md), [ranking and specificity](reference/ranking-specificity.md), [matching semantics audit](reference/matching-semantics-audit.md), [trimming and Native AOT compatibility](reference/aot-trimming.md), [duplicate behavior](reference/duplicate-behavior.md), [diagnostics](reference/diagnostics.md), [beta readiness](reference/beta-readiness.md)
+- Reference: [api](reference/api.md), [matching semantics](reference/matching-semantics.md), [trimming and Native AOT compatibility](reference/aot-trimming.md), [duplicate behavior](reference/duplicate-behavior.md), [diagnostics](reference/diagnostics.md)
 
 ## Maintainer guidance
 
 - [`../AGENTS.md`](../AGENTS.md)
-- [Project profile](reference/project-profile.md)
 - [Validation](reference/validation.md)
-- [Repository layout](reference/repository-layout.md)
 - [Git workflow](reference/git-workflow.md)
-- [Documentation standards](reference/documentation-standards.md)
 - [Documentation site](reference/documentation-site.md)
-- [Building offline](reference/building-offline.md)
 
-## Historical material
-
-Pattrn is pre-beta. Alpha-era migration notes, local benchmark reports, release-planning notes, and design drafts are not kept in the current documentation path. Use Git history for old context. Durable product decisions are captured as ADRs.
-
-Current benchmark proof should come from CI workflow artifacts and summaries referenced by [benchmarks reference](reference/benchmarks.md).
+Current benchmark proof should come from CI workflow artifacts and summaries referenced by [benchmarks reference](reference/benchmarks.md). Future work is tracked outside the product documentation.

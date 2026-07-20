@@ -1,14 +1,18 @@
-# ADR 0014: Builders are single-writer and compiled indexes are concurrent-reader safe
+# ADR 0008: Builders are single-writer and compiled indexes are concurrent-reader safe
 
 ## Status
 
 Accepted
 
+## Date
+
+2026-06-25
+
 ## Context
 
 Pattrn separates registration-time construction from read-time matching. The builder is mutable construction state: callers add, replace, remove, validate, and diagnose registrations before compiling an immutable index.
 
-Historical architecture notes documented that compiled indexes are safe for concurrent readers while builders are intentionally mutable and not thread-safe. That decision still shapes the public API and should be captured as an ADR rather than preserved only in discarded design drafts.
+This contract shapes the public API and keeps construction separate from read-time matching.
 
 ## Decision
 

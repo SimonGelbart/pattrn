@@ -15,7 +15,6 @@ services.AddPattrnIndex<string, string>(registration => registration
 
 services.AddPattrnIndex<string, string>("market-data", registration => registration
     .UseWildcard("*")
-    .UseMatchOptions(MatchOptions.Prefix)
     .UseSegmentComparer(StringComparer.OrdinalIgnoreCase)
     .Configure(builder => builder
         .Add(["market"], "named-market-prefix-client")));
@@ -41,7 +40,7 @@ var eventIndex = indexProvider.GetRequired("events");
 var adminIndex = indexProvider.GetRequired("admin");
 
 Console.WriteLine($"default: {string.Join(", ", defaultMatches)}");
-Console.WriteLine($"market-data: {string.Join(", ", marketIndex.MatchToArray(["MARKET", "NASDAQ", "MSFT"]))}");
+Console.WriteLine($"market-data: {string.Join(", ", marketIndex.MatchPrefixToArray(["MARKET", "NASDAQ", "MSFT"]))}");
 Console.WriteLine($"events: {string.Join(", ", eventIndex.MatchToArray(["events", "created"]))}");
 Console.WriteLine($"admin: {string.Join(", ", adminIndex.MatchToArray(["admin", "users"]))}");
 

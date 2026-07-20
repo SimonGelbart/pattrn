@@ -24,20 +24,22 @@ const allAdrs: AdrLink[] = getDocsForSection('ADRs', { renderableOnly: true })
 const recommended: RecommendedAdr[] = [
   { id: 'ADR 0001', title: 'Core remains segmented and domain-neutral', ...linkForSource('docs/adr/0001-core-remains-segmented-and-domain-neutral.md', 'Read decision record') },
   { id: 'ADR 0003', title: 'Explicit pattern segments are the primary core model', ...linkForSource('docs/adr/0003-explicit-pattern-segments-are-primary.md', 'Read decision record') },
-  { id: 'ADR 0004', title: 'Strings, DI, and Routing are companion packages', ...linkForSource('docs/adr/0004-companion-packages.md', 'Read decision record') },
-  { id: 'ADR 0010', title: 'Performance guardrails are release gates', ...linkForSource('docs/adr/0010-performance-guardrails-are-release-gates.md', 'Read decision record') },
-  { id: 'ADR 0013', title: 'Use fixed ranking with consumer-side sorting', ...linkForSource('docs/adr/0013-use-fixed-ranking-with-consumer-side-sorting.md', 'Read decision record') },
+  { id: 'ADR 0004', title: 'Keep domain helpers in companion packages', ...linkForSource('docs/adr/0004-companion-packages.md', 'Read decision record') },
+  { id: 'ADR 0005', title: 'Keep compiled-index internals private', ...linkForSource('docs/adr/0005-compiled-index-internals-are-private.md', 'Read decision record') },
+  { id: 'ADR 0006', title: 'Keep normal matching synchronous and diagnostics off the hot path', ...linkForSource('docs/adr/0006-hot-path-matching-policy.md', 'Read decision record') },
+  { id: 'ADR 0007', title: 'Use fixed ranking with consumer-side sorting', ...linkForSource('docs/adr/0007-use-fixed-ranking-with-consumer-side-sorting.md', 'Read decision record') },
+  { id: 'ADR 0008', title: 'Builders are single-writer and compiled indexes are concurrent-reader safe', ...linkForSource('docs/adr/0008-builders-single-writer-compiled-indexes-concurrent-reader-safe.md', 'Read decision record') },
 ];
 ---
 <PattrnLayout title="Pattrn ADRs" description="Pattrn architecture decision records." current="adr">
   <section class="page-heading narrow">
     <p class="eyebrow">ADRs</p>
     <h1>Decision records, not a general docs bucket.</h1>
-    <p class="lede">Architecture Decision Records capture durable product, architecture, package-boundary, compatibility, and workflow decisions. Accepted ADRs guide future changes unless a newer ADR supersedes or amends them.</p>
+    <p class="lede">Architecture Decision Records capture durable architecture and public-contract decisions.</p>
     <div class="actions"><a class="button" href={getSourceUrl('docs/adr/README.md')} rel="noreferrer">Open ADR index ↗</a></div>
   </section>
   <section class="section">
-    <div class="section-heading"><p class="eyebrow">Recommended read order</p><h2>Start with the decisions most changes touch.</h2><p>Use the full list below for complete accepted decision history. Start here when changing public behavior, package boundaries, roadmap policy, or validation evidence.</p></div>
+    <div class="section-heading"><p class="eyebrow">Recommended read order</p><h2>Start with the decisions most changes touch.</h2><p>Use the full list below for the current accepted decisions.</p></div>
     <div class="package-list">
       {recommended.map((adr) => (
         <a class="package-row" href={adr.href} rel={adr.external ? 'noreferrer' : undefined}>

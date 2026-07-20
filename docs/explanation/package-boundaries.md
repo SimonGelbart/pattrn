@@ -46,11 +46,4 @@ Keeping these boundaries separate makes the core easier to reason about and avoi
 
 When a domain needs its own syntax or policy, prefer a thin translator above the core instead of adding that policy to `Pattrn` itself.
 
-## Related docs
-
-- [Project profile](../reference/project-profile.md)
-- [Architecture boundaries](../reference/architecture/boundaries.md)
-- [Core API](../reference/api.md)
-- [String package README](../packages/pattrn-strings.md)
-- [Dependency injection package README](../packages/pattrn-dependency-injection.md)
-- [Routing package README](../packages/pattrn-routing.md)
+See the package READMEs for installation and package-specific APIs.
