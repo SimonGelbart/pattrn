@@ -367,7 +367,7 @@ public sealed class PattrnIndex<TSegment, TValue>
         var writer = new SpanMatchWriter<TValue>(values, _deduplicateValues, _valueComparer, throwOnInsufficientCapacity: true);
         foreach (var candidate in candidates)
         {
-            writer.Add(new[] { candidate.Value }, valuesAreUnique: false);
+            writer.AddValue(candidate.Value);
         }
 
         return writer.Count == values.Length ? values : values[..writer.Count];
@@ -385,7 +385,7 @@ public sealed class PattrnIndex<TSegment, TValue>
         var writer = new SpanMatchWriter<TValue>(values, _deduplicateValues, _valueComparer, throwOnInsufficientCapacity: true);
         foreach (var candidate in candidates)
         {
-            writer.Add(new[] { candidate.Value }, valuesAreUnique: false);
+            writer.AddValue(candidate.Value);
         }
 
         return writer.Count == values.Length ? values : values[..writer.Count];
@@ -408,7 +408,6 @@ public sealed class PattrnIndex<TSegment, TValue>
         return writer.Count == results.Length ? results : results[..writer.Count];
     }
 
-    /// <summary>Gets an upper bound for best-prefix result matches.</summary>
     /// <summary>Gets an upper bound for all-prefix enumeration result matches.</summary>
     public int GetEnumeratePrefixMatchCountUpperBound(ReadOnlySpan<TSegment> path)
     {
@@ -506,6 +505,26 @@ public sealed class PattrnIndex<TSegment, TValue>
     public int GetCaptureCountUpperBound(ReadOnlySpan<TSegment> path)
     {
         return CollectCandidates(path, prefix: false).Sum(candidate => candidate.Detail.CaptureCount);
+    }
+
+    /// <summary>
+    /// Gets a path-specific upper bound for the number of named captures that best-prefix detailed matching this path can emit.
+    /// </summary>
+    /// <param name="path">The segmented input path to inspect.</param>
+    /// <returns>A safe upper bound for a capture destination span used with <see cref="MatchPrefixDetailed(ReadOnlySpan{TSegment}, Span{PatternMatchDetailedSlice{TValue}}, Span{PatternCaptureSlice{TSegment}}, out int)"/>.</returns>
+    public int GetPrefixCaptureCountUpperBound(ReadOnlySpan<TSegment> path)
+    {
+        return SelectBestPrefixCandidates(path).Sum(candidate => candidate.Detail.CaptureCount);
+    }
+
+    /// <summary>
+    /// Gets a path-specific upper bound for the number of named captures that all-prefix detailed matching this path can emit.
+    /// </summary>
+    /// <param name="path">The segmented input path to inspect.</param>
+    /// <returns>A safe upper bound for a capture destination span used with <see cref="EnumeratePrefixDetailed(ReadOnlySpan{TSegment}, Span{PatternMatchDetailedSlice{TValue}}, Span{PatternCaptureSlice{TSegment}}, out int)"/>.</returns>
+    public int GetEnumeratePrefixCaptureCountUpperBound(ReadOnlySpan<TSegment> path)
+    {
+        return CollectCandidates(path, prefix: true).Sum(candidate => candidate.Detail.CaptureCount);
     }
 
     /// <summary>

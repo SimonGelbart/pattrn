@@ -14,6 +14,11 @@ public sealed record PattrnRegistration<TSegment, TValue>
         string? name = null)
     {
         ArgumentNullException.ThrowIfNull(pattern);
+        if (id == default)
+        {
+            throw new ArgumentException("Registration identity must be non-empty.", nameof(id));
+        }
+
         Id = id;
         Pattern = pattern.ToImmutableArray();
         Value = value;

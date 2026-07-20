@@ -74,6 +74,11 @@ records. Each record contains its value, registration identity, consumed depth,
 and an immutable capture array. `TryGetCapture` and `GetCapture` use ordinal name
 lookup. Caller-buffer detailed methods return
 `PatternMatchDetailedSlice<TValue>` records plus a caller-owned capture span.
+Use `GetPrefixCaptureCountUpperBound` for best-prefix detailed matching and
+`GetEnumeratePrefixCaptureCountUpperBound` for all-prefix detailed enumeration
+when sizing that capture span. These bounds are conservative when duplicate
+values are deduplicated because they are calculated from the selected
+candidate registrations before result filtering.
 
 Named parameters and named catch-alls are captured; unnamed wildcards and
 catch-alls are not. A terminal catch-all capture owns all remaining segments and
