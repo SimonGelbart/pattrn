@@ -28,19 +28,13 @@ var match = index.MatchDetailedToArray(["orders", "new"]).FirstOrDefault();
 
 This keeps the core domain-neutral. The result is the best generic pattern match, not the best HTTP route, filesystem glob, authorization rule, or tenant override.
 
-## Sort detailed matches explicitly
+## Select from the deterministic result order
 
-When code needs an explicit selection step, sort detailed matches by the exposed metadata instead of depending on numeric specificity constants:
+When code needs an explicit selection step, select from the returned order. The matcher already applies structural specificity and registration order internally:
 
 ```csharp
-var selected = index
-    .MatchDetailedToArray(path)
-    .OrderByDescending(match => match.Specificity)
-    .ThenBy(match => match.RegistrationOrder)
-    .FirstOrDefault();
+var selected = index.MatchDetailedToArray(path).FirstOrDefault();
 ```
-
-`Specificity` should be used as a relative comparison key. Do not persist it, compare it to hard-coded numbers, or treat it as a serialized format.
 
 ## Keep domain priority outside Pattrn
 
@@ -55,8 +49,6 @@ public sealed record HandlerRegistration(
 var selected = index
     .MatchDetailedToArray(path)
     .OrderByDescending(match => match.Value.DomainPriority)
-    .ThenByDescending(match => match.Specificity)
-    .ThenBy(match => match.RegistrationOrder)
     .FirstOrDefault();
 ```
 
@@ -80,11 +72,8 @@ public sealed record HandlerRegistration(
     int PatternLength,
     int DomainPriority);
 
-var longestPrefixThenSpecificity = index
-    .MatchDetailedToArray(path)
+var longestPrefixThenSpecificity = index.MatchDetailedToArray(path)
     .OrderByDescending(match => match.Value.PatternLength)
-    .ThenByDescending(match => match.Specificity)
-    .ThenBy(match => match.RegistrationOrder)
     .FirstOrDefault();
 ```
 

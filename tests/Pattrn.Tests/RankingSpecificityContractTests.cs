@@ -23,9 +23,6 @@ public sealed class RankingSpecificityContractTests
         ShouldSequenceEqual(
             detailed.Select(match => match.Kind),
             [PatternMatchKind.Exact, PatternMatchKind.Parameter, PatternMatchKind.Wildcard, PatternMatchKind.CatchAll]);
-        ShouldBeTrue(detailed[0].Specificity > detailed[1].Specificity, "Literal should outrank parameter.");
-        ShouldBeTrue(detailed[1].Specificity > detailed[2].Specificity, "Parameter should outrank wildcard.");
-        ShouldBeTrue(detailed[2].Specificity > detailed[3].Specificity, "Wildcard should outrank catch-all.");
     }
 
     [Test]
@@ -42,7 +39,6 @@ public sealed class RankingSpecificityContractTests
         ShouldSequenceEqual(matches.Select(match => match.Value), ["parameter", "wildcard"]);
         ShouldEqual(matches[0].Kind, PatternMatchKind.Parameter);
         ShouldEqual(matches[1].Kind, PatternMatchKind.Wildcard);
-        ShouldBeTrue(matches[0].Specificity > matches[1].Specificity, "A named parameter carries capture metadata and should outrank an anonymous wildcard.");
     }
 
     [Test]
@@ -60,11 +56,6 @@ public sealed class RankingSpecificityContractTests
 
         ShouldSequenceEqual(values, ["first", "second"]);
         ShouldSequenceEqual(matches.Select(match => match.Value), ["first", "second"]);
-        ShouldEqual(matches[0].Specificity, matches[1].Specificity);
-        ShouldEqual(matches[0].RegistrationOrder, 0);
-        ShouldEqual(matches[1].RegistrationOrder, 1);
-        ShouldEqual(matches[0].PatternId, "first");
-        ShouldEqual(matches[1].PatternId, "second");
     }
 
     [Test]
@@ -82,10 +73,6 @@ public sealed class RankingSpecificityContractTests
 
         ShouldSequenceEqual(values, ["first", "second"]);
         ShouldSequenceEqual(matches.Select(match => match.Value), values);
-        ShouldSequenceEqual(matches.Select(match => match.RegistrationOrder), [0, 1]);
-        ShouldEqual(matches[0].Specificity, matches[1].Specificity);
-        ShouldEqual(matches[0].PatternId, "first-wildcard");
-        ShouldEqual(matches[1].PatternId, "second-wildcard");
     }
 
     [Test]
@@ -108,10 +95,6 @@ public sealed class RankingSpecificityContractTests
 
         ShouldSequenceEqual(values, ["first", "second"]);
         ShouldSequenceEqual(matches.Select(match => match.Value), values);
-        ShouldSequenceEqual(matches.Select(match => match.RegistrationOrder), [0, 1]);
-        ShouldEqual(matches[0].Specificity, matches[1].Specificity);
-        ShouldEqual(matches[0].PatternId, "first-parameter");
-        ShouldEqual(matches[1].PatternId, "second-parameter");
         ShouldSequenceEqual(matches[0].Captures, [new PatternCapture<string>("id", "42", 1)]);
         ShouldSequenceEqual(matches[1].Captures, [new PatternCapture<string>("orderId", "42", 1)]);
     }
@@ -129,7 +112,6 @@ public sealed class RankingSpecificityContractTests
 
         ShouldEqual(matches.Length, 1);
         ShouldEqual(matches[0].Value, "handler");
-        ShouldEqual(matches[0].PatternId, "literal-handler");
         ShouldEqual(matches[0].Kind, PatternMatchKind.Exact);
     }
 
@@ -148,7 +130,6 @@ public sealed class RankingSpecificityContractTests
 
         ShouldSequenceEqual(values, ["api-prefix", "orders-prefix", "orders-new"]);
         ShouldSequenceEqual(detailed.Select(match => match.Value), values);
-        ShouldSequenceEqual(detailed.Select(match => match.RegistrationOrder), [0, 1, 2]);
     }
 
     [Test]
@@ -166,10 +147,6 @@ public sealed class RankingSpecificityContractTests
         ShouldSequenceEqual(values, ["api-prefix", "orders-new-literal"]);
         ShouldSequenceEqual(detailed.Select(match => match.Value), values);
         ShouldSequenceEqual(detailed.Select(match => match.Kind), [PatternMatchKind.Exact, PatternMatchKind.Exact]);
-        ShouldSequenceEqual(detailed.Select(match => match.PatternId), ["api-prefix", "orders-new-literal"]);
-        ShouldBeTrue(
-            detailed[1].Specificity > detailed[0].Specificity,
-            "The deeper literal registration is structurally more specific, but prefix traversal emits the prefix node first.");
     }
 
     [Test]
@@ -187,8 +164,6 @@ public sealed class RankingSpecificityContractTests
         var matches = index.MatchDetailedToArray(["api", "orders", "new"]);
 
         ShouldSequenceEqual(matches.Select(match => match.Value), ["literal", "parameter", "wildcard"]);
-        ShouldBeTrue(matches[0].Specificity > matches[1].Specificity, "Literal should outrank parameter at the same depth.");
-        ShouldBeTrue(matches[1].Specificity > matches[2].Specificity, "Parameter should outrank wildcard at the same depth.");
     }
 
     [Test]
@@ -214,9 +189,6 @@ public sealed class RankingSpecificityContractTests
         ShouldSequenceEqual(
             detailed.Select(match => match.Kind),
             [PatternMatchKind.Exact, PatternMatchKind.Parameter, PatternMatchKind.Wildcard, PatternMatchKind.CatchAll]);
-        ShouldBeTrue(detailed[0].Specificity > detailed[1].Specificity, "Literal should outrank parameter at the same depth.");
-        ShouldBeTrue(detailed[1].Specificity > detailed[2].Specificity, "Parameter should outrank wildcard at the same depth.");
-        ShouldBeTrue(detailed[2].Specificity > detailed[3].Specificity, "Wildcard should outrank catch-all at the same depth.");
         ShouldSequenceEqual(detailed[3].Captures, [new PatternCapture<string>("tail", "new", 2)]);
     }
 
@@ -244,13 +216,6 @@ public sealed class RankingSpecificityContractTests
         ShouldSequenceEqual(
             detailed.Select(match => match.Kind),
             [PatternMatchKind.Exact, PatternMatchKind.Exact, PatternMatchKind.Parameter, PatternMatchKind.Wildcard, PatternMatchKind.CatchAll]);
-        ShouldSequenceEqual(detailed.Select(match => match.RegistrationOrder), [0, 4, 3, 2, 1]);
-        ShouldBeTrue(
-            detailed[1].Specificity > detailed[0].Specificity,
-            "The deeper literal registration is structurally more specific, but the prefix node should be emitted first.");
-        ShouldBeTrue(detailed[1].Specificity > detailed[2].Specificity, "Literal should outrank parameter after the prefix node.");
-        ShouldBeTrue(detailed[2].Specificity > detailed[3].Specificity, "Parameter should outrank wildcard after the prefix node.");
-        ShouldBeTrue(detailed[3].Specificity > detailed[4].Specificity, "Wildcard should outrank catch-all after the prefix node.");
     }
 
     [Test]
@@ -313,9 +278,6 @@ public sealed class RankingSpecificityContractTests
 
         ShouldSequenceEqual(values, ["first", "second"]);
         ShouldSequenceEqual(matches.Select(match => match.Value), ["first", "second"]);
-        ShouldEqual(matches[0].Specificity, matches[1].Specificity);
-        ShouldEqual(matches[0].RegistrationOrder, 0);
-        ShouldEqual(matches[1].RegistrationOrder, 1);
         ShouldSequenceEqual(
             matches[0].Captures,
             [new PatternCapture<string>("firstPath", ["a", "b.txt"], 1)]);

@@ -255,8 +255,6 @@ var captures = new PatternCaptureSlice<string>[index.GetCaptureCountUpperBound(p
 var written = index.MatchDetailed(path, matches, captures, out var capturesWritten);
 
 var first = matches[0];
-var patternId = first.PatternId;
-var registrationOrder = first.RegistrationOrder;
 var firstCaptures = captures.AsSpan(first.CaptureStart, first.CaptureCount);
 ```
 
@@ -264,7 +262,7 @@ var firstCaptures = captures.AsSpan(first.CaptureStart, first.CaptureCount);
 
 `MatchDetailedToArray(...)` is the allocating detailed convenience API. It returns `PatternMatchDetailed<TSegment, TValue>` values with owning `PatternCapture<TSegment>` captures. `PatternCapture<TSegment>.Values` contains the captured input segments, `StartSegmentIndex` identifies where the capture begins, and `SegmentCount` is computed from `Values.Length`. `PatternCapture<TSegment>.Value` is only for single-segment captures and throws `InvalidOperationException` for zero-segment or multi-segment captures.
 
-Detailed matches expose `PatternId`, `RegistrationOrder`, `Kind`, `Specificity`, `PatternSegmentCount`, and `ConsumedSegmentCount`. `PatternId` is optional caller-provided identity; `RegistrationOrder` is a deterministic zero-based order assigned when the builder accepts the registration. See [matching semantics](matching-semantics.md) for the ordering contract.
+Detailed matches expose `Kind`, `PatternSegmentCount`, `ConsumedSegmentCount`, and captures. Registration identity and descriptive names belong to canonical registrations, not match results. See [matching semantics](matching-semantics.md) for the ordering contract.
 
 ## Explanation results
 

@@ -21,9 +21,6 @@ public sealed class CompatibilitySemanticsTests
         ShouldSequenceEqual(
             matches.Select(match => match.Kind),
             [PatternMatchKind.Exact, PatternMatchKind.Parameter, PatternMatchKind.Wildcard, PatternMatchKind.CatchAll]);
-        ShouldBeTrue(matches[0].Specificity > matches[1].Specificity, "Literal matches should be more specific than parameter matches.");
-        ShouldBeTrue(matches[1].Specificity > matches[2].Specificity, "Parameter matches should be more specific than anonymous wildcard matches.");
-        ShouldBeTrue(matches[2].Specificity > matches[3].Specificity, "Anonymous wildcard matches should be more specific than catch-all matches.");
     }
 
     [Test]

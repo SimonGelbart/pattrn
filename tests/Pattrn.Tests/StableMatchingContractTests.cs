@@ -24,13 +24,9 @@ public sealed class StableMatchingContractTests
         ShouldEqual(captureCount, 1);
 
         var literal = matches.Single(match => match.Value == "literal");
-        ShouldEqual(literal.PatternId, "orders-new");
-        ShouldEqual(literal.RegistrationOrder, 0);
         ShouldEqual(literal.Kind, PatternMatchKind.Exact);
 
         var parameter = matches.Single(match => match.Value == "parameter");
-        ShouldEqual(parameter.PatternId, "orders-by-id");
-        ShouldEqual(parameter.RegistrationOrder, 1);
         ShouldEqual(parameter.Kind, PatternMatchKind.Parameter);
         ShouldEqual(captures[parameter.CaptureStart], new PatternCaptureSlice<string>("id", 1, 1));
     }
@@ -49,8 +45,6 @@ public sealed class StableMatchingContractTests
         var result = index.MatchDetailedToArray(["customers", "42"]).Single();
 
         ShouldEqual(result.Value, "handler");
-        ShouldEqual(result.PatternId, "customers-by-id");
-        ShouldEqual(result.RegistrationOrder, 0);
         ShouldEqual(result.Captures[0], new PatternCapture<string>("customerId", "42", 1));
     }
 
@@ -67,8 +61,6 @@ public sealed class StableMatchingContractTests
             .Single();
 
         ShouldEqual(ignored.Value, "first");
-        ShouldEqual(ignored.PatternId, "first");
-        ShouldEqual(ignored.RegistrationOrder, 0);
 
         var replaced = PattrnIndex<string, string>
             .Builder()
@@ -80,8 +72,6 @@ public sealed class StableMatchingContractTests
             .Single();
 
         ShouldEqual(replaced.Value, "second");
-        ShouldEqual(replaced.PatternId, "replacement");
-        ShouldEqual(replaced.RegistrationOrder, 1);
     }
 
     [Test]
@@ -96,7 +86,5 @@ public sealed class StableMatchingContractTests
         var match = builder.Build().MatchDetailedToArray(["topics", "alpha"]).Single();
 
         ShouldEqual(match.Value, "topic-handler");
-        ShouldEqual(match.PatternId, "topics-by-name");
-        ShouldEqual(match.RegistrationOrder, 0);
     }
 }

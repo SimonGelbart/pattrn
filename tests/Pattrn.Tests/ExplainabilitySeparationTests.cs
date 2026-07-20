@@ -22,7 +22,6 @@ public sealed class ExplainabilitySeparationTests
         ShouldBeTrue(explanation.HasMatches, "Explanation should report accepted matches.");
         ShouldEqual(explanation.MatchCount, 1);
         ShouldEqual(explanation.Matches[0].Value, "handler");
-        ShouldEqual(explanation.Matches[0].PatternId, "orders-by-id");
         ShouldEqual(explanation.Matches[0].Captures[0], new PatternCapture<string>("id", "123", 1));
         ShouldSequenceEqual(explanation.Path, ["orders", "123"]);
     }

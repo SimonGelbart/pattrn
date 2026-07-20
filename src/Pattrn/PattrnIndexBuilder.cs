@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace Pattrn;
 
 /// <summary>
@@ -6,12 +8,13 @@ namespace Pattrn;
 /// <typeparam name="TSegment">The segment type used by registered patterns and incoming paths.</typeparam>
 /// <typeparam name="TValue">The value type returned when a registered pattern matches.</typeparam>
 /// <remarks>
-/// The builder is mutable and is not thread-safe. The compiled index returned by <see cref="Build"/> is immutable
+/// The builder is mutable and is not thread-safe. The compiled index returned by <see cref="Build(MatchOptions)"/> is immutable
 /// and can be shared safely between concurrent readers.
 /// </remarks>
 public sealed class PattrnIndexBuilder<TSegment, TValue>
     where TSegment : notnull
 {
+    private readonly List<PattrnRegistration<TSegment, TValue>> _canonicalRegistrations = [];
     private readonly BuilderNode<TSegment, TValue> _root;
     private readonly bool _usesWildcardSegmentToken;
     private int _patternCount;
@@ -99,6 +102,61 @@ public sealed class PattrnIndexBuilder<TSegment, TValue>
             valueComparer ?? EqualityComparer<TValue>.Default);
     }
 
+    /// <summary>Adds an immutable canonical registration, preserving its identity.</summary>
+    public RegistrationId Add(PattrnRegistration<TSegment, TValue> registration)
+    {
+        ArgumentNullException.ThrowIfNull(registration);
+        if (registration.Id.Value == Guid.Empty || _canonicalRegistrations.Any(r => r.Id == registration.Id))
+        {
+            throw new ArgumentException("Registration identity must be non-empty and unique in the builder.", nameof(registration));
+        }
+
+        _canonicalRegistrations.Add(registration);
+        return registration.Id;
+    }
+
+    /// <summary>Replaces a registration while preserving its position in the ordered source.</summary>
+    public bool Replace(PattrnRegistration<TSegment, TValue> updatedRegistration)
+    {
+        ArgumentNullException.ThrowIfNull(updatedRegistration);
+        var index = _canonicalRegistrations.FindIndex(r => r.Id == updatedRegistration.Id);
+        if (index < 0) return false;
+        _canonicalRegistrations[index] = updatedRegistration;
+        return true;
+    }
+
+    /// <summary>Removes a canonical registration by identity.</summary>
+    public bool Remove(RegistrationId id)
+    {
+        var index = _canonicalRegistrations.FindIndex(r => r.Id == id);
+        if (index < 0) return false;
+        _canonicalRegistrations.RemoveAt(index);
+        return true;
+    }
+
+    /// <summary>Returns an immutable snapshot of the canonical registration source.</summary>
+    public ImmutableArray<PattrnRegistration<TSegment, TValue>> ToRegistrations() => [.. _canonicalRegistrations];
+
+    /// <summary>Builds from the canonical registration source using compilation options.</summary>
+    public PattrnIndex<TSegment, TValue> Build(PattrnCompileOptions? options)
+    {
+        return PattrnIndex<TSegment, TValue>.Compile(ToRegistrations(), options, SegmentComparer, ValueComparer);
+    }
+
+    /// <summary>Builds from the canonical source and returns stable diagnostics.</summary>
+    public PattrnCompileResult<TSegment, TValue> BuildWithDiagnostics(PattrnCompileOptions? options = null)
+    {
+        return PattrnIndex<TSegment, TValue>.CompileWithDiagnostics(ToRegistrations(), options, SegmentComparer, ValueComparer);
+    }
+
+    /// <summary>Builds the canonical source with default compilation options.</summary>
+    public PattrnIndex<TSegment, TValue> Build()
+    {
+        return _canonicalRegistrations.Count == 0
+            ? Build(MatchOptions.Default)
+            : Build(PattrnCompileOptions.Default);
+    }
+
     /// <summary>
     /// Creates a new mutable builder that treats a reserved segment value as a single-segment wildcard in tokenized registrations.
     /// </summary>
@@ -149,7 +207,7 @@ public sealed class PattrnIndexBuilder<TSegment, TValue>
     /// <summary>
     /// Enables build validation that rejects diagnostics at or above the specified severity.
     /// </summary>
-    /// <param name="minimumSeverity">The minimum diagnostic severity that should fail <see cref="Build"/>.</param>
+    /// <param name="minimumSeverity">The minimum diagnostic severity that should fail <see cref="Build(MatchOptions)"/>.</param>
     /// <returns>The current builder, allowing fluent configuration chains.</returns>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="minimumSeverity"/> is not a defined severity.</exception>
     public PattrnIndexBuilder<TSegment, TValue> ValidateOnBuild(
@@ -167,11 +225,11 @@ public sealed class PattrnIndexBuilder<TSegment, TValue>
     /// <summary>
     /// Enables build validation with a caller-supplied diagnostic rejection predicate.
     /// </summary>
-    /// <param name="rejectDiagnostic">A predicate that returns <see langword="true"/> for diagnostics that should fail <see cref="Build"/>.</param>
+    /// <param name="rejectDiagnostic">A predicate that returns <see langword="true"/> for diagnostics that should fail <see cref="Build(MatchOptions)"/>.</param>
     /// <returns>The current builder, allowing fluent configuration chains.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="rejectDiagnostic"/> is <see langword="null"/>.</exception>
     /// <remarks>
-    /// The predicate is evaluated only during <see cref="Build"/>. Matching remains unaffected. This hook is intended for
+    /// The predicate is evaluated only during <see cref="Build(MatchOptions)"/>. Matching remains unaffected. This hook is intended for
     /// domain-specific strictness in companion packages or applications without putting domain rules into the core.
     /// </remarks>
     public PattrnIndexBuilder<TSegment, TValue> ValidateOnBuild(
@@ -224,6 +282,15 @@ public sealed class PattrnIndexBuilder<TSegment, TValue>
         var kind = hasWildcard ? PatternMatchKind.Wildcard : PatternMatchKind.Exact;
         AddRegistration(node, value, new BuilderRegistrationMetadata([], kind, score, pattern.Length, patternId));
         return this;
+    }
+
+    /// <summary>Registers a legacy tokenized array without ambiguity with canonical registrations.</summary>
+    // Keeps collection expressions targeting legacy tokenized registrations unambiguous
+    // alongside the canonical PatternSegment overload.
+    public PattrnIndexBuilder<TSegment, TValue> Add(TSegment[] pattern, TValue value, string? patternId = null)
+    {
+        ArgumentNullException.ThrowIfNull(pattern);
+        return Add(pattern.AsSpan(), value, patternId);
     }
 
     /// <summary>
@@ -822,6 +889,7 @@ public sealed class PattrnIndexBuilder<TSegment, TValue>
     public PattrnIndexBuilder<TSegment, TValue> Clear()
     {
         _root.Clear();
+        _canonicalRegistrations.Clear();
         _patternCount = 0;
         _registrationCount = 0;
         _nextRegistrationOrder = 0;

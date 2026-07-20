@@ -65,13 +65,12 @@ var detailed = index.MatchDetailedToArray(["market", "NASDAQ", "MSFT"]);
 
 foreach (var match in detailed)
 {
-    Console.WriteLine(match.PatternId);
-    Console.WriteLine(match.RegistrationOrder);
-    Console.WriteLine(match.Specificity);
+    Console.WriteLine(match.Kind);
+    Console.WriteLine(match.Value);
 }
 ```
 
-Detailed matches expose pattern identity, registration order, specificity metadata, and captures.
+Detailed matches expose pattern shape, values, and captures. Results are already deterministically ordered.
 
 ## 6. Next steps
 
