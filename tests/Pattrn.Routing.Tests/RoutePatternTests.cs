@@ -188,7 +188,7 @@ public sealed class RoutePatternTests
     public void AddRouteUsesSamePatternIdentityForExpandedOptionalVariants()
     {
         var builder = PattrnIndex<string, string>.Builder();
-        builder.AddRoute("/archive/{year:int}/{month:int=6}/{day:int?}", "archive", patternId: "archive-template");
+        builder.AddRoute("/archive/{year:int}/{month:int=6}/{day:int?}", "archive", name: "archive-template");
         var index = builder.Build();
 
         var shortMatches = index.MatchDetailedToArray(RoutePattern.SplitPath("/archive/2026"));

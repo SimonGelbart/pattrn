@@ -5,7 +5,7 @@ internal ref struct DetailedMatchWriter<TSegment, TValue>
 {
     private const int OrderedBlockDedupThreshold = 8;
 
-    private readonly Span<PatternMatch<TValue>> _matches;
+    private readonly Span<PatternMatchDetailedSlice<TValue>> _matches;
     private readonly Span<PatternCaptureSlice<TSegment>> _captures;
     private readonly ReadOnlySpan<TSegment> _path;
     private readonly bool _deduplicateValues;
@@ -16,7 +16,7 @@ internal ref struct DetailedMatchWriter<TSegment, TValue>
     private bool _succeeded;
 
     internal DetailedMatchWriter(
-        Span<PatternMatch<TValue>> matches,
+        Span<PatternMatchDetailedSlice<TValue>> matches,
         Span<PatternCaptureSlice<TSegment>> captures,
         ReadOnlySpan<TSegment> path,
         bool deduplicateValues,
@@ -74,13 +74,12 @@ internal ref struct DetailedMatchWriter<TSegment, TValue>
             var captureStart = _captureCount;
             WriteCaptures(detail, captureDescriptors);
 
-            _matches[_matchCount] = new PatternMatch<TValue>(
+            _matches[_matchCount] = new PatternMatchDetailedSlice<TValue>(
                 values[i],
-                detail.Kind,
-                captureStart,
-                actualCaptureCount,
+                detail.RegistrationId,
                 consumedSegmentCount,
-                patternSegmentCount: detail.PatternSegmentCount);
+                captureStart,
+                actualCaptureCount);
             _matchCount++;
         }
     }

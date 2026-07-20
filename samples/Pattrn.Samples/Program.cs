@@ -26,7 +26,7 @@ var subscriptions = PattrnIndex<string, string>
     .Build();
 
 Console.WriteLine("Exact + wildcard matches:");
-foreach (var match in subscriptions.MatchToArray(["market", "NASDAQ", "MSFT"]))
+foreach (var match in subscriptions.MatchValuesToArray(["market", "NASDAQ", "MSFT"]))
 {
     Console.WriteLine($"- {match}");
 }
@@ -39,13 +39,13 @@ var prefixSubscriptions = PattrnIndex<string, string>
 
 Console.WriteLine();
 Console.WriteLine("Prefix matches:");
-foreach (var match in prefixSubscriptions.MatchPrefixToArray(["market", "NASDAQ", "MSFT"]))
+foreach (var match in prefixSubscriptions.MatchPrefixValuesToArray(["market", "NASDAQ", "MSFT"]))
 {
     Console.WriteLine($"- {match}");
 }
 
 var destination = new string[prefixSubscriptions.GetPrefixMatchCountUpperBound(["market", "NASDAQ", "MSFT"] )];
-if (prefixSubscriptions.TryMatchPrefix(["market", "NASDAQ", "MSFT"], destination, out var written))
+if (prefixSubscriptions.TryMatchPrefixValues(["market", "NASDAQ", "MSFT"], destination, out var written))
 {
     Console.WriteLine();
     Console.WriteLine($"Span-based matching wrote {written} value(s).");

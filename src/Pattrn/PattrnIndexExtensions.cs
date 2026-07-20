@@ -1,3 +1,4 @@
+#pragma warning disable CS1591
 namespace Pattrn;
 
 /// <summary>
@@ -29,13 +30,21 @@ public static class PattrnIndexExtensions
         return index.GetPrefixMatchCountUpperBound(path.Span);
     }
 
-    /// <summary>
-    /// Attempts to match a memory-backed path and write matching values into the caller-provided destination span.
-    /// </summary>
-    public static bool TryMatch<TSegment, TValue>(
+    public static bool TryMatchValues<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path,
         Span<TValue> destination,
+        out int written)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        return index.TryMatchValues(path.Span, destination, out written);
+    }
+
+    public static bool TryMatch<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        ReadOnlyMemory<TSegment> path,
+        Span<PatternMatch<TValue>> destination,
         out int written)
         where TSegment : notnull
     {
@@ -43,10 +52,7 @@ public static class PattrnIndexExtensions
         return index.TryMatch(path.Span, destination, out written);
     }
 
-    /// <summary>
-    /// Attempts to match prefix registrations for a memory-backed path and write matching values into the caller-provided destination span.
-    /// </summary>
-    public static bool TryMatchPrefix<TSegment, TValue>(
+    public static bool TryMatchPrefixValues<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path,
         Span<TValue> destination,
@@ -54,7 +60,40 @@ public static class PattrnIndexExtensions
         where TSegment : notnull
     {
         ArgumentNullException.ThrowIfNull(index);
+        return index.TryMatchPrefixValues(path.Span, destination, out written);
+    }
+
+    public static bool TryMatchPrefix<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        ReadOnlyMemory<TSegment> path,
+        Span<PatternMatch<TValue>> destination,
+        out int written)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
         return index.TryMatchPrefix(path.Span, destination, out written);
+    }
+
+    public static bool TryEnumeratePrefixMatches<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        ReadOnlyMemory<TSegment> path,
+        Span<PatternMatch<TValue>> destination,
+        out int written)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        return index.TryEnumeratePrefixMatches(path.Span, destination, out written);
+    }
+
+    public static bool TryEnumeratePrefixValues<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        ReadOnlyMemory<TSegment> path,
+        Span<TValue> destination,
+        out int written)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        return index.TryEnumeratePrefixValues(path.Span, destination, out written);
     }
 
     /// <summary>
@@ -75,7 +114,7 @@ public static class PattrnIndexExtensions
     public static int MatchDetailed<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path,
-        Span<PatternMatch<TValue>> matches,
+        Span<PatternMatchDetailedSlice<TValue>> matches,
         Span<PatternCaptureSlice<TSegment>> captures,
         out int capturesWritten)
         where TSegment : notnull
@@ -90,7 +129,7 @@ public static class PattrnIndexExtensions
     public static bool TryMatchDetailed<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path,
-        Span<PatternMatch<TValue>> matches,
+        Span<PatternMatchDetailedSlice<TValue>> matches,
         Span<PatternCaptureSlice<TSegment>> captures,
         out int matchesWritten,
         out int capturesWritten)
@@ -98,6 +137,32 @@ public static class PattrnIndexExtensions
     {
         ArgumentNullException.ThrowIfNull(index);
         return index.TryMatchDetailed(path.Span, matches, captures, out matchesWritten, out capturesWritten);
+    }
+
+    public static bool TryMatchPrefixDetailed<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        ReadOnlyMemory<TSegment> path,
+        Span<PatternMatchDetailedSlice<TValue>> matches,
+        Span<PatternCaptureSlice<TSegment>> captures,
+        out int matchesWritten,
+        out int capturesWritten)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        return index.TryMatchPrefixDetailed(path.Span, matches, captures, out matchesWritten, out capturesWritten);
+    }
+
+    public static bool TryEnumeratePrefixDetailed<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        ReadOnlyMemory<TSegment> path,
+        Span<PatternMatchDetailedSlice<TValue>> matches,
+        Span<PatternCaptureSlice<TSegment>> captures,
+        out int matchesWritten,
+        out int capturesWritten)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        return index.TryEnumeratePrefixDetailed(path.Span, matches, captures, out matchesWritten, out capturesWritten);
     }
 
     /// <summary>
@@ -164,10 +229,66 @@ public static class PattrnIndexExtensions
         return index.MatchDetailedToArray(path.ToArray().AsSpan());
     }
 
+    public static PatternMatchDetailed<TSegment, TValue>[] MatchPrefixDetailedToArray<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        ReadOnlyMemory<TSegment> path)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        return index.MatchPrefixDetailedToArray(path.Span);
+    }
+
+    public static PatternMatchDetailed<TSegment, TValue>[] EnumeratePrefixDetailedToArray<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        ReadOnlyMemory<TSegment> path)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        return index.EnumeratePrefixDetailedToArray(path.Span);
+    }
+
+    public static PatternMatch<TValue>[] MatchPrefixToArray<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        IEnumerable<TSegment> path)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        ArgumentNullException.ThrowIfNull(path);
+        return index.MatchPrefixToArray(path is TSegment[] array ? array.AsSpan() : path.ToArray().AsSpan());
+    }
+
+    public static PatternMatch<TValue>[] EnumeratePrefixMatchesToArray<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        ReadOnlyMemory<TSegment> path)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        return index.EnumeratePrefixMatchesToArray(path.Span);
+    }
+
+    public static TValue[] MatchPrefixValuesToArray<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        IEnumerable<TSegment> path)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        ArgumentNullException.ThrowIfNull(path);
+        return index.MatchPrefixValuesToArray(path is TSegment[] array ? array.AsSpan() : path.ToArray().AsSpan());
+    }
+
+    public static TValue[] EnumeratePrefixValuesToArray<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        ReadOnlyMemory<TSegment> path)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        return index.EnumeratePrefixValuesToArray(path.Span);
+    }
+
     /// <summary>
     /// Matches a memory-backed path and returns matching values as a new array.
     /// </summary>
-    public static TValue[] MatchToArray<TSegment, TValue>(
+    public static PatternMatch<TValue>[] MatchToArray<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path)
         where TSegment : notnull
@@ -176,10 +297,19 @@ public static class PattrnIndexExtensions
         return index.MatchToArray(path.Span);
     }
 
+    public static TValue[] MatchValuesToArray<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        ReadOnlyMemory<TSegment> path)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        return index.MatchValuesToArray(path.Span);
+    }
+
     /// <summary>
     /// Matches prefix registrations for a memory-backed path and returns matching values as a new array.
     /// </summary>
-    public static TValue[] MatchPrefixToArray<TSegment, TValue>(
+    public static PatternMatch<TValue>[] MatchPrefixToArray<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path)
         where TSegment : notnull
@@ -188,10 +318,19 @@ public static class PattrnIndexExtensions
         return index.MatchPrefixToArray(path.Span);
     }
 
+    public static TValue[] MatchPrefixValuesToArray<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        ReadOnlyMemory<TSegment> path)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        return index.MatchPrefixValuesToArray(path.Span);
+    }
+
     /// <summary>
     /// Matches an enumerable path and returns matching values as a new array.
     /// </summary>
-    public static TValue[] MatchToArray<TSegment, TValue>(
+    public static PatternMatch<TValue>[] MatchToArray<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         IEnumerable<TSegment> path)
         where TSegment : notnull
@@ -205,5 +344,15 @@ public static class PattrnIndexExtensions
         }
 
         return index.MatchToArray(path.ToArray().AsSpan());
+    }
+
+    public static TValue[] MatchValuesToArray<TSegment, TValue>(
+        this PattrnIndex<TSegment, TValue> index,
+        IEnumerable<TSegment> path)
+        where TSegment : notnull
+    {
+        ArgumentNullException.ThrowIfNull(index);
+        ArgumentNullException.ThrowIfNull(path);
+        return index.MatchValuesToArray(path is TSegment[] array ? array.AsSpan() : path.ToArray().AsSpan());
     }
 }

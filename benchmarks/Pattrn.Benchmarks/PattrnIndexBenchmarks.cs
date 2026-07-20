@@ -9,7 +9,7 @@ public class PattrnIndexBenchmarks
     private PattrnIndex<string, int> _index = null!;
     private string[] _path = [];
     private int[] _valueDestination = [];
-    private PatternMatch<int>[] _matchDestination = [];
+    private PatternMatchDetailedSlice<int>[] _matchDestination = [];
     private PatternCaptureSlice<string>[] _captureDestination = [];
 
     [Params(
@@ -34,7 +34,7 @@ public class PattrnIndexBenchmarks
         var builder = PattrnIndex<string, int>.Builder("*");
         var options = Scenario switch
         {
-            BenchmarkScenario.PrefixExactOnly or BenchmarkScenario.PrefixWildcard => MatchOptions.Prefix,
+            BenchmarkScenario.PrefixExactOnly or BenchmarkScenario.PrefixWildcard => MatchOptions.Default,
             BenchmarkScenario.DuplicateHeavyPreserveDuplicates => MatchOptions.PreserveDuplicates,
             _ => MatchOptions.Default
         };
@@ -96,18 +96,18 @@ public class PattrnIndexBenchmarks
         _index = builder.Build(options);
         var matchUpperBound = _index.GetMatchCountUpperBound(_path);
         _valueDestination = new int[Math.Max(1, matchUpperBound)];
-        _matchDestination = new PatternMatch<int>[Math.Max(1, matchUpperBound)];
+        _matchDestination = new PatternMatchDetailedSlice<int>[Math.Max(1, matchUpperBound)];
         _captureDestination = new PatternCaptureSlice<string>[Math.Max(1, _index.GetCaptureCountUpperBound(_path))];
     }
 
     [Benchmark(Baseline = true)]
-    public int[] NaiveScan_MatchToArray()
+    public int[] NaiveScan_MatchValuesToArray()
     {
         var matches = new List<int>();
 
         foreach (var registration in _registrations)
         {
-            if (!Matches(registration.Pattern, _path, _index.Options.IncludePrefixMatches))
+            if (!Matches(registration.Pattern, _path, Scenario is BenchmarkScenario.PrefixExactOnly or BenchmarkScenario.PrefixWildcard))
             {
                 continue;
             }
@@ -132,20 +132,20 @@ public class PattrnIndexBenchmarks
     [Benchmark]
     public int Trie_MatchToSpan()
     {
-        return _index.TryMatch(_path, _valueDestination, out var written) ? written : -1;
+        return _index.TryMatchValues(_path, _valueDestination, out var written) ? written : -1;
     }
 
     [Benchmark]
     public int Trie_TryMatchToSpan_SufficientDestination()
     {
-        var succeeded = _index.TryMatch(_path, _valueDestination, out var written);
+        var succeeded = _index.TryMatchValues(_path, _valueDestination, out var written);
         return succeeded ? written : -1;
     }
 
     [Benchmark]
-    public int[] Trie_MatchToArray()
+    public int[] Trie_MatchValuesToArray()
     {
-        return _index.MatchToArray(_path);
+        return _index.MatchValuesToArray(_path);
     }
 
     [Benchmark]

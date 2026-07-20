@@ -5,32 +5,23 @@ internal readonly struct CompiledValueDetail
     internal CompiledValueDetail(
         int firstCapture,
         int captureCount,
-        PatternMatchKind kind,
         int score,
-        string? patternId,
         int registrationOrder,
-        int patternSegmentCount)
+        RegistrationId registrationId,
+        string? name)
     {
         FirstCapture = firstCapture;
         CaptureCount = captureCount;
-        Kind = kind;
         Score = score;
-        PatternId = patternId;
         RegistrationOrder = registrationOrder;
-        PatternSegmentCount = patternSegmentCount;
+        RegistrationId = registrationId;
+        Name = name;
     }
 
     internal int FirstCapture { get; }
-
     internal int CaptureCount { get; }
-
-    internal PatternMatchKind Kind { get; }
-
     internal int Score { get; }
-
-    internal string? PatternId { get; }
-
     internal int RegistrationOrder { get; }
-
-    internal int PatternSegmentCount { get; }
+    internal RegistrationId RegistrationId { get; }
+    internal string? Name { get; }
 }

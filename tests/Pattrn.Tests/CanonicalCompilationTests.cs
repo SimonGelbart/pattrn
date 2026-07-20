@@ -26,7 +26,7 @@ public sealed class CanonicalCompilationTests
 
         ShouldBeFalse(result.Succeeded, "Expected duplicate patterns to reject compilation.");
         ShouldEqual(result.Report.Diagnostics.Length, 1);
-        ShouldEqual(result.Report.Diagnostics[0].Code, "PTRN0003");
+        ShouldEqual(result.Report.Diagnostics[0].Code, "PTRN1003");
         ShouldEqual(result.Report.Diagnostics[0].RegistrationId, second.Id);
     }
 
@@ -39,6 +39,6 @@ public sealed class CanonicalCompilationTests
 
         ShouldSequenceEqual(builder.ToRegistrations().Select(r => r.Id), [first, second]);
         ShouldBeTrue(builder.Remove(first), "Expected identity removal to succeed.");
-        ShouldSequenceEqual(builder.Build().MatchToArray(["b"]), ["second"]);
+        ShouldSequenceEqual(builder.Build().MatchValuesToArray(["b"]), ["second"]);
     }
 }

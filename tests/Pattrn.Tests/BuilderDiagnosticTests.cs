@@ -5,193 +5,71 @@ namespace Pattrn.Tests;
 public sealed class BuilderDiagnosticTests
 {
     [Test]
-    public void GetDiagnosticsReturnsEmptyArrayWhenBuilderHasNoDiagnostics()
+    public void CompileWithDiagnosticsReportsStableDuplicatePatternWarning()
     {
-        var builder = PattrnIndex<string, string>.Builder("*")
-            .Add(["orders", "new"], "new-order");
+        var first = PattrnRegistration<string, string>.Create([PatternSegment<string>.Literal("orders")], "a");
+        var second = PattrnRegistration<string, string>.Create([PatternSegment<string>.Literal("orders")], "b");
 
-        var diagnostics = builder.GetDiagnostics();
+        var result = PattrnIndex<string, string>.CompileWithDiagnostics(
+            [first, second],
+            new PattrnCompileOptions { DuplicatePatternPolicy = DuplicatePatternPolicy.Warn });
 
-        ShouldEqual(diagnostics.Length, 0);
+        ShouldBeFalse(result.Report.HasErrors, "Warnings should not prevent compilation.");
+        ShouldBeTrue(result.Report.HasWarnings, "Expected a duplicate-pattern warning.");
+        var diagnostic = result.Report.Diagnostics.Single();
+        ShouldEqual(diagnostic.Code, "PTRN1003");
+        ShouldEqual(diagnostic.Severity, PattrnDiagnosticSeverity.Warning);
+        ShouldEqual(diagnostic.RegistrationId, second.Id);
+        ShouldEqual(diagnostic.PatternSegmentIndex, null);
     }
 
     [Test]
-    public void GetDiagnosticsReportsDuplicateStructuralPattern()
+    public void DuplicatePatternRejectsWithoutProducingAnIndex()
     {
-        var builder = PattrnIndex<string, string>.Builder("*")
-            .Add(["orders", "new"], "a")
-            .Add(["orders", "new"], "b");
-
-        var diagnostics = builder.GetDiagnostics();
-        var duplicate = diagnostics.Single(diagnostic => diagnostic.Kind == PatternDiagnosticKind.DuplicatePattern);
-
-        ShouldEqual(duplicate.Severity, PatternDiagnosticSeverity.Warning);
-        ShouldEqual(duplicate.RegistrationCount, 2);
-        ShouldSequenceEqual(duplicate.Pattern.Select(segment => segment.ToString()), ["orders", "new"]);
-    }
-
-    [Test]
-    public void GetDiagnosticsReportsAmbiguousParameterNamesForEquivalentPatterns()
-    {
-        var builder = PattrnIndex<string, string>.Builder("*")
-            .AddPattern(
-                [
-                    PatternSegment<string>.Literal("orders"),
-                    PatternSegment<string>.Parameter("id")
-                ],
-                "a")
-            .AddPattern(
-                [
-                    PatternSegment<string>.Literal("orders"),
-                    PatternSegment<string>.Parameter("name")
-                ],
-                "b");
-
-        var diagnostics = builder.GetDiagnostics();
-        var ambiguous = diagnostics.Single(diagnostic => diagnostic.Kind == PatternDiagnosticKind.AmbiguousParameterNames);
-
-        ShouldEqual(ambiguous.Severity, PatternDiagnosticSeverity.Warning);
-        ShouldSequenceEqual(ambiguous.Pattern.Select(segment => segment.ToString()), ["orders", "{id}"]);
-    }
-
-    [Test]
-    public void GetDiagnosticsReportsWildcardOverlapWithLiteralBranch()
-    {
-        var builder = PattrnIndex<string, string>.Builder("*")
-            .Add(["orders", "*"], "wildcard")
-            .Add(["orders", "new"], "literal");
-
-        var diagnostics = builder.GetDiagnostics();
-        var overlap = diagnostics.Single(diagnostic => diagnostic.Kind == PatternDiagnosticKind.OverlappingWildcard);
-
-        ShouldEqual(overlap.Severity, PatternDiagnosticSeverity.Info);
-        ShouldSequenceEqual(overlap.Pattern.Select(segment => segment.ToString()), ["orders", "*"]);
-    }
-
-    [Test]
-    public void GetDiagnosticsReportsCatchAllOverlapWithMoreSpecificBranch()
-    {
-        var builder = PattrnIndex<string, string>.Builder("*")
-            .AddPattern(
-                [
-                    PatternSegment<string>.Literal("files"),
-                    PatternSegment<string>.CatchAll("path")
-                ],
-                "catch-all")
-            .Add(["files", "readme"], "literal");
-
-        var diagnostics = builder.GetDiagnostics();
-        var overlap = diagnostics.Single(diagnostic => diagnostic.Kind == PatternDiagnosticKind.OverlappingCatchAll);
-
-        ShouldEqual(overlap.Severity, PatternDiagnosticSeverity.Info);
-        ShouldSequenceEqual(overlap.Pattern.Select(segment => segment.ToString()), ["files", "{*path}"]);
-    }
-
-    [Test]
-    public void DiagnosticsDoNotChangeMatchingSemantics()
-    {
-        var builder = PattrnIndex<string, string>.Builder("*")
-            .Add(["orders", "*"], "wildcard")
-            .Add(["orders", "new"], "literal");
-
-        var diagnostics = builder.GetDiagnostics();
-        var index = builder.Build();
-
-        ShouldBeTrue(diagnostics.Length > 0, "Expected diagnostics for the overlapping wildcard registration.");
-        ShouldSequenceEqual(index.MatchToArray(["orders", "new"]), ["literal", "wildcard"]);
-    }
-
-    [Test]
-    public void DiagnosticsReferenceDocumentsEveryBuilderDiagnosticKindWithSeverityAndStability()
-    {
-        var diagnosticKindNames = Enum.GetNames<PatternDiagnosticKind>();
-        var tableRows = ReadDiagnosticsReference()
-            .Where(line => diagnosticKindNames.Any(kind => line.StartsWith($"| `{kind}`", StringComparison.Ordinal)))
-            .Select(line => line.Split('|', StringSplitOptions.TrimEntries))
-            .ToDictionary(cells => cells[1].Trim('`'), cells => new { NumericValue = cells[2], Severity = cells[3], Stability = cells[4] }, StringComparer.Ordinal);
-
-        var expected = new Dictionary<PatternDiagnosticKind, (int NumericValue, PatternDiagnosticSeverity Severity, string Stability)>
+        var registrations = new[]
         {
-            [PatternDiagnosticKind.DuplicatePattern] = (0, PatternDiagnosticSeverity.Warning, "Stable"),
-            [PatternDiagnosticKind.AmbiguousParameterNames] = (1, PatternDiagnosticSeverity.Warning, "Stable"),
-            [PatternDiagnosticKind.OverlappingWildcard] = (2, PatternDiagnosticSeverity.Info, "Stable kind/severity; overlap metadata needs follow-up"),
-            [PatternDiagnosticKind.OverlappingCatchAll] = (3, PatternDiagnosticSeverity.Info, "Stable kind/severity; overlap metadata needs follow-up")
+            PattrnRegistration<string, string>.Create([PatternSegment<string>.Literal("orders")], "a"),
+            PattrnRegistration<string, string>.Create([PatternSegment<string>.Literal("orders")], "b")
         };
 
-        ShouldEqual(tableRows.Count, Enum.GetValues<PatternDiagnosticKind>().Length);
+        var result = PattrnIndex<string, string>.CompileWithDiagnostics(registrations);
 
-        foreach (var kind in Enum.GetValues<PatternDiagnosticKind>())
-        {
-            ShouldBeTrue(tableRows.TryGetValue(kind.ToString(), out var row), $"Missing diagnostics reference row for {kind}.");
-            ShouldEqual(row!.NumericValue, ((int)kind).ToString(System.Globalization.CultureInfo.InvariantCulture));
-            ShouldEqual(row.Severity, expected[kind].Severity.ToString());
-            ShouldEqual(row.Stability, expected[kind].Stability);
-            ShouldEqual((int)kind, expected[kind].NumericValue);
-        }
+        ShouldBeTrue(result.Report.HasErrors, "The default duplicate policy should reject duplicates.");
+        ShouldBeFalse(result.TryGetIndex(out _), "Rejected compilation must not expose a partial index.");
+        ShouldEqual(result.Report.Diagnostics.Single().Code, "PTRN1003");
     }
 
     [Test]
-    public void ExistingDiagnosticKindsEmitDocumentedDefaultSeverities()
+    public void StructuralDiagnosticsCarryRegistrationAndSegmentAttribution()
     {
-        var diagnostics = new[]
+        var registration = PattrnRegistration<string, string>.Create(
+            [PatternSegment<string>.CatchAll("path"), PatternSegment<string>.Literal("tail")],
+            "invalid");
+
+        var result = PattrnIndex<string, string>.CompileWithDiagnostics([registration], new PattrnCompileOptions { DuplicatePatternPolicy = DuplicatePatternPolicy.Allow });
+
+        var diagnostic = result.Report.Diagnostics.Single();
+        ShouldEqual(diagnostic.Code, "PTRN1004");
+        ShouldEqual(diagnostic.Severity, PattrnDiagnosticSeverity.Error);
+        ShouldEqual(diagnostic.RegistrationId, registration.Id);
+        ShouldEqual(diagnostic.PatternSegmentIndex, 0);
+    }
+
+    [Test]
+    public void TreatWarningsAsErrorsSuppressesIndexButKeepsWarningSeverity()
+    {
+        var registrations = new[]
         {
-            CreateDiagnostic(PatternDiagnosticKind.DuplicatePattern),
-            CreateDiagnostic(PatternDiagnosticKind.AmbiguousParameterNames),
-            CreateDiagnostic(PatternDiagnosticKind.OverlappingWildcard),
-            CreateDiagnostic(PatternDiagnosticKind.OverlappingCatchAll)
+            PattrnRegistration<string, string>.Create([PatternSegment<string>.Literal("orders")], "a"),
+            PattrnRegistration<string, string>.Create([PatternSegment<string>.Literal("orders")], "b")
         };
 
-        var severities = diagnostics.ToDictionary(diagnostic => diagnostic.Kind, diagnostic => diagnostic.Severity);
+        var result = PattrnIndex<string, string>.CompileWithDiagnostics(
+            registrations,
+            new PattrnCompileOptions { DuplicatePatternPolicy = DuplicatePatternPolicy.Warn, TreatWarningsAsErrors = true });
 
-        ShouldEqual(severities[PatternDiagnosticKind.DuplicatePattern], PatternDiagnosticSeverity.Warning);
-        ShouldEqual(severities[PatternDiagnosticKind.AmbiguousParameterNames], PatternDiagnosticSeverity.Warning);
-        ShouldEqual(severities[PatternDiagnosticKind.OverlappingWildcard], PatternDiagnosticSeverity.Info);
-        ShouldEqual(severities[PatternDiagnosticKind.OverlappingCatchAll], PatternDiagnosticSeverity.Info);
-    }
-
-    private static PatternDiagnostic<string> CreateDiagnostic(PatternDiagnosticKind kind)
-    {
-        var builder = PattrnIndex<string, string>.Builder("*");
-
-        switch (kind)
-        {
-            case PatternDiagnosticKind.DuplicatePattern:
-                builder.Add(["orders", "new"], "a").Add(["orders", "new"], "b");
-                break;
-            case PatternDiagnosticKind.AmbiguousParameterNames:
-                builder
-                    .AddPattern([PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("id")], "a")
-                    .AddPattern([PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("name")], "b");
-                break;
-            case PatternDiagnosticKind.OverlappingWildcard:
-                builder.Add(["orders", "*"], "wildcard").Add(["orders", "new"], "literal");
-                break;
-            case PatternDiagnosticKind.OverlappingCatchAll:
-                builder
-                    .AddPattern([PatternSegment<string>.Literal("files"), PatternSegment<string>.CatchAll("path")], "catch-all")
-                    .Add(["files", "readme"], "literal");
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(kind), kind, "Unknown diagnostic kind.");
-        }
-
-        return builder.GetDiagnostics().Single(diagnostic => diagnostic.Kind == kind);
-    }
-
-    private static string[] ReadDiagnosticsReference()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null)
-        {
-            var path = Path.Combine(directory.FullName, "docs", "reference", "diagnostics.md");
-            if (File.Exists(path))
-            {
-                return File.ReadAllLines(path);
-            }
-
-            directory = directory.Parent;
-        }
-
-        throw new FileNotFoundException("Could not find docs/reference/diagnostics.md.");
+        ShouldBeTrue(result.Report.HasWarnings, "The report retains warning severity.");
+        ShouldBeFalse(result.Report.HasErrors, "Warning escalation must not rewrite diagnostic severity.");
+        ShouldBeFalse(result.TryGetIndex(out _), "Escalated warnings must suppress the index.");
     }
 }

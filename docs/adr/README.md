@@ -15,6 +15,7 @@ ADRs record decisions that constrain the architecture or public contracts. Curre
 | [0007](0007-use-fixed-ranking-with-consumer-side-sorting.md) | Use fixed generic ranking and consumer-side sorting. |
 | [0008](0008-builders-single-writer-compiled-indexes-concurrent-reader-safe.md) | Keep builders single-writer and compiled indexes safe for concurrent readers. |
 | [0009](0009-use-concrete-compiled-index-contract.md) | Use the concrete compiled-index contract. |
+| [0010](0010-canonical-registrations-and-explicit-match-families.md) | Make canonical registrations authoritative and separate exact, prefix, enumeration, and detailed result families. |
 
 ## Writing a new ADR
 

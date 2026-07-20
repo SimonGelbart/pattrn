@@ -53,6 +53,21 @@ public sealed class StringExtensionTests
         ShouldEqual(written, 2);
         ShouldSetEqual(destination[..written].ToArray(), [1, 2]);
     }
+
+    [Test]
+    public void CaseInsensitiveFacadeContainsAndRemovesCanonicalRegistration()
+    {
+        var options = new StringNormalizationOptions('/')
+        {
+            CaseSensitivity = StringCaseSensitivity.OrdinalIgnoreCase
+        };
+        var builder = StringPattrnIndexBuilder.Create<string>(options)
+            .Add("Market/NASDAQ", "handler");
+
+        ShouldBeTrue(builder.Contains("market/nasdaq"), "Expected comparer-aware containment.");
+        ShouldBeTrue(builder.Remove("market/nasdaq", "handler"), "Expected comparer-aware removal.");
+        ShouldBeFalse(builder.Contains("market/nasdaq"), "Expected registration to be removed.");
+    }
 }
 
 public sealed class StringExtensionValidationTests
@@ -157,7 +172,7 @@ public sealed class StringIdentityTests
     public void SeparatedAddFlowsPatternIdentityToDetailedMatches()
     {
         var builder = PattrnIndexBuilder<string, string>.Create();
-        builder.AddSeparated("config.feature.enabled", "value", '.', patternId: "feature-enabled");
+        builder.AddSeparated("config.feature.enabled", "value", '.', name: "feature-enabled");
 
         var match = builder.Build().MatchDetailedToArray(["config", "feature", "enabled"]).Single();
 
@@ -236,10 +251,10 @@ public sealed class StringPattrnIndexBuilderFacadeTests
 
         var index = StringPattrnIndexBuilder
             .Create<string>(options)
-            .Add("/ API / Users /", "users", patternId: "users")
+            .Add("/ API / Users /", "users", name: "users")
             .Build();
 
-        ShouldSequenceEqual(index.MatchToArray("//api//USERS/"), ["users"]);
+        ShouldSequenceEqual(index.MatchValuesToArray("//api//USERS/"), ["users"]);
         var detailed = index.MatchDetailedToArray("api/users").Single();
     }
 
@@ -255,7 +270,7 @@ public sealed class StringPattrnIndexBuilderFacadeTests
                     PatternSegment<string>.CatchAll("symbol")
                 ],
                 "handler",
-                patternId: "market-handler")
+                name: "market-handler")
             .Build();
 
         var match = index.MatchDetailedToArray("market.NASDAQ.MSFT.QUOTE").Single();
@@ -274,7 +289,7 @@ public sealed class StringPattrnIndexBuilderFacadeTests
             .Add("market.NASDAQ.*", "wildcard")
             .Build();
 
-        ShouldSequenceEqual(index.MatchToArray("market.NASDAQ.MSFT"), ["wildcard"]);
+        ShouldSequenceEqual(index.MatchValuesToArray("market.NASDAQ.MSFT"), ["wildcard"]);
     }
 
     [Test]
@@ -288,7 +303,7 @@ public sealed class StringPattrnIndexBuilderFacadeTests
             .Add("Market.NASDAQ.MSFT", "value")
             .Build();
 
-        ShouldSequenceEqual(index.MatchToArray("market.nasdaq.msft"), ["value"]);
+        ShouldSequenceEqual(index.MatchValuesToArray("market.nasdaq.msft"), ["value"]);
     }
 
     [Test]

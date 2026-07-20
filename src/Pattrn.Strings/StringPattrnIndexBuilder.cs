@@ -111,66 +111,20 @@ public sealed class StringPattrnIndexBuilder<TValue>
     }
 
     /// <summary>
-    /// Configures duplicate pattern registration behavior on the underlying builder.
-    /// </summary>
-    /// <param name="behavior">The duplicate registration behavior to use.</param>
-    /// <returns>The current string-path builder.</returns>
-    public StringPattrnIndexBuilder<TValue> UseDuplicatePatternRegistrationBehavior(
-        DuplicatePatternRegistrationBehavior behavior)
-    {
-        CoreBuilder.UseDuplicatePatternRegistrationBehavior(behavior);
-        return this;
-    }
-
-    /// <summary>
-    /// Enables build validation with the specified minimum diagnostic severity.
-    /// </summary>
-    /// <param name="minimumSeverity">The minimum diagnostic severity that should fail <see cref="Build"/>.</param>
-    /// <returns>The current string-path builder.</returns>
-    public StringPattrnIndexBuilder<TValue> ValidateOnBuild(
-        PatternDiagnosticSeverity minimumSeverity = PatternDiagnosticSeverity.Warning)
-    {
-        CoreBuilder.ValidateOnBuild(minimumSeverity);
-        return this;
-    }
-
-    /// <summary>
-    /// Enables build validation with a caller-supplied diagnostic rejection predicate.
-    /// </summary>
-    /// <param name="rejectDiagnostic">A predicate that returns <see langword="true"/> for diagnostics that should fail <see cref="Build"/>.</param>
-    /// <returns>The current string-path builder.</returns>
-    public StringPattrnIndexBuilder<TValue> ValidateOnBuild(
-        Func<PatternDiagnostic<string>, bool> rejectDiagnostic)
-    {
-        CoreBuilder.ValidateOnBuild(rejectDiagnostic);
-        return this;
-    }
-
-    /// <summary>
-    /// Disables build validation on the underlying builder.
-    /// </summary>
-    /// <returns>The current string-path builder.</returns>
-    public StringPattrnIndexBuilder<TValue> DisableBuildValidation()
-    {
-        CoreBuilder.DisableBuildValidation();
-        return this;
-    }
-
-    /// <summary>
     /// Registers a normalized string pattern.
     /// </summary>
     /// <param name="pattern">The separated string pattern.</param>
     /// <param name="value">The value returned when the pattern matches.</param>
-    /// <param name="patternId">An optional caller-provided identity for this registration.</param>
+    /// <param name="name">An optional descriptive name for this registration.</param>
     /// <returns>The current string-path builder.</returns>
     /// <remarks>
     /// On tokenless builders, all string segments are literals. On tokenized builders, segments equal to the configured wildcard token
     /// use the core tokenized wildcard convenience path. Use the explicit pattern registration overloads when wildcard, parameter, or catch-all
     /// segments are required without reserving a string token.
     /// </remarks>
-    public StringPattrnIndexBuilder<TValue> Add(string pattern, TValue value, string? patternId = null)
+    public StringPattrnIndexBuilder<TValue> Add(string pattern, TValue value, string? name = null)
     {
-        CoreBuilder.Add(Options.Split(pattern, nameof(pattern)), value, patternId);
+        CoreBuilder.Add(Options.Split(pattern, nameof(pattern)), value, name);
         return this;
     }
 
@@ -179,14 +133,14 @@ public sealed class StringPattrnIndexBuilder<TValue>
     /// </summary>
     /// <param name="pattern">The explicit string pattern segments.</param>
     /// <param name="value">The value returned when the pattern matches.</param>
-    /// <param name="patternId">An optional caller-provided identity for this registration.</param>
+    /// <param name="name">An optional descriptive name for this registration.</param>
     /// <returns>The current string-path builder.</returns>
     public StringPattrnIndexBuilder<TValue> AddPattern(
         ReadOnlySpan<PatternSegment<string>> pattern,
         TValue value,
-        string? patternId = null)
+        string? name = null)
     {
-        CoreBuilder.AddPattern(NormalizePattern(pattern), value, patternId);
+        CoreBuilder.AddPattern(NormalizePattern(pattern), value, name);
         return this;
     }
 
@@ -195,15 +149,15 @@ public sealed class StringPattrnIndexBuilder<TValue>
     /// </summary>
     /// <param name="pattern">The explicit string pattern segments.</param>
     /// <param name="value">The value returned when the pattern matches.</param>
-    /// <param name="patternId">An optional caller-provided identity for this registration.</param>
+    /// <param name="name">An optional descriptive name for this registration.</param>
     /// <returns>The current string-path builder.</returns>
     public StringPattrnIndexBuilder<TValue> AddPattern(
         IEnumerable<PatternSegment<string>> pattern,
         TValue value,
-        string? patternId = null)
+        string? name = null)
     {
         ArgumentNullException.ThrowIfNull(pattern);
-        return AddPattern(pattern.ToArray().AsSpan(), value, patternId);
+        return AddPattern(pattern.ToArray().AsSpan(), value, name);
     }
 
     /// <summary>
@@ -224,7 +178,12 @@ public sealed class StringPattrnIndexBuilder<TValue>
     /// <returns><see langword="true"/> when a registration was removed; otherwise, <see langword="false"/>.</returns>
     public bool Remove(string pattern, TValue value)
     {
-        return CoreBuilder.Remove(Options.Split(pattern, nameof(pattern)), value);
+        var segments = Options.Split(pattern, nameof(pattern));
+        var canonical = CanonicalizeLiteralPattern(segments);
+        var registration = CoreBuilder.ToRegistrations().FirstOrDefault(candidate =>
+            SamePattern(candidate.Pattern, canonical)
+            && CoreBuilder.ValueComparer.Equals(candidate.Value, value));
+        return registration is not null && CoreBuilder.Remove(registration.Id);
     }
 
     /// <summary>
@@ -234,7 +193,18 @@ public sealed class StringPattrnIndexBuilder<TValue>
     /// <returns>The number of removed values.</returns>
     public int RemoveAll(string pattern)
     {
-        return CoreBuilder.RemoveAll(Options.Split(pattern, nameof(pattern)));
+        var segments = Options.Split(pattern, nameof(pattern));
+        var canonical = CanonicalizeLiteralPattern(segments);
+        var registrations = CoreBuilder.ToRegistrations()
+            .Where(candidate => SamePattern(candidate.Pattern, canonical))
+            .Select(candidate => candidate.Id)
+            .ToArray();
+        foreach (var id in registrations)
+        {
+            CoreBuilder.Remove(id);
+        }
+
+        return registrations.Length;
     }
 
     /// <summary>
@@ -278,5 +248,43 @@ public sealed class StringPattrnIndexBuilder<TValue>
         }
 
         return normalized;
+    }
+
+    private PatternSegment<string>[] CanonicalizeLiteralPattern(ReadOnlySpan<string> segments)
+    {
+        var canonical = new PatternSegment<string>[segments.Length];
+        for (var i = 0; i < segments.Length; i++)
+        {
+            canonical[i] = CoreBuilder.UsesWildcardSegmentToken
+                && CoreBuilder.SegmentComparer.Equals(segments[i], CoreBuilder.WildcardSegment)
+                ? PatternSegment<string>.Wildcard()
+                : PatternSegment<string>.Literal(segments[i]);
+        }
+
+        return canonical;
+    }
+
+    private bool SamePattern(
+        IReadOnlyList<PatternSegment<string>> left,
+        IReadOnlyList<PatternSegment<string>> right)
+    {
+        if (left.Count != right.Count)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < left.Count; i++)
+        {
+            left[i].Deconstruct(out var leftKind, out var leftLiteral, out var leftName);
+            right[i].Deconstruct(out var rightKind, out var rightLiteral, out var rightName);
+            if (leftKind != rightKind
+                || (leftKind == PatternSegmentKind.Literal && !CoreBuilder.SegmentComparer.Equals(leftLiteral, rightLiteral))
+                || !string.Equals(leftName, rightName, StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

@@ -10,9 +10,8 @@ public class BuilderBenchmarks
     [Params(
         BuilderBenchmarkScenario.BuildLargeExact,
         BuilderBenchmarkScenario.BuildLargeParameters,
-        BuilderBenchmarkScenario.GetDiagnosticsClean,
-        BuilderBenchmarkScenario.GetDiagnosticsAmbiguous,
-        BuilderBenchmarkScenario.ValidateOnBuild)]
+        BuilderBenchmarkScenario.CompileDiagnosticsClean,
+        BuilderBenchmarkScenario.CompileDiagnosticsDuplicate)]
     public BuilderBenchmarkScenario Scenario { get; set; }
 
     [GlobalSetup]
@@ -21,7 +20,7 @@ public class BuilderBenchmarks
         _registrations = Scenario switch
         {
             BuilderBenchmarkScenario.BuildLargeParameters => CreateParameterRegistrations(4096),
-            BuilderBenchmarkScenario.GetDiagnosticsAmbiguous or BuilderBenchmarkScenario.ValidateOnBuild => CreateAmbiguousRegistrations(2048),
+            BuilderBenchmarkScenario.CompileDiagnosticsDuplicate => CreateAmbiguousRegistrations(2048),
             _ => CreateExactRegistrations(4096)
         };
     }
@@ -34,18 +33,19 @@ public class BuilderBenchmarks
     }
 
     [Benchmark]
-    public PatternDiagnostic<string>[] GetDiagnostics()
+    public PattrnDiagnosticReport CompileWithDiagnostics()
     {
-        var builder = CreateBuilder();
-        return [.. builder.GetDiagnostics()];
-    }
-
-    [Benchmark]
-    public PattrnIndex<string, int> BuildWithValidation()
-    {
-        var builder = CreateBuilder();
-        builder.ValidateOnBuild(diagnostic => false);
-        return builder.Build();
+        var registrations = _registrations
+            .Select(registration => PattrnRegistration<string, int>.Create(registration.Pattern, registration.Value))
+            .ToArray();
+        return PattrnIndex<string, int>.CompileWithDiagnostics(
+            registrations,
+            new PattrnCompileOptions
+            {
+                DuplicatePatternPolicy = Scenario == BuilderBenchmarkScenario.CompileDiagnosticsDuplicate
+                    ? DuplicatePatternPolicy.Warn
+                    : DuplicatePatternPolicy.Allow
+            }).Report;
     }
 
     private PattrnIndexBuilder<string, int> CreateBuilder()

@@ -2,67 +2,54 @@ using System.Collections.Immutable;
 
 namespace Pattrn;
 
-/// <summary>
-/// Convenience detailed match result returned by <see cref="PattrnIndex{TSegment, TValue}.MatchDetailedToArray"/>.
-/// </summary>
-/// <typeparam name="TSegment">The segment type used by registered patterns and incoming paths.</typeparam>
-/// <typeparam name="TValue">The value type returned when a registered pattern matches.</typeparam>
+/// <summary>Describes an accepted match and its owning named captures.</summary>
 public readonly record struct PatternMatchDetailed<TSegment, TValue>(
     TValue Value,
-    PatternMatchKind Kind,
-    int PatternSegmentCount,
+    RegistrationId RegistrationId,
     int ConsumedSegmentCount,
     ImmutableArray<PatternCapture<TSegment>> Captures)
     where TSegment : notnull
 {
-    internal PatternMatchDetailed(
-        TValue value,
-        PatternMatchKind kind,
-        int patternSegmentCount,
-        int consumedSegmentCount,
-        ImmutableArray<PatternCapture<TSegment>> captures,
-        string? patternId = null,
-        int registrationOrder = -1,
-        int specificity = 0)
-        : this(value, kind, patternSegmentCount, consumedSegmentCount, captures)
-    { }
-
-    /// <inheritdoc />
-    public bool Equals(PatternMatchDetailed<TSegment, TValue> other)
+    /// <summary>Returns a capture by its ordinal, case-sensitive name.</summary>
+    public bool TryGetCapture(string name, out PatternCapture<TSegment> capture)
     {
-        if (!EqualityComparer<TValue>.Default.Equals(Value, other.Value)
-            || Kind != other.Kind
-            || PatternSegmentCount != other.PatternSegmentCount
-            || ConsumedSegmentCount != other.ConsumedSegmentCount
-            )
+        ArgumentNullException.ThrowIfNull(name);
+        if (Captures.IsDefault)
         {
+            capture = default;
             return false;
         }
-        if (Captures.IsDefault || other.Captures.IsDefault)
-        {
-            return Captures.IsDefault == other.Captures.IsDefault;
-        }
 
-        return Captures.SequenceEqual(other.Captures);
-    }
-
-    /// <inheritdoc />
-    public override int GetHashCode()
-    {
-        var hash = new HashCode();
-        hash.Add(Value);
-        hash.Add(Kind);
-        hash.Add(PatternSegmentCount);
-        hash.Add(ConsumedSegmentCount);
-        if (!Captures.IsDefault)
+        foreach (var candidate in Captures)
         {
-            foreach (var capture in Captures)
+            if (string.Equals(candidate.Name, name, StringComparison.Ordinal))
             {
-                hash.Add(capture);
+                capture = candidate;
+                return true;
             }
         }
 
+        capture = default;
+        return false;
+    }
 
-        return hash.ToHashCode();
+    /// <summary>Returns a capture by its ordinal, case-sensitive name.</summary>
+    /// <exception cref="KeyNotFoundException">The named capture does not exist.</exception>
+    public PatternCapture<TSegment> GetCapture(string name)
+    {
+        if (TryGetCapture(name, out var capture))
+        {
+            return capture;
+        }
+
+        throw new KeyNotFoundException($"The capture '{name}' was not found.");
     }
 }
+
+/// <summary>Describes a detailed caller-buffer match and its contiguous capture range.</summary>
+public readonly record struct PatternMatchDetailedSlice<TValue>(
+    TValue Value,
+    RegistrationId RegistrationId,
+    int ConsumedSegmentCount,
+    int CaptureStart,
+    int CaptureCount);

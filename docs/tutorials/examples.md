@@ -13,7 +13,7 @@ var index = PattrnIndex<string, Action<string>>
         message => Console.WriteLine($"any order event: {message}"))
     .Build();
 
-foreach (var handler in index.MatchToArray(["orders", "created"]))
+foreach (var handler in index.MatchValuesToArray(["orders", "created"]))
 {
     handler("order-123");
 }
@@ -46,5 +46,5 @@ var index = PattrnIndex<string, string>
         "log-rule")
     .Build();
 
-var rules = index.MatchToArray(["home", "simon", "downloads"]);
+var rules = index.MatchValuesToArray(["home", "simon", "downloads"]);
 ```

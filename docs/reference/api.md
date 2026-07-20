@@ -1,329 +1,92 @@
 # API overview
 
-The core API is intentionally small and segmented-path-first.
+The generic package accepts segmented paths and keeps registration, compilation,
+and matching contracts separate.
 
-## Build an index
-
-The preferred core registration model is explicit `PatternSegment<TSegment>` values:
-
-```csharp
-var builder = PattrnIndex<string, string>.Builder();
-
-builder
-    .AddPattern(
-        [
-            PatternSegment<string>.Literal("market"),
-            PatternSegment<string>.Literal("NASDAQ"),
-            PatternSegment<string>.Literal("MSFT")
-        ],
-        "exact-msft")
-    .AddPattern(
-        [
-            PatternSegment<string>.Literal("market"),
-            PatternSegment<string>.Literal("NASDAQ"),
-            PatternSegment<string>.Wildcard()
-        ],
-        "any-nasdaq");
-
-var index = builder.Build();
-```
-
-The default builder is tokenless. `AddPattern(...)` callers do not need to reserve any segment value for wildcard behavior.
-
-## Builder and index lifecycle
-
-[ADR 0008](../adr/0008-builders-single-writer-compiled-indexes-concurrent-reader-safe.md) is the source of truth for the builder/index concurrency model: builders are mutable, single-writer construction objects, and compiled indexes are immutable snapshots safe for concurrent readers after construction.
-
-### Builder ownership
-
-Create a builder for the registration phase and keep mutation owned by one writer:
+## Canonical registrations
 
 ```csharp
-var builder = PattrnIndex<string, string>.Builder();
-```
-
-The tokenless builder is preferred for core and domain-neutral registration because explicit `PatternSegment<TSegment>` values distinguish literals, parameters, wildcards, and catch-alls without reserving a special segment value.
-
-Tokenized builders remain a convenience when reserving a wildcard token is acceptable in the segment domain:
-
-```csharp
-var builder = PattrnIndex<string, string>.Builder("*");
-```
-
-Do not mutate one builder concurrently. If registrations are discovered in parallel, collect them first, order them deterministically, and then apply them to one builder from a single writer. Deterministic application order matters because equal-specificity ties preserve registration order, duplicate structural registration behavior depends on accepted registration order, and diagnostics are easier to reason about when input order is stable.
-
-Configure builder-time policies before building and publishing the compiled index:
-
-```csharp
-builder.UseDuplicatePatternRegistrationBehavior(DuplicatePatternRegistrationBehavior.Throw);
-builder.ValidateOnBuild(PatternDiagnosticSeverity.Warning);
-```
-
-See [duplicate behavior](duplicate-behavior.md) and [diagnostics](diagnostics.md) for the policy details.
-
-### Building an immutable index
-
-Call `Build()` after registration and policy configuration are complete:
-
-```csharp
-var index = builder.Build();
-```
-
-The returned index is an immutable snapshot. Later changes to the builder do not update indexes that were already built. To change what readers observe, build a new index and publish that completed index instead of trying to mutate a live index.
-
-### Publishing indexes to readers
-
-Publish only completed compiled indexes to read paths. A common reload shape is to keep the current index reference, build a replacement from deterministic input, then swap the reference readers use:
-
-```csharp
-private sealed record Registration(
-    int Order,
-    PatternSegment<string>[] Pattern,
-    Action Handler,
-    string Id);
-
-private volatile PattrnIndex<string, Action> _current = BuildInitialIndex();
-
-private static PattrnIndex<string, Action> BuildInitialIndex()
-{
-    return PattrnIndex<string, Action>.Builder().Build();
-}
-
-public Action[] Match(string[] path)
-{
-    var index = _current;
-    return index.MatchToArray(path);
-}
-
-public void Reload(IEnumerable<Registration> registrations)
-{
-    var builder = PattrnIndex<string, Action>.Builder();
-
-    foreach (var registration in registrations.OrderBy(registration => registration.Order))
-    {
-        builder.AddPattern(registration.Pattern, registration.Handler, registration.Id);
-    }
-
-    _current = builder.Build();
-}
-```
-
-The compiled index read APIs are safe for concurrent callers after construction. Keep hot paths on `TryMatch`, `MatchToArray`, the explicit prefix methods, or detailed span APIs as appropriate. Use `Explain(...)` for diagnostics and troubleshooting rather than as the hot path because it is allocation-oriented and can include extra diagnostic traversal.
-
-## Match to an array
-
-```csharp
-var matches = index.MatchToArray(["market", "NASDAQ", "MSFT"]);
-```
-
-## Match into a caller-provided buffer
-
-```csharp
-var path = new[] { "market", "NASDAQ", "MSFT" };
-var destination = new string[index.GetMatchCountUpperBound(path)];
-var matched = index.TryMatch(path, destination, out var written);
-```
-
-## Compiled index surface
-
-`PattrnIndex<TSegment, TValue>` keeps hot matching explicit and exposes explanation matching as a separate diagnostics-oriented operation:
-
-```csharp
-int GetMatchCountUpperBound(ReadOnlySpan<TSegment> path);
-bool TryMatch(ReadOnlySpan<TSegment> path, Span<TValue> destination, out int written);
-TValue[] MatchToArray(ReadOnlySpan<TSegment> path);
-
-int GetCaptureCountUpperBound(ReadOnlySpan<TSegment> path);
-int MatchDetailed(
-    ReadOnlySpan<TSegment> path,
-    Span<PatternMatch<TValue>> matches,
-    Span<PatternCaptureSlice<TSegment>> captures,
-    out int capturesWritten);
-bool TryMatchDetailed(
-    ReadOnlySpan<TSegment> path,
-    Span<PatternMatch<TValue>> matches,
-    Span<PatternCaptureSlice<TSegment>> captures,
-    out int matchesWritten,
-    out int capturesWritten);
-PatternMatchDetailed<TSegment, TValue>[] MatchDetailedToArray(ReadOnlySpan<TSegment> path);
-
-PatternMatchExplanation<TSegment, TValue> Explain(
-    ReadOnlySpan<TSegment> path,
-    PatternExplanationOptions options = default);
-```
-
-Value-only matching is split into exact and prefix operations. `MatchToArray`, `TryMatch`, and `GetMatchCountUpperBound` are exact-length operations. `MatchPrefixToArray`, `TryMatchPrefix`, and `GetPrefixMatchCountUpperBound` explicitly include registrations at matching prefix nodes. The build-time `MatchOptions.Prefix` setting currently controls detailed and explanation traversal; it does not turn the exact value-only methods into prefix methods.
-
-Convenience overloads for `ReadOnlyMemory<T>` and `IEnumerable<T>` are extension methods in the core package. Dotted and separated string helpers live in `Pattrn.Strings`.
-
-## String normalization boundary
-
-The core package does not split or normalize strings. It receives already-segmented paths and uses the builder's segment comparer.
-
-`Pattrn.Strings` owns string conversion policy through `StringNormalizationOptions`. For new string-based code, the ergonomic facade stores those options once:
-
-```csharp
-var options = new StringNormalizationOptions('/')
-{
-    CaseSensitivity = StringCaseSensitivity.OrdinalIgnoreCase,
-    EmptySegmentBehavior = StringEmptySegmentBehavior.Ignore,
-    TrimBehavior = StringSegmentTrimBehavior.TrimWhitespace,
-    NormalizeSegment = static segment => segment.ToLowerInvariant()
-};
-
-var index = options.CreateStringBuilder<string>()
-    .Add("/ API / Users /", "users", patternId: "users")
-    .Build();
-
-var matches = index.MatchToArray("//api//USERS/");
-```
-
-The facade is convenience-oriented: `StringPattrnIndexBuilder<TValue>` wraps `PattrnIndexBuilder<string, TValue>`, and `StringPattrnIndex<TValue>` wraps `PattrnIndex<string, TValue>`. Advanced callers can still use `CoreBuilder`, `CoreIndex`, or the older `AddSeparated` / `MatchSeparatedToArray` extension methods directly.
-
-This boundary keeps URL decoding, filesystem rules, route semantics, glob syntax, and application-specific normalization out of the generic core and the generic string layer.
-
-
-## Generic pattern segments
-
-The builder accepts domain-neutral `PatternSegment<TSegment>` registrations through explicit `*Pattern` methods. These are the primary core registration APIs. The method names intentionally avoid overload ambiguity with empty collection expressions passed to the tokenized convenience `Add` API.
-
-```csharp
-var builder = PattrnIndex<string, string>.Builder();
-
-builder.AddPattern(
-    [
-        PatternSegment<string>.Literal("orders"),
-        PatternSegment<string>.Parameter("id")
-    ],
+var registration = PattrnRegistration<string, string>.Create(
+    [PatternSegment<string>.Literal("orders"), PatternSegment<string>.Parameter("id")],
     "order-handler",
-    patternId: "orders-by-id");
+    "orders-by-id");
+
+var result = PattrnIndex<string, string>.CompileWithDiagnostics([registration]);
+if (result.TryGetIndex(out var index))
+{
+    // Publish the complete immutable index.
+}
 ```
 
-Available methods:
+Builders are single-writer mutable sources of canonical registrations. Use
+`Add(PattrnRegistration<,>)` or convenience `Add`/`AddPattern` methods; the
+canonical overload returns a `RegistrationId`. Use `Replace` and `Remove` by ID,
+`Clear`, and `ToRegistrations` to inspect or mutate the source list. Existing
+compiled indexes are immutable snapshots.
+
+## Compilation and diagnostics
+
+`PattrnIndex.Compile` is the normal static compiler. `CompileWithDiagnostics`
+returns an immutable `PattrnDiagnosticReport`; `BuildWithDiagnostics` delegates
+to the same compiler. `PattrnCompileOptions` contains only
+`DuplicatePatternPolicy` and `TreatWarningsAsErrors`.
+
+Structural diagnostics use stable `PTRN1001`–`PTRN1005` codes. Duplicate IDs are
+always errors. A failed compilation never exposes a partial index.
+
+## Match families
+
+Exact result records:
 
 ```csharp
-AddPattern(...);
-AddPatternRange(...);
-ContainsPattern(...);
-RemovePattern(...);
-RemoveAllPattern(...);
+PatternMatch<TValue>[] matches = index.MatchToArray(path);
+index.TryMatch(path, destination, out var written);
 ```
 
-`PatternSegment<TSegment>.Literal(value)` always registers an exact literal value. `PatternSegment<TSegment>.Wildcard()` and `PatternSegment<TSegment>.Parameter(name)` both register a single-segment wildcard branch. Named parameters are exposed by the detailed match APIs.
-
-See [matching semantics](matching-semantics.md).
-
-## Builder maintenance and convenience APIs
-
-`PattrnIndexBuilder<TSegment, TValue>` also exposes maintenance and convenience families for tokenized and explicit-segment workflows:
-
-| Family | Methods |
-|---|---|
-| Containment checks | `Contains(...)`, `ContainsPattern(...)` |
-| Remove one value | `Remove(...)`, `RemovePattern(...)` |
-| Remove all values for a pattern | `RemoveAll(...)`, `RemoveAllPattern(...)` |
-| Reset builder state | `Clear()` |
-| Convenience registration | `Add(...)`, `AddRange(...)`, `AddPattern(...)`, `AddPatternRange(...)` |
-
-Each family includes span-first overloads plus `ReadOnlyMemory<T>` and `IEnumerable<T>` overloads for convenience.
-
-
-
-## Tokenized convenience registration
-
-`Add(ReadOnlySpan<TSegment>, TValue)` remains available. On a tokenless builder it registers literal-only segments. On a tokenized builder created with a wildcard segment, it registers compact tokenized patterns:
+Exact value-only methods are explicit:
 
 ```csharp
-var builder = PattrnIndex<string, string>.Builder("*");
-
-builder
-    .Add(["market", "NASDAQ", "MSFT"], "exact-msft")
-    .Add(["market", "NASDAQ", "*"], "any-nasdaq");
+TValue[] values = index.MatchValuesToArray(path);
+index.TryMatchValues(path, valueDestination, out var valueCount);
 ```
 
-Use tokenized builders only when reserving a wildcard token in the segment domain is acceptable. Use the default tokenless builder plus `AddPattern(...)` when a segment value such as `"*"` must be representable as a literal.
+`PatternMatch<TValue>` contains `Value`, `RegistrationId`, and
+`ConsumedSegmentCount`. Result ordering is specificity descending, then
+registration order ascending.
 
-## Detailed match results
-
-Use the detailed APIs when you need match metadata, pattern identity, registration order, or named-parameter captures. The low-allocation API writes match descriptors and captures into separate caller-provided spans:
+Best-prefix methods return only the deepest matching prefix:
 
 ```csharp
-var path = new[] { "orders", "123" };
-var matches = new PatternMatch<string>[index.GetMatchCountUpperBound(path)];
-var captures = new PatternCaptureSlice<string>[index.GetCaptureCountUpperBound(path)];
-
-var written = index.MatchDetailed(path, matches, captures, out var capturesWritten);
-
-var first = matches[0];
-var firstCaptures = captures.AsSpan(first.CaptureStart, first.CaptureCount);
+var best = index.MatchPrefixToArray(path);
+var bestValues = index.MatchPrefixValuesToArray(path);
 ```
 
-`MatchDetailed(...)` and `TryMatchDetailed(...)` use `PatternCaptureSlice<TSegment>` so caller-provided detailed matching can remain allocation-sensitive and zero-allocation when the destination spans are large enough. Each slice gives the capture name, `StartSegmentIndex`, and `SegmentCount`; callers read the captured values from the original input path.
-
-`MatchDetailedToArray(...)` is the allocating detailed convenience API. It returns `PatternMatchDetailed<TSegment, TValue>` values with owning `PatternCapture<TSegment>` captures. `PatternCapture<TSegment>.Values` contains the captured input segments, `StartSegmentIndex` identifies where the capture begins, and `SegmentCount` is computed from `Values.Length`. `PatternCapture<TSegment>.Value` is only for single-segment captures and throws `InvalidOperationException` for zero-segment or multi-segment captures.
-
-Detailed matches expose `Kind`, `PatternSegmentCount`, `ConsumedSegmentCount`, and captures. Registration identity and descriptive names belong to canonical registrations, not match results. See [matching semantics](matching-semantics.md) for the ordering contract.
-
-## Explanation results
-
-Use `Explain(...)` for troubleshooting, logging, developer tools, and user-facing diagnostics. It intentionally allocates a `PatternMatchExplanation<TSegment, TValue>` object containing:
-
-- a copy of the explained input path;
-- accepted detailed matches;
-- the index `MatchOptions`;
-- the explanation options used;
-- path-specific match and capture upper bounds;
-- rejected-candidate hints when explicitly requested.
-
-Rejected-candidate diagnostics are disabled by default:
+All-prefix enumeration is shallowest to deepest, with the same ordering within
+each depth:
 
 ```csharp
-var explanation = index.Explain(["orders", "123"]);
+var all = index.EnumeratePrefixMatchesToArray(path);
+var allValues = index.EnumeratePrefixValuesToArray(path);
 ```
 
-Opt in only for troubleshooting paths where the extra traversal and allocation are acceptable:
+Use the corresponding `Try...` methods and separate upper bounds when supplying
+caller-owned spans. `MatchOptions` does not select prefix behavior; it contains
+only `DuplicateValueMatchMode` and its `DeduplicateValues` convenience property.
 
-```csharp
-var explanation = index.Explain(
-    ["customers", "42"],
-    PatternExplanationOptions.IncludeRejections);
-```
+## Detailed matching
 
-`Explain(...)` does not replace the hot APIs. Keep request-routing, policy checks, and repeated read paths on `TryMatch`, `MatchToArray`, explicit prefix methods, or span-based `MatchDetailed`.
+`MatchDetailedToArray` returns owning `PatternMatchDetailed<TSegment, TValue>`
+records with immutable captures. Caller-buffer detailed methods return
+`PatternMatchDetailedSlice<TValue>` plus a capture span. Use `TryGetCapture` or
+`GetCapture` for ordinal capture-name lookup.
 
-## Builder duplicate and validation policies
+## Companion packages
 
-The builder appends duplicate structural patterns by default:
+`Pattrn.Strings` normalizes string paths and delegates to the core segmented
+index. `Pattrn.Routing` is preview and translates route templates into explicit
+pattern segments. `Pattrn.DependencyInjection` only owns registration and
+publication of immutable indexes. None of these packages changes generic-core
+result ordering or diagnostics semantics.
 
-```csharp
-var builder = PattrnIndex<string, string>.Builder();
-```
-
-Use an explicit registration-time policy when duplicates should be rejected or collapsed:
-
-```csharp
-builder.UseDuplicatePatternRegistrationBehavior(DuplicatePatternRegistrationBehavior.Throw);
-```
-
-Supported behaviors are `Append`, `Throw`, `Replace`, and `Ignore`. This is independent of `DuplicateValueMatchMode`, which affects values emitted by a compiled index at match time.
-
-Build validation is opt-in and evaluates generic diagnostics:
-
-```csharp
-builder.ValidateOnBuild(PatternDiagnosticSeverity.Warning);
-```
-
-Use the predicate overload for domain-specific strictness:
-
-```csharp
-builder.ValidateOnBuild(diagnostic => diagnostic.Kind == PatternDiagnosticKind.OverlappingWildcard);
-```
-
-
-## Try method failure semantics
-
-`TryMatch` and `TryMatchDetailed` do not publish partial results. When a destination span is too small, the method returns `false`, reports zero written counts, and does not write to caller-provided destination spans. Use the allocating array APIs or span-based `MatchDetailed` when you prefer an exception on insufficient capacity.
-
-## Preview status
-
-`Pattrn`, `Pattrn.Strings`, and `Pattrn.DependencyInjection` are pre-beta packages intended for early use. `Pattrn.Routing` remains preview. Public API names may still change before beta.
+See [matching semantics](matching-semantics.md), [diagnostics](diagnostics.md),
+and [duplicate behavior](duplicate-behavior.md) for the stable contracts.

@@ -12,7 +12,7 @@ public sealed class RouteDetailedSliceTests
             .AddRoute("/files/{*path}", "handler")
             .Build();
         const string path = "/files/a/b.txt";
-        var matches = new PatternMatch<string>[index.GetRouteMatchCountUpperBound(path)];
+        var matches = new PatternMatchDetailedSlice<string>[index.GetRouteMatchCountUpperBound(path)];
         var captures = new PatternCaptureSlice<string>[index.GetRouteCaptureCountUpperBound(path)];
 
         var matchCount = index.MatchRouteDetailed(path, matches, captures, out var captureCount);

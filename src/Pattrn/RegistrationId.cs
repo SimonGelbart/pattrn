@@ -17,4 +17,8 @@ public readonly record struct RegistrationId
     public Guid Value { get; }
 
     public static RegistrationId New() => new(Guid.NewGuid());
+
+    public override string ToString() => Value.ToString();
+
+    public string ToString(string? format, IFormatProvider? formatProvider) => Value.ToString(format, formatProvider);
 }

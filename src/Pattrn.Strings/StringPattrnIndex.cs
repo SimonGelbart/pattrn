@@ -75,9 +75,9 @@ public sealed class StringPattrnIndex<TValue>
     /// <summary>
     /// Matches a normalized string path and writes matching values into the caller-provided destination span.
     /// </summary>
-    public int Match(string path, Span<TValue> destination)
+    public int MatchValues(string path, Span<TValue> destination)
     {
-        if (CoreIndex.TryMatch(Options.Split(path, nameof(path)), destination, out var written))
+        if (CoreIndex.TryMatchValues(Options.Split(path, nameof(path)), destination, out var written))
         {
             return written;
         }
@@ -88,25 +88,67 @@ public sealed class StringPattrnIndex<TValue>
     /// <summary>
     /// Attempts to match a normalized string path and write values into the caller-provided destination span.
     /// </summary>
-    public bool TryMatch(string path, Span<TValue> destination, out int written)
+    public bool TryMatchValues(string path, Span<TValue> destination, out int written)
     {
-        return CoreIndex.TryMatch(Options.Split(path, nameof(path)), destination, out written);
+        return CoreIndex.TryMatchValues(Options.Split(path, nameof(path)), destination, out written);
     }
+
+    /// <summary>Attempts to match a path and write exact result records.</summary>
+    public bool TryMatch(string path, Span<PatternMatch<TValue>> destination, out int written)
+        => CoreIndex.TryMatch(Options.Split(path, nameof(path)), destination, out written);
 
     /// <summary>
     /// Matches a normalized string path and returns matching values as a new array.
     /// </summary>
-    public TValue[] MatchToArray(string path)
+    public PatternMatch<TValue>[] MatchToArray(string path)
     {
         return CoreIndex.MatchToArray(Options.Split(path, nameof(path)));
     }
+
+    /// <summary>Matches a normalized string path and returns value-only results.</summary>
+    public TValue[] MatchValuesToArray(string path)
+    {
+        return CoreIndex.MatchValuesToArray(Options.Split(path, nameof(path)));
+    }
+
+    /// <summary>Attempts to write the deepest matching prefix result records.</summary>
+    public bool TryMatchPrefix(string path, Span<PatternMatch<TValue>> destination, out int written)
+        => CoreIndex.TryMatchPrefix(Options.Split(path, nameof(path)), destination, out written);
+
+    /// <summary>Attempts to write values from the deepest matching prefix.</summary>
+    public bool TryMatchPrefixValues(string path, Span<TValue> destination, out int written)
+        => CoreIndex.TryMatchPrefixValues(Options.Split(path, nameof(path)), destination, out written);
+
+    /// <summary>Returns result records from the deepest matching prefix.</summary>
+    public PatternMatch<TValue>[] MatchPrefixToArray(string path)
+        => CoreIndex.MatchPrefixToArray(Options.Split(path, nameof(path)));
+
+    /// <summary>Returns values from the deepest matching prefix.</summary>
+    public TValue[] MatchPrefixValuesToArray(string path)
+        => CoreIndex.MatchPrefixValuesToArray(Options.Split(path, nameof(path)));
+
+    /// <summary>Attempts to enumerate all matching prefixes from shallowest to deepest.</summary>
+    public bool TryEnumeratePrefixMatches(string path, Span<PatternMatch<TValue>> destination, out int written)
+        => CoreIndex.TryEnumeratePrefixMatches(Options.Split(path, nameof(path)), destination, out written);
+
+    /// <summary>Attempts to enumerate values from all matching prefixes.</summary>
+    public bool TryEnumeratePrefixValues(string path, Span<TValue> destination, out int written)
+        => CoreIndex.TryEnumeratePrefixValues(Options.Split(path, nameof(path)), destination, out written);
+
+    /// <summary>Returns result records from all matching prefixes.</summary>
+    public PatternMatch<TValue>[] EnumeratePrefixMatchesToArray(string path)
+        => CoreIndex.EnumeratePrefixMatchesToArray(Options.Split(path, nameof(path)));
+
+    /// <summary>Returns values from all matching prefixes.</summary>
+    public TValue[] EnumeratePrefixValuesToArray(string path)
+        => CoreIndex.EnumeratePrefixValuesToArray(Options.Split(path, nameof(path)));
 
     /// <summary>
     /// Matches a normalized string path and writes detailed matches and captures into caller-provided destination spans.
     /// </summary>
     public int MatchDetailed(
         string path,
-        Span<PatternMatch<TValue>> matches,
+        Span<PatternMatchDetailedSlice<TValue>> matches,
         Span<PatternCaptureSlice<string>> captures,
         out int capturesWritten)
     {
@@ -118,7 +160,7 @@ public sealed class StringPattrnIndex<TValue>
     /// </summary>
     public bool TryMatchDetailed(
         string path,
-        Span<PatternMatch<TValue>> matches,
+        Span<PatternMatchDetailedSlice<TValue>> matches,
         Span<PatternCaptureSlice<string>> captures,
         out int matchesWritten,
         out int capturesWritten)

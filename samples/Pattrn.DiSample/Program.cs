@@ -32,7 +32,7 @@ services
 using var provider = services.BuildServiceProvider();
 
 var defaultIndex = provider.GetRequiredService<PattrnIndex<string, string>>();
-var defaultMatches = defaultIndex.MatchToArray(["market", "NASDAQ", "MSFT"]);
+var defaultMatches = defaultIndex.MatchValuesToArray(["market", "NASDAQ", "MSFT"]);
 
 var indexProvider = provider.GetRequiredService<IPattrnProvider<string, string>>();
 var marketIndex = indexProvider.GetRequired("market-data");
@@ -40,9 +40,9 @@ var eventIndex = indexProvider.GetRequired("events");
 var adminIndex = indexProvider.GetRequired("admin");
 
 Console.WriteLine($"default: {string.Join(", ", defaultMatches)}");
-Console.WriteLine($"market-data: {string.Join(", ", marketIndex.MatchPrefixToArray(["MARKET", "NASDAQ", "MSFT"]))}");
-Console.WriteLine($"events: {string.Join(", ", eventIndex.MatchToArray(["events", "created"]))}");
-Console.WriteLine($"admin: {string.Join(", ", adminIndex.MatchToArray(["admin", "users"]))}");
+Console.WriteLine($"market-data: {string.Join(", ", marketIndex.MatchPrefixValuesToArray(["MARKET", "NASDAQ", "MSFT"]))}");
+Console.WriteLine($"events: {string.Join(", ", eventIndex.MatchValuesToArray(["events", "created"]))}");
+Console.WriteLine($"admin: {string.Join(", ", adminIndex.MatchValuesToArray(["admin", "users"]))}");
 
 internal sealed class AdminRegistrationSource : IPattrnRegistrationSource<string, string>
 {

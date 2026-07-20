@@ -17,9 +17,9 @@ public static class PattrnStringExtensions
         string pattern,
         TValue value,
         char separator = '.',
-        string? patternId = null)
+        string? name = null)
     {
-        return builder.AddSeparated(pattern, value, separator, patternId);
+        return builder.AddSeparated(pattern, value, separator, name);
     }
 
     /// <summary>
@@ -30,9 +30,9 @@ public static class PattrnStringExtensions
         string pattern,
         TValue value,
         char separator,
-        string? patternId = null)
+        string? name = null)
     {
-        return builder.AddSeparated(pattern, value, new StringNormalizationOptions(separator), patternId);
+        return builder.AddSeparated(pattern, value, new StringNormalizationOptions(separator), name);
     }
 
     /// <summary>
@@ -43,11 +43,11 @@ public static class PattrnStringExtensions
         string pattern,
         TValue value,
         StringNormalizationOptions options,
-        string? patternId = null)
+        string? name = null)
     {
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentNullException.ThrowIfNull(options);
-        return builder.Add(options.Split(pattern, nameof(pattern)), value, patternId);
+        return builder.Add(options.Split(pattern, nameof(pattern)), value, name);
     }
 
     /// <summary>
@@ -85,7 +85,12 @@ public static class PattrnStringExtensions
     {
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentNullException.ThrowIfNull(options);
-        return builder.Remove(options.Split(pattern, nameof(pattern)), value);
+        var segments = options.Split(pattern, nameof(pattern));
+        var canonical = CanonicalizeLiteralPattern(builder, segments);
+        var registration = builder.ToRegistrations().FirstOrDefault(candidate =>
+            SamePattern(candidate.Pattern, canonical, builder.SegmentComparer)
+            && builder.ValueComparer.Equals(candidate.Value, value));
+        return registration is not null && builder.Remove(registration.Id);
     }
 
     /// <summary>
@@ -133,7 +138,58 @@ public static class PattrnStringExtensions
     {
         ArgumentNullException.ThrowIfNull(builder);
         ArgumentNullException.ThrowIfNull(options);
-        return builder.RemoveAll(options.Split(pattern, nameof(pattern)));
+        var canonical = CanonicalizeLiteralPattern(builder, options.Split(pattern, nameof(pattern)));
+        var registrations = builder.ToRegistrations()
+            .Where(candidate => SamePattern(candidate.Pattern, canonical, builder.SegmentComparer))
+            .Select(candidate => candidate.Id)
+            .ToArray();
+        foreach (var id in registrations)
+        {
+            builder.Remove(id);
+        }
+
+        return registrations.Length;
+    }
+
+    private static PatternSegment<string>[] CanonicalizeLiteralPattern<TValue>(
+        PattrnIndexBuilder<string, TValue> builder,
+        ReadOnlySpan<string> segments)
+    {
+        var canonical = new PatternSegment<string>[segments.Length];
+        for (var i = 0; i < segments.Length; i++)
+        {
+            canonical[i] = builder.UsesWildcardSegmentToken
+                && builder.SegmentComparer.Equals(segments[i], builder.WildcardSegment)
+                ? PatternSegment<string>.Wildcard()
+                : PatternSegment<string>.Literal(segments[i]);
+        }
+
+        return canonical;
+    }
+
+    private static bool SamePattern(
+        IReadOnlyList<PatternSegment<string>> left,
+        IReadOnlyList<PatternSegment<string>> right,
+        IEqualityComparer<string> comparer)
+    {
+        if (left.Count != right.Count)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < left.Count; i++)
+        {
+            left[i].Deconstruct(out var leftKind, out var leftLiteral, out var leftName);
+            right[i].Deconstruct(out var rightKind, out var rightLiteral, out var rightName);
+            if (leftKind != rightKind
+                || (leftKind == PatternSegmentKind.Literal && !comparer.Equals(leftLiteral, rightLiteral))
+                || !string.Equals(leftName, rightName, StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /// <summary>
@@ -203,7 +259,7 @@ public static class PattrnStringExtensions
     {
         ArgumentNullException.ThrowIfNull(index);
         ArgumentNullException.ThrowIfNull(options);
-        return index.MatchToArray(options.Split(path, nameof(path)));
+        return index.MatchValuesToArray(options.Split(path, nameof(path)));
     }
 
     /// <summary>
@@ -241,7 +297,7 @@ public static class PattrnStringExtensions
     {
         ArgumentNullException.ThrowIfNull(index);
         ArgumentNullException.ThrowIfNull(options);
-        if (index.TryMatch(options.Split(path, nameof(path)), destination, out var written))
+        if (index.TryMatchValues(options.Split(path, nameof(path)), destination, out var written))
         {
             return written;
         }
@@ -287,6 +343,6 @@ public static class PattrnStringExtensions
     {
         ArgumentNullException.ThrowIfNull(index);
         ArgumentNullException.ThrowIfNull(options);
-        return index.TryMatch(options.Split(path, nameof(path)), destination, out written);
+        return index.TryMatchValues(options.Split(path, nameof(path)), destination, out written);
     }
 }

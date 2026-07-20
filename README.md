@@ -28,10 +28,10 @@ var index = PattrnIndex<string, string>
             PatternSegment<string>.Parameter("id")
         ],
         "order-handler",
-        patternId: "orders-by-id")
+        name: "orders-by-id")
     .Build();
 
-var matches = index.MatchToArray(["orders", "123"]);
+var matches = index.MatchValuesToArray(["orders", "123"]);
 ```
 
 ## Start with the docs hub

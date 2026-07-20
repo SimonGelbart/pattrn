@@ -3,7 +3,7 @@
 Pattrn returns matches in deterministic built-in order. Many applications can use the first match directly:
 
 ```csharp
-var first = index.MatchToArray(path).FirstOrDefault();
+var first = index.MatchValuesToArray(path).FirstOrDefault();
 ```
 
 Use detailed matches when the application needs to explain the decision, inspect captures, or apply domain metadata after the generic matcher has run.
@@ -56,7 +56,7 @@ Use this pattern for domain rules such as HTTP route precedence, authorization p
 
 ## Prefix matching
 
-Prefix matching is deterministic but traversal ordered. Prefix registrations are emitted before deeper descendant registrations:
+Best-prefix matching returns only the deepest accepted prefix. Use prefix enumeration when every accepted level is needed:
 
 ```text
 api
@@ -64,17 +64,11 @@ api/orders
 api/orders/new
 ```
 
-For prefix scenarios that need one global best-match result, choose and document the application rule. For example, store the registered pattern length in the value when the domain wants longest-prefix-first behavior:
+For best-prefix scenarios, use the dedicated API directly:
 
 ```csharp
-public sealed record HandlerRegistration(
-    string Name,
-    int PatternLength,
-    int DomainPriority);
-
-var longestPrefixThenSpecificity = index.MatchDetailedToArray(path)
-    .OrderByDescending(match => match.Value.PatternLength)
-    .FirstOrDefault();
+var longestPrefix = index.MatchPrefixToArray(path).FirstOrDefault();
+var everyPrefix = index.EnumeratePrefixMatchesToArray(path);
 ```
 
 If the public API does not expose exactly the metadata your domain needs, store it in the value registered with the pattern.

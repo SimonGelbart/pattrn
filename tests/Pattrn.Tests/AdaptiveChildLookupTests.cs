@@ -16,9 +16,9 @@ public sealed class AdaptiveChildLookupTests
 
         var index = builder.Build();
 
-        ShouldSequenceEqual(index.MatchToArray(["root", "segment-73"]), [73]);
+        ShouldSequenceEqual(index.MatchValuesToArray(["root", "segment-73"]), [73]);
         ShouldEqual(index.GetMatchCountUpperBound(["root", "segment-73"]), 1);
-        ShouldEqual(index.MatchToArray(["root", "missing"]).Length, 0);
+        ShouldEqual(index.MatchValuesToArray(["root", "missing"]).Length, 0);
     }
 
     [Test]
@@ -33,8 +33,8 @@ public sealed class AdaptiveChildLookupTests
 
         var index = builder.Build();
 
-        ShouldSequenceEqual(index.MatchToArray(["root", "segment-73"]), [73]);
-        ShouldEqual(index.MatchToArray(["root", "missing"]).Length, 0);
+        ShouldSequenceEqual(index.MatchValuesToArray(["root", "segment-73"]), [73]);
+        ShouldEqual(index.MatchValuesToArray(["root", "missing"]).Length, 0);
     }
 
     [Test]
@@ -49,8 +49,8 @@ public sealed class AdaptiveChildLookupTests
 
         var index = builder.Build();
 
-        ShouldSequenceEqual(index.MatchToArray(["root", "segment-73"]), [73]);
-        ShouldEqual(index.MatchToArray(["root", "missing"]).Length, 0);
+        ShouldSequenceEqual(index.MatchValuesToArray(["root", "segment-73"]), [73]);
+        ShouldEqual(index.MatchValuesToArray(["root", "missing"]).Length, 0);
     }
 
     [Test]
@@ -67,8 +67,8 @@ public sealed class AdaptiveChildLookupTests
 
         var index = builder.Build();
 
-        ShouldSetEqual(index.MatchToArray(["root", "segment-73"]), ["exact-73", "wildcard"]);
-        ShouldSequenceEqual(index.MatchToArray(["root", "other"]), ["wildcard"]);
+        ShouldSetEqual(index.MatchValuesToArray(["root", "segment-73"]), ["exact-73", "wildcard"]);
+        ShouldSequenceEqual(index.MatchValuesToArray(["root", "other"]), ["wildcard"]);
     }
 
     private sealed class ConstantHashStringComparer : IEqualityComparer<string>
@@ -78,3 +78,4 @@ public sealed class AdaptiveChildLookupTests
         public int GetHashCode(string obj) => 42;
     }
 }
+
