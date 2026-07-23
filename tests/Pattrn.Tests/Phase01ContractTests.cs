@@ -101,6 +101,49 @@ public sealed class Phase01ContractTests
     }
 
     [Test]
+    public async Task DeduplicatedValueBufferCapacityIsMeasuredAfterDeduplication()
+    {
+        var index = PattrnIndex<string, string>.Compile([
+            PattrnRegistration<string, string>.Create([PatternSegment<string>.Literal("orders")], "handler"),
+            PattrnRegistration<string, string>.Create([PatternSegment<string>.Wildcard()], "handler")
+        ]);
+        var destination = new[] { "sentinel" };
+
+        await Assert.That(index.TryMatchValues(["orders"], destination, out var written)).IsTrue().Because("The duplicate value should fit after deduplication.");
+        await Assert.That(written).IsEqualTo(1);
+        await Assert.That(destination[0]).IsEqualTo("handler");
+    }
+
+    [Test]
+    public async Task ZeroLengthCatchAllDoesNotOutrankAnExactRegistration()
+    {
+        var index = PattrnIndex<string, string>.Compile([
+            PattrnRegistration<string, string>.Create(
+                [PatternSegment<string>.Literal("files"), PatternSegment<string>.CatchAll("path")], "catch-all"),
+            PattrnRegistration<string, string>.Create([PatternSegment<string>.Literal("files")], "exact")
+        ]);
+
+        var exactValues = index.MatchToArray(["files"]).Select(match => match.Value).ToArray();
+        var valueOnlyValues = index.MatchValuesToArray(["files"]);
+        var detailedValues = index.MatchDetailedToArray(["files"]).Select(match => match.Value).ToArray();
+        var bestPrefixValues = index.MatchPrefixToArray(["files"]).Select(match => match.Value).ToArray();
+        var enumeratedPrefixValues = index.EnumeratePrefixMatchesToArray(["files"]).Select(match => match.Value).ToArray();
+
+        await Assert.That(exactValues).IsEquivalentTo(["exact", "catch-all"], CollectionOrdering.Matching);
+        await Assert.That(valueOnlyValues).IsEquivalentTo(exactValues, CollectionOrdering.Matching);
+        await Assert.That(detailedValues).IsEquivalentTo(exactValues, CollectionOrdering.Matching);
+        await Assert.That(bestPrefixValues).IsEquivalentTo(exactValues, CollectionOrdering.Matching);
+        await Assert.That(enumeratedPrefixValues).IsEquivalentTo(exactValues, CollectionOrdering.Matching);
+
+        var rootIndex = PattrnIndex<string, string>.Compile([
+            PattrnRegistration<string, string>.Create([PatternSegment<string>.CatchAll("path")], "root-catch-all"),
+            PattrnRegistration<string, string>.Create([], "root-exact")
+        ]);
+
+        await Assert.That(rootIndex.MatchValuesToArray([])).IsEquivalentTo(["root-exact", "root-catch-all"], CollectionOrdering.Matching);
+    }
+
+    [Test]
     public async Task DetailedResultsOwnNamedCaptures()
     {
         var index = PattrnIndex<string, string>.Compile([
@@ -134,5 +177,71 @@ public sealed class Phase01ContractTests
         await Assert.That(index.TryMatch(["a"], results, out var resultsWritten)).IsFalse().Because("Expected an insufficient result buffer.");
         await Assert.That(resultsWritten).IsEqualTo(0);
         await Assert.That(results[0]).IsEqualTo(default(PatternMatch<string>));
+    }
+
+    [Test]
+    public async Task WarmedCallerBufferAndUpperBoundPathsDoNotAllocate()
+    {
+        var index = PattrnIndex<string, string>.Compile([
+            PattrnRegistration<string, string>.Create([PatternSegment<string>.Literal("api")], "api"),
+            PattrnRegistration<string, string>.Create([PatternSegment<string>.Literal("api"), PatternSegment<string>.Literal("orders")], "orders"),
+            PattrnRegistration<string, string>.Create([PatternSegment<string>.Literal("api"), PatternSegment<string>.Parameter("id")], "parameter"),
+            PattrnRegistration<string, string>.Create([PatternSegment<string>.Literal("api"), PatternSegment<string>.CatchAll("rest")], "catch-all")
+        ]);
+        var path = new[] { "api", "orders" };
+        var matches = new PatternMatch<string>[index.GetMatchCountUpperBound(path)];
+        var prefixMatches = new PatternMatch<string>[index.GetPrefixMatchCountUpperBound(path)];
+        var enumeratedMatches = new PatternMatch<string>[index.GetEnumeratePrefixMatchCountUpperBound(path)];
+        var values = new string[index.GetMatchCountUpperBound(path)];
+        var prefixValues = new string[index.GetPrefixMatchCountUpperBound(path)];
+        var enumeratedValues = new string[index.GetEnumeratePrefixMatchCountUpperBound(path)];
+        var detailedMatches = new PatternMatchDetailedSlice<string>[index.GetMatchCountUpperBound(path)];
+        var detailedCaptures = new PatternCaptureSlice<string>[index.GetCaptureCountUpperBound(path)];
+        var prefixDetailedMatches = new PatternMatchDetailedSlice<string>[index.GetPrefixMatchCountUpperBound(path)];
+        var prefixDetailedCaptures = new PatternCaptureSlice<string>[index.GetPrefixCaptureCountUpperBound(path)];
+        var enumeratedDetailedMatches = new PatternMatchDetailedSlice<string>[index.GetEnumeratePrefixMatchCountUpperBound(path)];
+        var enumeratedDetailedCaptures = new PatternCaptureSlice<string>[index.GetEnumeratePrefixCaptureCountUpperBound(path)];
+
+        _ = index.TryMatch(path, matches, out _);
+        _ = index.TryMatchValues(path, values, out _);
+        _ = index.TryMatchPrefix(path, prefixMatches, out _);
+        _ = index.TryMatchPrefixValues(path, prefixValues, out _);
+        _ = index.TryEnumeratePrefixMatches(path, enumeratedMatches, out _);
+        _ = index.TryEnumeratePrefixValues(path, enumeratedValues, out _);
+        _ = index.TryMatchDetailed(path, detailedMatches, detailedCaptures, out _, out _);
+        _ = index.TryMatchPrefixDetailed(path, prefixDetailedMatches, prefixDetailedCaptures, out _, out _);
+        _ = index.TryEnumeratePrefixDetailed(path, enumeratedDetailedMatches, enumeratedDetailedCaptures, out _, out _);
+        _ = index.GetMatchCountUpperBound(path);
+        _ = index.GetPrefixMatchCountUpperBound(path);
+        _ = index.GetEnumeratePrefixMatchCountUpperBound(path);
+        _ = index.GetCaptureCountUpperBound(path);
+        _ = index.GetPrefixCaptureCountUpperBound(path);
+        _ = index.GetEnumeratePrefixCaptureCountUpperBound(path);
+
+        await Assert.That(AllocatedBytes(() => _ = index.TryMatch(path, matches, out _))).IsEqualTo(0);
+        await Assert.That(AllocatedBytes(() => _ = index.TryMatchValues(path, values, out _))).IsEqualTo(0);
+        await Assert.That(AllocatedBytes(() => _ = index.TryMatchPrefix(path, prefixMatches, out _))).IsEqualTo(0);
+        await Assert.That(AllocatedBytes(() => _ = index.TryMatchPrefixValues(path, prefixValues, out _))).IsEqualTo(0);
+        await Assert.That(AllocatedBytes(() => _ = index.TryEnumeratePrefixMatches(path, enumeratedMatches, out _))).IsEqualTo(0);
+        await Assert.That(AllocatedBytes(() => _ = index.TryEnumeratePrefixValues(path, enumeratedValues, out _))).IsEqualTo(0);
+        await Assert.That(AllocatedBytes(() => _ = index.TryMatchDetailed(path, detailedMatches, detailedCaptures, out _, out _))).IsEqualTo(0);
+        await Assert.That(AllocatedBytes(() => _ = index.TryMatchPrefixDetailed(path, prefixDetailedMatches, prefixDetailedCaptures, out _, out _))).IsEqualTo(0);
+        await Assert.That(AllocatedBytes(() => _ = index.TryEnumeratePrefixDetailed(path, enumeratedDetailedMatches, enumeratedDetailedCaptures, out _, out _))).IsEqualTo(0);
+        await Assert.That(AllocatedBytes(() => _ = index.GetMatchCountUpperBound(path))).IsEqualTo(0);
+        await Assert.That(AllocatedBytes(() => _ = index.GetPrefixMatchCountUpperBound(path))).IsEqualTo(0);
+        await Assert.That(AllocatedBytes(() => _ = index.GetEnumeratePrefixMatchCountUpperBound(path))).IsEqualTo(0);
+        await Assert.That(AllocatedBytes(() => _ = index.GetCaptureCountUpperBound(path))).IsEqualTo(0);
+        await Assert.That(AllocatedBytes(() => _ = index.GetPrefixCaptureCountUpperBound(path))).IsEqualTo(0);
+        await Assert.That(AllocatedBytes(() => _ = index.GetEnumeratePrefixCaptureCountUpperBound(path))).IsEqualTo(0);
+    }
+
+    private static long AllocatedBytes(Action operation)
+    {
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        operation();
+        return GC.GetAllocatedBytesForCurrentThread() - before;
     }
 }

@@ -75,6 +75,7 @@ internal sealed class CompiledIndex<TSegment, TValue>
         var node = root;
         var captures = new List<CaptureDescriptor>();
         var score = 0;
+        var terminalCatchAllSegmentIndex = -1;
 
         for (var i = 0; i < registration.Pattern.Length; i++)
         {
@@ -99,6 +100,11 @@ internal sealed class CompiledIndex<TSegment, TValue>
                 case PatternSegmentKind.CatchAll:
                     node.CatchAllChild ??= new BuilderNode<TSegment, TValue>(segmentComparer);
                     node = node.CatchAllChild;
+                    if (i == registration.Pattern.Length - 1)
+                    {
+                        terminalCatchAllSegmentIndex = i;
+                    }
+
                     if (segment.ParameterName is not null)
                     {
                         captures.Add(new CaptureDescriptor(segment.ParameterName, i, isCatchAll: true));
@@ -116,7 +122,8 @@ internal sealed class CompiledIndex<TSegment, TValue>
             score,
             registrationOrder,
             registration.Id,
-            registration.Name);
+            registration.Name,
+            terminalCatchAllSegmentIndex);
         node.Values ??= [];
         node.Metadata ??= [];
         node.Values.Add(registration.Value);
@@ -372,7 +379,8 @@ internal sealed class CompiledIndex<TSegment, TValue>
                 metadata.Score,
                 metadata.RegistrationOrder,
                 metadata.RegistrationId,
-                metadata.Name));
+                metadata.Name,
+                metadata.TerminalCatchAllSegmentIndex));
         }
 
         private static BuilderRegistrationMetadata GetMetadata(List<BuilderRegistrationMetadata>? metadata, int index)

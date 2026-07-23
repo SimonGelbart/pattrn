@@ -8,7 +8,8 @@ internal readonly struct CompiledValueDetail
         int score,
         int registrationOrder,
         RegistrationId registrationId,
-        string? name)
+        string? name,
+        int terminalCatchAllSegmentIndex)
     {
         FirstCapture = firstCapture;
         CaptureCount = captureCount;
@@ -16,6 +17,7 @@ internal readonly struct CompiledValueDetail
         RegistrationOrder = registrationOrder;
         RegistrationId = registrationId;
         Name = name;
+        TerminalCatchAllSegmentIndex = terminalCatchAllSegmentIndex;
     }
 
     internal int FirstCapture { get; }
@@ -24,4 +26,5 @@ internal readonly struct CompiledValueDetail
     internal int RegistrationOrder { get; }
     internal RegistrationId RegistrationId { get; }
     internal string? Name { get; }
+    internal int TerminalCatchAllSegmentIndex { get; }
 }
