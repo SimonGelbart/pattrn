@@ -16,6 +16,7 @@ ADRs record decisions that constrain the architecture or public contracts. Curre
 | [0008](0008-builders-single-writer-compiled-indexes-concurrent-reader-safe.md) | Keep builders single-writer and compiled indexes safe for concurrent readers. |
 | [0009](0009-use-concrete-compiled-index-contract.md) | Use the concrete compiled-index contract. |
 | [0010](0010-canonical-registrations-and-explicit-match-families.md) | Make canonical registrations authoritative and separate exact, prefix, enumeration, and detailed result families. |
+| [0013](0013-deterministic-match-ordering.md) | Define deterministic ordering across exact, best-prefix, enumeration, and result projections. |
 
 ## Writing a new ADR
 
@@ -27,4 +28,4 @@ This cleanup is the final normalization of the project's previously murky ADR hi
 
 After this baseline is accepted, ADR numbers, filenames, titles, context, decisions, consequences, and alternatives are immutable. If a decision changes, create a new ADR that links to the old one and change the old record only through a validated status transition such as `Superseded` or `Deprecated`.
 
-The accepted baseline uses 0001–0009. The 0000 file is the template; 0010 is the next available ADR number.
+The accepted baseline uses 0001–0009. The 0000 file is the template; 0010 and later ADR numbers are assigned to decisions added after the baseline.

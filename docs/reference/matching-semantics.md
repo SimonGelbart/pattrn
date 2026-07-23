@@ -8,10 +8,12 @@ or more remaining segments.
 ## Registration and ordering
 
 Registration order is deterministic and is preserved by the builder, compiler,
-and result APIs. Results are ordered by specificity descending, then registration
-order ascending. Specificity is fixed internal behavior: literals outrank
-parameters, parameters outrank wildcards, and wildcards outrank catch-alls.
-The public result records do not expose ranking metadata.
+and result APIs. Exact and best-prefix results are ordered by specificity
+descending, then registration order ascending for true ties. Specificity is
+fixed internal behavior: literals outrank parameters, parameters outrank
+wildcards, and wildcards outrank catch-alls. A zero-length terminal catch-all is
+lower-ranked than a non-catch-all registration at the same consumed depth. The
+public result records do not expose ranking metadata.
 
 ```csharp
 var id = builder.AddPattern(
@@ -36,8 +38,10 @@ index.TryMatchValues(path, valueDestination, out var valueCount);
 
 `PatternMatch<TValue>` contains `Value`, `RegistrationId`, and
 `ConsumedSegmentCount`. Value-only methods are explicit `...Values` methods.
-Duplicate values are deduplicated by default or retained when the index was
-compiled with `MatchOptions.PreserveDuplicates`.
+Duplicate values are deduplicated by default, retaining the first value accepted
+by the deterministic order, or retained when the index was compiled with
+`MatchOptions.PreserveDuplicates`. Normal, value-only, owning detailed, and
+caller-buffer detailed projections preserve the same relative ordering.
 
 ## Best-prefix matching
 
@@ -55,7 +59,9 @@ var bestValues = index.MatchPrefixValuesToArray(path);
 ## Prefix enumeration
 
 Enumeration returns registrations from shallowest matching prefix depth to
-deepest. Within each depth, specificity and registration order apply:
+deepest. Within each depth, specificity and registration order apply. Depth is
+resolved before specificity, so deeper accepted prefixes are selected only by
+best-prefix matching, not moved ahead of ancestors during enumeration:
 
 ```csharp
 var all = index.EnumeratePrefixMatchesToArray(path);
