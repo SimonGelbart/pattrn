@@ -318,13 +318,13 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// </remarks>
     public int GetPrefixMatchCountUpperBound(ReadOnlySpan<TSegment> path)
     {
-        return SelectBestPrefixCandidates(path).Count;
+        return CountBestPrefixCandidates(path);
     }
 
     /// <summary>Attempts exact matching into a caller-provided result span.</summary>
     public bool TryMatch(ReadOnlySpan<TSegment> path, Span<PatternMatch<TValue>> destination, out int written)
     {
-        return TryWriteCandidates(CollectCandidates(path, prefix: false), destination, out written);
+        return TryWritePathCandidates(path, prefix: false, bestPrefix: false, destination, out written);
     }
 
     /// <summary>Returns all exact matches as owning result values.</summary>
@@ -357,7 +357,7 @@ public sealed class PattrnIndex<TSegment, TValue>
 
     /// <summary>Attempts best-prefix value-only matching.</summary>
     public bool TryMatchPrefixValues(ReadOnlySpan<TSegment> path, Span<TValue> destination, out int written)
-        => TryWriteValueCandidates(SelectBestPrefixCandidates(path), destination, out written);
+        => TryWritePathValues(path, prefix: true, bestPrefix: true, destination, out written);
 
     /// <summary>Returns values from the deepest accepted prefix level.</summary>
     public TValue[] MatchPrefixValuesToArray(ReadOnlySpan<TSegment> path)
@@ -375,7 +375,7 @@ public sealed class PattrnIndex<TSegment, TValue>
 
     /// <summary>Attempts all-prefix value-only enumeration.</summary>
     public bool TryEnumeratePrefixValues(ReadOnlySpan<TSegment> path, Span<TValue> destination, out int written)
-        => TryWriteValueCandidates(CollectCandidates(path, prefix: true), destination, out written);
+        => TryWritePathValues(path, prefix: true, bestPrefix: false, destination, out written);
 
     /// <summary>Returns values from every accepted prefix level.</summary>
     public TValue[] EnumeratePrefixValuesToArray(ReadOnlySpan<TSegment> path)
@@ -394,8 +394,7 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// <summary>Attempts best-prefix matching into a caller-provided result span.</summary>
     public bool TryMatchPrefix(ReadOnlySpan<TSegment> path, Span<PatternMatch<TValue>> destination, out int written)
     {
-        var candidates = SelectBestPrefixCandidates(path);
-        return TryWriteCandidates(candidates, destination, out written);
+        return TryWritePathCandidates(path, prefix: true, bestPrefix: true, destination, out written);
     }
 
     /// <summary>Returns only the deepest accepted prefix matches.</summary>
@@ -411,13 +410,13 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// <summary>Gets an upper bound for all-prefix enumeration result matches.</summary>
     public int GetEnumeratePrefixMatchCountUpperBound(ReadOnlySpan<TSegment> path)
     {
-        return CollectCandidates(path, prefix: true).Count;
+        return CountPrefix(path);
     }
 
     /// <summary>Attempts all-prefix enumeration into a caller-provided result span.</summary>
     public bool TryEnumeratePrefixMatches(ReadOnlySpan<TSegment> path, Span<PatternMatch<TValue>> destination, out int written)
     {
-        return TryWriteCandidates(CollectCandidates(path, prefix: true), destination, out written);
+        return TryWritePathCandidates(path, prefix: true, bestPrefix: false, destination, out written);
     }
 
     /// <summary>Returns every accepted prefix match, from the root outward.</summary>
@@ -494,7 +493,7 @@ public sealed class PattrnIndex<TSegment, TValue>
 
     private int GetDetailedMatchCountUpperBound(ReadOnlySpan<TSegment> path)
     {
-        return CollectCandidates(path, prefix: false).Count;
+        return CountExact(path);
     }
 
     /// <summary>
@@ -504,7 +503,7 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// <returns>A safe upper bound for a capture destination span used with <see cref="MatchDetailed(ReadOnlySpan{TSegment}, Span{PatternMatchDetailedSlice{TValue}}, Span{PatternCaptureSlice{TSegment}}, out int)"/>.</returns>
     public int GetCaptureCountUpperBound(ReadOnlySpan<TSegment> path)
     {
-        return CollectCandidates(path, prefix: false).Sum(candidate => candidate.Detail.CaptureCount);
+        return CountExactCaptures(path);
     }
 
     /// <summary>
@@ -514,7 +513,7 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// <returns>A safe upper bound for a capture destination span used with <see cref="MatchPrefixDetailed(ReadOnlySpan{TSegment}, Span{PatternMatchDetailedSlice{TValue}}, Span{PatternCaptureSlice{TSegment}}, out int)"/>.</returns>
     public int GetPrefixCaptureCountUpperBound(ReadOnlySpan<TSegment> path)
     {
-        return SelectBestPrefixCandidates(path).Sum(candidate => candidate.Detail.CaptureCount);
+        return CountBestPrefixCaptures(path);
     }
 
     /// <summary>
@@ -524,7 +523,7 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// <returns>A safe upper bound for a capture destination span used with <see cref="EnumeratePrefixDetailed(ReadOnlySpan{TSegment}, Span{PatternMatchDetailedSlice{TValue}}, Span{PatternCaptureSlice{TSegment}}, out int)"/>.</returns>
     public int GetEnumeratePrefixCaptureCountUpperBound(ReadOnlySpan<TSegment> path)
     {
-        return CollectCandidates(path, prefix: true).Sum(candidate => candidate.Detail.CaptureCount);
+        return CountPrefixCaptures(path);
     }
 
     /// <summary>
@@ -566,7 +565,7 @@ public sealed class PattrnIndex<TSegment, TValue>
         out int matchesWritten,
         out int capturesWritten)
     {
-        return TryWriteDetailedCandidates(CollectCandidates(path, prefix: false), path, matches, captures, out matchesWritten, out capturesWritten);
+        return TryWritePathDetailedCandidates(path, prefix: false, bestPrefix: false, matches, captures, out matchesWritten, out capturesWritten);
     }
 
     /// <summary>
@@ -586,7 +585,7 @@ public sealed class PattrnIndex<TSegment, TValue>
         Span<PatternCaptureSlice<TSegment>> captures,
         out int matchesWritten,
         out int capturesWritten)
-        => TryWriteDetailedCandidates(SelectBestPrefixCandidates(path), path, matches, captures, out matchesWritten, out capturesWritten);
+        => TryWritePathDetailedCandidates(path, prefix: true, bestPrefix: true, matches, captures, out matchesWritten, out capturesWritten);
 
     /// <summary>Writes best-prefix detailed matches into caller-provided buffers.</summary>
     public int MatchPrefixDetailed(
@@ -614,7 +613,7 @@ public sealed class PattrnIndex<TSegment, TValue>
         Span<PatternCaptureSlice<TSegment>> captures,
         out int matchesWritten,
         out int capturesWritten)
-        => TryWriteDetailedCandidates(CollectCandidates(path, prefix: true), path, matches, captures, out matchesWritten, out capturesWritten);
+        => TryWritePathDetailedCandidates(path, prefix: true, bestPrefix: false, matches, captures, out matchesWritten, out capturesWritten);
 
     /// <summary>Writes all-prefix detailed matches into caller-provided buffers.</summary>
     public int EnumeratePrefixDetailed(
@@ -1337,6 +1336,75 @@ public sealed class PattrnIndex<TSegment, TValue>
         return count;
     }
 
+    private int CountBestPrefixCandidates(ReadOnlySpan<TSegment> path)
+    {
+        var capacity = CountPrefix(path);
+        if (capacity == 0)
+        {
+            return 0;
+        }
+
+        var rented = ArrayPool<MatchCandidate<TValue>>.Shared.Rent(capacity);
+        try
+        {
+            var candidates = rented.AsSpan(0, capacity);
+            var count = CollectCandidatesInto(path, prefix: true, candidates);
+            SortCandidates(candidates[..count], prefix: true);
+            return SelectDeepestPrefixCandidates(candidates[..count]).Length;
+        }
+        finally
+        {
+            ArrayPool<MatchCandidate<TValue>>.Shared.Return(rented, clearArray: true);
+        }
+    }
+
+    private int CountBestPrefixCaptures(ReadOnlySpan<TSegment> path)
+    {
+        var capacity = CountPrefix(path);
+        if (capacity == 0)
+        {
+            return 0;
+        }
+
+        var rented = ArrayPool<MatchCandidate<TValue>>.Shared.Rent(capacity);
+        try
+        {
+            var candidates = rented.AsSpan(0, capacity);
+            var count = CollectCandidatesInto(path, prefix: true, candidates);
+            SortCandidates(candidates[..count], prefix: true);
+            var selected = SelectDeepestPrefixCandidates(candidates[..count]);
+            var captureCount = 0;
+            for (var i = 0; i < selected.Length; i++)
+            {
+                captureCount += selected[i].Detail.CaptureCount;
+            }
+
+            return captureCount;
+        }
+        finally
+        {
+            ArrayPool<MatchCandidate<TValue>>.Shared.Return(rented, clearArray: true);
+        }
+    }
+
+    private static ReadOnlySpan<MatchCandidate<TValue>> SelectDeepestPrefixCandidates(
+        Span<MatchCandidate<TValue>> candidates)
+    {
+        if (candidates.IsEmpty)
+        {
+            return ReadOnlySpan<MatchCandidate<TValue>>.Empty;
+        }
+
+        var deepestDepth = candidates[^1].ConsumedSegmentCount;
+        var first = candidates.Length - 1;
+        while (first > 0 && candidates[first - 1].ConsumedSegmentCount == deepestDepth)
+        {
+            first--;
+        }
+
+        return candidates[first..];
+    }
+
     private void CollectExact(ReadOnlySpan<TSegment> path, MatchAccumulator<TValue> accumulator)
     {
         Span<TraversalFrame> initialFrames = stackalloc TraversalFrame[64];
@@ -1508,11 +1576,11 @@ public sealed class PattrnIndex<TSegment, TValue>
                 var frame = stack.Pop();
                 if (frame.Depth == path.Length)
                 {
-                    AddCandidates(frame.NodeIndex, frame.Depth, candidates);
+                    AddCandidates(frame.NodeIndex, frame.Depth, path.Length, candidates);
                     ref readonly var node = ref _nodes[frame.NodeIndex];
                     if (node.CatchAllChild != CompiledNode.NoNode)
                     {
-                        AddCandidates(node.CatchAllChild, frame.Depth, candidates);
+                        AddCandidates(node.CatchAllChild, frame.Depth, path.Length, candidates);
                     }
 
                     continue;
@@ -1520,7 +1588,7 @@ public sealed class PattrnIndex<TSegment, TValue>
 
                 if (prefix)
                 {
-                    AddCandidates(frame.NodeIndex, frame.Depth, candidates);
+                    AddCandidates(frame.NodeIndex, frame.Depth, path.Length, candidates);
                 }
 
                 PushMatchingChildren(ref stack, frame.NodeIndex, path[frame.Depth], frame.Depth + 1, path.Length);
@@ -1531,28 +1599,22 @@ public sealed class PattrnIndex<TSegment, TValue>
             stack.Dispose();
         }
 
-        candidates.Sort((left, right) =>
-        {
-            var depth = left.ConsumedSegmentCount.CompareTo(right.ConsumedSegmentCount);
-            if (prefix && depth != 0)
-            {
-                return depth;
-            }
-
-            var score = right.Detail.Score.CompareTo(left.Detail.Score);
-            return score != 0 ? score : left.Detail.RegistrationOrder.CompareTo(right.Detail.RegistrationOrder);
-        });
+        candidates.Sort((left, right) => CompareCandidates(left, right, prefix));
 
         return candidates;
     }
 
-    private void AddCandidates(int nodeIndex, int depth, List<MatchCandidate<TValue>> candidates)
+    private void AddCandidates(int nodeIndex, int depth, int pathLength, List<MatchCandidate<TValue>> candidates)
     {
         var values = GetValues(nodeIndex);
         var details = GetValueDetails(nodeIndex);
         for (var i = 0; i < values.Length; i++)
         {
-            candidates.Add(new MatchCandidate<TValue>(values[i], details[i], depth));
+            candidates.Add(new MatchCandidate<TValue>(
+                values[i],
+                details[i],
+                depth,
+                details[i].TerminalCatchAllSegmentIndex == pathLength));
         }
     }
 
@@ -1571,6 +1633,39 @@ public sealed class PattrnIndex<TSegment, TValue>
         try
         {
             var temporary = rented.AsSpan(0, candidates.Count);
+            var writer = new ResultMatchWriter<TValue>(temporary, _deduplicateValues, _valueComparer, throwOnInsufficientCapacity: false);
+            WriteCandidates(candidates, ref writer);
+            if (!writer.Succeeded || writer.Count > destination.Length)
+            {
+                written = 0;
+                return false;
+            }
+
+            temporary[..writer.Count].CopyTo(destination);
+            written = writer.Count;
+            return true;
+        }
+        finally
+        {
+            ArrayPool<PatternMatch<TValue>>.Shared.Return(rented, clearArray: true);
+        }
+    }
+
+    private bool TryWriteCandidates(
+        ReadOnlySpan<MatchCandidate<TValue>> candidates,
+        Span<PatternMatch<TValue>> destination,
+        out int written)
+    {
+        if (candidates.IsEmpty)
+        {
+            written = 0;
+            return true;
+        }
+
+        var rented = ArrayPool<PatternMatch<TValue>>.Shared.Rent(candidates.Length);
+        try
+        {
+            var temporary = rented.AsSpan(0, candidates.Length);
             var writer = new ResultMatchWriter<TValue>(temporary, _deduplicateValues, _valueComparer, throwOnInsufficientCapacity: false);
             WriteCandidates(candidates, ref writer);
             if (!writer.Succeeded || writer.Count > destination.Length)
@@ -1631,6 +1726,106 @@ public sealed class PattrnIndex<TSegment, TValue>
         }
     }
 
+    private bool TryWriteValueCandidates(
+        ReadOnlySpan<MatchCandidate<TValue>> candidates,
+        Span<TValue> destination,
+        out int written)
+    {
+        if (candidates.IsEmpty)
+        {
+            written = 0;
+            return true;
+        }
+
+        var rented = ArrayPool<TValue>.Shared.Rent(candidates.Length);
+        try
+        {
+            var temporary = rented.AsSpan(0, candidates.Length);
+            var writer = new SpanMatchWriter<TValue>(temporary, _deduplicateValues, _valueComparer, throwOnInsufficientCapacity: false);
+            for (var i = 0; i < candidates.Length; i++)
+            {
+                writer.AddValue(candidates[i].Value);
+                if (!writer.Succeeded)
+                {
+                    written = 0;
+                    return false;
+                }
+            }
+
+            if (writer.Count > destination.Length)
+            {
+                written = 0;
+                return false;
+            }
+
+            temporary[..writer.Count].CopyTo(destination);
+            written = writer.Count;
+            return true;
+        }
+        finally
+        {
+            ArrayPool<TValue>.Shared.Return(rented, clearArray: true);
+        }
+    }
+
+    private bool TryWritePathCandidates(
+        ReadOnlySpan<TSegment> path,
+        bool prefix,
+        bool bestPrefix,
+        Span<PatternMatch<TValue>> destination,
+        out int written)
+    {
+        var capacity = prefix ? CountPrefix(path) : CountExact(path);
+        if (capacity == 0)
+        {
+            written = 0;
+            return true;
+        }
+
+        var rented = ArrayPool<MatchCandidate<TValue>>.Shared.Rent(capacity);
+        try
+        {
+            var candidates = rented.AsSpan(0, capacity);
+            var count = CollectCandidatesInto(path, prefix, candidates);
+            SortCandidates(candidates[..count], prefix);
+            var selected = bestPrefix ? SelectDeepestPrefixCandidates(candidates[..count]) : candidates[..count];
+            return TryWriteCandidates(selected, destination, out written);
+        }
+        finally
+        {
+            ArrayPool<MatchCandidate<TValue>>.Shared.Return(rented, clearArray: true);
+        }
+    }
+
+    private bool TryWritePathValues(
+        ReadOnlySpan<TSegment> path,
+        bool prefix,
+        bool bestPrefix,
+        Span<TValue> destination,
+        out int written)
+    {
+        var capacity = prefix ? CountPrefix(path) : CountExact(path);
+        if (capacity == 0)
+        {
+            written = 0;
+            return true;
+        }
+
+        var rented = ArrayPool<MatchCandidate<TValue>>.Shared.Rent(capacity);
+        try
+        {
+            var candidates = rented.AsSpan(0, capacity);
+            var count = CollectCandidatesInto(path, prefix, candidates);
+            SortCandidates(candidates[..count], prefix);
+            var selected = bestPrefix ? SelectDeepestPrefixCandidates(candidates[..count]) : candidates[..count];
+            return TryWriteValueCandidates(selected, destination, out written);
+        }
+        finally
+        {
+            ArrayPool<MatchCandidate<TValue>>.Shared.Return(rented, clearArray: true);
+        }
+    }
+
     private bool TryWriteExactValueCandidates(
         ReadOnlySpan<TSegment> path,
         Span<TValue> destination,
@@ -1643,26 +1838,13 @@ public sealed class PattrnIndex<TSegment, TValue>
             return true;
         }
 
-        if (destination.Length < capacity)
-        {
-            written = 0;
-            return false;
-        }
-
         var rented = ArrayPool<MatchCandidate<TValue>>.Shared.Rent(capacity);
         try
         {
             var candidates = rented.AsSpan(0, capacity);
             var count = CollectCandidatesInto(path, prefix: false, candidates);
             SortCandidates(candidates[..count], prefix: false);
-            var writer = new SpanMatchWriter<TValue>(destination, _deduplicateValues, _valueComparer, throwOnInsufficientCapacity: false);
-            for (var i = 0; i < count; i++)
-            {
-                writer.AddValue(candidates[i].Value);
-            }
-
-            written = writer.Count;
-            return writer.Succeeded;
+            return TryWriteValueCandidates(candidates[..count], destination, out written);
         }
         finally
         {
@@ -1676,6 +1858,21 @@ public sealed class PattrnIndex<TSegment, TValue>
     {
         foreach (var candidate in candidates)
         {
+            writer.Add(candidate.Value, candidate.Detail, candidate.ConsumedSegmentCount);
+            if (!writer.Succeeded)
+            {
+                return;
+            }
+        }
+    }
+
+    private static void WriteCandidates(
+        ReadOnlySpan<MatchCandidate<TValue>> candidates,
+        ref ResultMatchWriter<TValue> writer)
+    {
+        for (var i = 0; i < candidates.Length; i++)
+        {
+            var candidate = candidates[i];
             writer.Add(candidate.Value, candidate.Detail, candidate.ConsumedSegmentCount);
             if (!writer.Succeeded)
             {
@@ -1701,11 +1898,11 @@ public sealed class PattrnIndex<TSegment, TValue>
                 var frame = stack.Pop();
                 if (frame.Depth == path.Length)
                 {
-                    count = AddCandidates(frame.NodeIndex, frame.Depth, destination, count);
+                    count = AddCandidates(frame.NodeIndex, frame.Depth, path.Length, destination, count);
                     ref readonly var node = ref _nodes[frame.NodeIndex];
                     if (node.CatchAllChild != CompiledNode.NoNode)
                     {
-                        count = AddCandidates(node.CatchAllChild, frame.Depth, destination, count);
+                        count = AddCandidates(node.CatchAllChild, frame.Depth, path.Length, destination, count);
                     }
 
                     continue;
@@ -1713,7 +1910,7 @@ public sealed class PattrnIndex<TSegment, TValue>
 
                 if (prefix)
                 {
-                    count = AddCandidates(frame.NodeIndex, frame.Depth, destination, count);
+                    count = AddCandidates(frame.NodeIndex, frame.Depth, path.Length, destination, count);
                 }
 
                 PushMatchingChildren(ref stack, frame.NodeIndex, path[frame.Depth], frame.Depth + 1, path.Length);
@@ -1730,6 +1927,7 @@ public sealed class PattrnIndex<TSegment, TValue>
     private int AddCandidates(
         int nodeIndex,
         int depth,
+        int pathLength,
         Span<MatchCandidate<TValue>> destination,
         int count)
     {
@@ -1737,7 +1935,11 @@ public sealed class PattrnIndex<TSegment, TValue>
         var details = GetValueDetails(nodeIndex);
         for (var i = 0; i < values.Length; i++)
         {
-            destination[count++] = new MatchCandidate<TValue>(values[i], details[i], depth);
+            destination[count++] = new MatchCandidate<TValue>(
+                values[i],
+                details[i],
+                depth,
+                details[i].TerminalCatchAllSegmentIndex == pathLength);
         }
 
         return count;
@@ -1771,6 +1973,11 @@ public sealed class PattrnIndex<TSegment, TValue>
             {
                 return depth;
             }
+        }
+
+        if (left.IsZeroLengthCatchAll != right.IsZeroLengthCatchAll)
+        {
+            return left.IsZeroLengthCatchAll ? 1 : -1;
         }
 
         var score = right.Detail.Score.CompareTo(left.Detail.Score);
@@ -1846,6 +2053,111 @@ public sealed class PattrnIndex<TSegment, TValue>
         {
             ArrayPool<PatternMatchDetailedSlice<TValue>>.Shared.Return(rentedMatches, clearArray: true);
             ArrayPool<PatternCaptureSlice<TSegment>>.Shared.Return(rentedCaptures, clearArray: true);
+        }
+    }
+
+    private bool TryWriteDetailedCandidates(
+        ReadOnlySpan<MatchCandidate<TValue>> candidates,
+        ReadOnlySpan<TSegment> path,
+        Span<PatternMatchDetailedSlice<TValue>> matches,
+        Span<PatternCaptureSlice<TSegment>> captures,
+        out int matchesWritten,
+        out int capturesWritten)
+    {
+        var captureUpperBound = 0;
+        for (var i = 0; i < candidates.Length; i++)
+        {
+            captureUpperBound += candidates[i].Detail.CaptureCount;
+        }
+
+        var rentedMatches = ArrayPool<PatternMatchDetailedSlice<TValue>>.Shared.Rent(Math.Max(1, candidates.Length));
+        var rentedCaptures = ArrayPool<PatternCaptureSlice<TSegment>>.Shared.Rent(Math.Max(1, captureUpperBound));
+        try
+        {
+            var temporaryMatches = rentedMatches.AsSpan(0, candidates.Length);
+            var temporaryCaptures = rentedCaptures.AsSpan(0, captureUpperBound);
+            var matchCount = 0;
+            var captureCount = 0;
+
+            for (var candidateIndex = 0; candidateIndex < candidates.Length; candidateIndex++)
+            {
+                var candidate = candidates[candidateIndex];
+                if (_deduplicateValues && ContainsValue(temporaryMatches[..matchCount], candidate.Value))
+                {
+                    continue;
+                }
+
+                var detail = candidate.Detail;
+                var captureStart = captureCount;
+                for (var i = 0; i < detail.CaptureCount; i++)
+                {
+                    var descriptor = _captureDescriptors[detail.FirstCapture + i];
+                    var segmentCount = descriptor.IsCatchAll
+                        ? Math.Max(0, path.Length - descriptor.SegmentIndex)
+                        : 1;
+                    temporaryCaptures[captureCount++] = new PatternCaptureSlice<TSegment>(
+                        descriptor.Name,
+                        descriptor.SegmentIndex,
+                        segmentCount);
+                }
+
+                temporaryMatches[matchCount++] = new PatternMatchDetailedSlice<TValue>(
+                    candidate.Value,
+                    detail.RegistrationId,
+                    candidate.ConsumedSegmentCount,
+                    captureStart,
+                    detail.CaptureCount);
+            }
+
+            if (matchCount > matches.Length || captureCount > captures.Length)
+            {
+                matchesWritten = 0;
+                capturesWritten = 0;
+                return false;
+            }
+
+            temporaryMatches[..matchCount].CopyTo(matches);
+            temporaryCaptures[..captureCount].CopyTo(captures);
+            matchesWritten = matchCount;
+            capturesWritten = captureCount;
+            return true;
+        }
+        finally
+        {
+            ArrayPool<PatternMatchDetailedSlice<TValue>>.Shared.Return(rentedMatches, clearArray: true);
+            ArrayPool<PatternCaptureSlice<TSegment>>.Shared.Return(rentedCaptures, clearArray: true);
+        }
+    }
+
+    private bool TryWritePathDetailedCandidates(
+        ReadOnlySpan<TSegment> path,
+        bool prefix,
+        bool bestPrefix,
+        Span<PatternMatchDetailedSlice<TValue>> matches,
+        Span<PatternCaptureSlice<TSegment>> captures,
+        out int matchesWritten,
+        out int capturesWritten)
+    {
+        var capacity = prefix ? CountPrefix(path) : CountExact(path);
+        if (capacity == 0)
+        {
+            matchesWritten = 0;
+            capturesWritten = 0;
+            return true;
+        }
+
+        var rented = ArrayPool<MatchCandidate<TValue>>.Shared.Rent(capacity);
+        try
+        {
+            var candidates = rented.AsSpan(0, capacity);
+            var count = CollectCandidatesInto(path, prefix, candidates);
+            SortCandidates(candidates[..count], prefix);
+            var selected = bestPrefix ? SelectDeepestPrefixCandidates(candidates[..count]) : candidates[..count];
+            return TryWriteDetailedCandidates(selected, path, matches, captures, out matchesWritten, out capturesWritten);
+        }
+        finally
+        {
+            ArrayPool<MatchCandidate<TValue>>.Shared.Return(rented, clearArray: true);
         }
     }
 
