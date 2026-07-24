@@ -16,6 +16,7 @@ These docs describe the current code and public API. Historical experiments and 
 - [Validation](reference/validation.md) for CI-first validation policy.
 - [Trimming and Native AOT compatibility](reference/aot-trimming.md) for stable-package support posture and local harness commands.
 - [Benchmarks](reference/benchmarks.md) for evidence policy and benchmark workflow expectations.
+- [Namespace migration](reference/namespace-migration.md) for the pre-beta namespace changes.
 - [Architecture decisions](adr/README.md) for accepted decision history.
 
 ## Packages
@@ -30,7 +31,7 @@ These docs describe the current code and public API. Historical experiments and 
 - Tutorials: [first index](tutorials/first-index.md), [examples](tutorials/examples.md)
 - How-to: [select a best match](how-to/select-best-match.md)
 - Explanation: [package boundaries](explanation/package-boundaries.md)
-- Reference: [api](reference/api.md), [matching semantics](reference/matching-semantics.md), [trimming and Native AOT compatibility](reference/aot-trimming.md), [duplicate behavior](reference/duplicate-behavior.md), [diagnostics](reference/diagnostics.md)
+- Reference: [api](reference/api.md), [namespace migration](reference/namespace-migration.md), [matching semantics](reference/matching-semantics.md), [trimming and Native AOT compatibility](reference/aot-trimming.md), [duplicate behavior](reference/duplicate-behavior.md), [diagnostics](reference/diagnostics.md)
 
 ## Maintainer guidance
 

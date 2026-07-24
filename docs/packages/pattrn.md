@@ -38,7 +38,10 @@ This table is the canonical package-selection reference.
 The primary core model is explicit generic pattern segments. This avoids reserving a magic segment value for wildcards and keeps the core independent from route, glob, URL, filesystem, or application semantics.
 
 ```csharp
-using Pattrn;
+using Pattrn.Builders;
+using Pattrn.Diagnostics;
+using Pattrn.Matching;
+using Pattrn.Patterns;
 
 var index = PattrnIndex<string, string>
     .Builder()
@@ -130,7 +133,9 @@ Named catch-alls return one `PatternCapture<TSegment>` whose `Values` contains a
 ### Strings
 
 ```csharp
-using Pattrn;
+using Pattrn.Matching;
+using Pattrn.Patterns;
+using Pattrn.Strings;
 
 var index = StringPattrnIndexBuilder
     .CreateTokenized<string>('.', "*")
@@ -146,7 +151,7 @@ String helpers allocate because they split strings into segments. Keep hot paths
 
 ```csharp
 using Microsoft.Extensions.DependencyInjection;
-using Pattrn;
+using Pattrn.Matching;
 using Pattrn.DependencyInjection;
 
 services.AddPattrnIndex<string, string>(registration => registration
@@ -161,8 +166,8 @@ var index = provider.GetRequiredService<PattrnIndex<string, string>>();
 Route-like string syntax lives in `Pattrn.Routing`, not in the core package.
 
 ```csharp
-using Pattrn;
-using Pattrn.Routing;
+using Pattrn.Matching;
+using Pattrn.Routing.Integration;
 
 var index = PattrnIndex<string, string>
     .Builder()

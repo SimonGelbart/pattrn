@@ -1,6 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
-using Pattrn;
 using Pattrn.DependencyInjection;
+using Pattrn.DependencyInjection.Registration;
+using Pattrn.Builders;
+using Pattrn.Matching;
+using Pattrn.Patterns;
 
 var services = new ServiceCollection();
 

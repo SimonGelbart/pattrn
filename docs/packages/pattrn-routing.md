@@ -48,7 +48,7 @@ The routing package also does not URL-decode, join catch-all captures, apply end
 ## Parsing route metadata
 
 ```csharp
-using Pattrn.Routing;
+using Pattrn.Routing.Templates;
 
 var template = RoutePattern.ParseTemplate("/orders/{id:int:min(1)}");
 var parameter = template.Segments[1].Parameter!;
@@ -73,8 +73,9 @@ Optional/defaulted parameters must form a contiguous suffix. That keeps expansio
 ## Registering routes
 
 ```csharp
-using Pattrn;
-using Pattrn.Routing;
+using Pattrn.Builders;
+using Pattrn.Matching;
+using Pattrn.Routing.Integration;
 
 var builder = PattrnIndex<string, string>.Builder();
 

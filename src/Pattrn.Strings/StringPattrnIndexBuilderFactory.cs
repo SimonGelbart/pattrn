@@ -1,4 +1,4 @@
-namespace Pattrn;
+namespace Pattrn.Strings;
 
 /// <summary>
 /// Provides type-inference friendly factories for <see cref="StringPattrnIndexBuilder{TValue}"/>.

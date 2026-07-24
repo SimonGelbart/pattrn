@@ -18,7 +18,8 @@ Pattrn is pre-beta. The public surface may still change while the core contracts
 ## First-use example
 
 ```csharp
-using Pattrn;
+using Pattrn.Matching;
+using Pattrn.Patterns;
 
 var index = PattrnIndex<string, string>
     .Builder()

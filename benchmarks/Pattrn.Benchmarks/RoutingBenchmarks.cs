@@ -1,5 +1,5 @@
 using BenchmarkDotNet.Attributes;
-using Pattrn.Routing;
+using Pattrn.Routing.Integration;
 
 namespace Pattrn.Benchmarks;
 

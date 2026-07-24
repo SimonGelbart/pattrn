@@ -18,7 +18,8 @@ Install both packages when you want string helpers. Use the current pre-beta pac
 For new string-based code, prefer the string-path builder facade. It stores the normalization options once and returns a string-path wrapper, so callers do not repeat options on every registration and match:
 
 ```csharp
-using Pattrn;
+using Pattrn.Strings;
+using Pattrn.Strings.Normalization;
 
 var index = StringPattrnIndexBuilder
     .CreateTokenized<string>('.', "*")
@@ -125,7 +126,7 @@ var capturedValues = segments.AsSpan(catchAll.StartSegmentIndex, catchAll.Segmen
 
 ## Boundary with the core package
 
-`StringNormalizationOptions` lives in `Pattrn.Strings`. The core package remains generic and only sees already-split `string` segments plus the comparer configured on the builder.
+`StringNormalizationOptions` lives in `Pattrn.Strings.Normalization`. The core package remains generic and only sees already-split `string` segments plus the comparer configured on the builder.
 
 This keeps URL decoding, filesystem separator rules, route semantics, glob syntax, and application-specific normalization outside the core.
 

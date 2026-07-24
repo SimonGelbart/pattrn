@@ -11,7 +11,7 @@ Use companion packages only after the segmented core model is clear:
 ## 1. Create a builder
 
 ```csharp
-using Pattrn;
+using Pattrn.Matching;
 
 var builder = PattrnIndex<string, string>.Builder();
 ```

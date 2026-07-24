@@ -15,6 +15,12 @@ The package is pre-beta. The fluent registration model is the stable-candidate s
 ## Default index
 
 ```csharp
+using Microsoft.Extensions.DependencyInjection;
+using Pattrn.DependencyInjection;
+using Pattrn.DependencyInjection.Registration;
+using Pattrn.Matching;
+using Pattrn.Patterns;
+
 services.AddPattrnIndex<string, string>(registration => registration
     .Configure(builder => builder.Add(["market", "NASDAQ"], "client-a")));
 ```
