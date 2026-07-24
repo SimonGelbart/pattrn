@@ -90,119 +90,15 @@ public sealed class PattrnIndex<TSegment, TValue>
         MatchOptions matchOptions,
         IEqualityComparer<TSegment>? segmentComparer = null,
         IEqualityComparer<TValue>? valueComparer = null)
-    {
-        ArgumentNullException.ThrowIfNull(registrations);
-        options ??= PattrnCompileOptions.Default;
-        if (!Enum.IsDefined(options.DuplicatePatternPolicy))
-        {
-            throw new ArgumentOutOfRangeException(nameof(options), "Unknown duplicate pattern policy.");
-        }
-
-        var segmentEquality = segmentComparer ?? EqualityComparer<TSegment>.Default;
-        var valueEquality = valueComparer ?? EqualityComparer<TValue>.Default;
-        var snapshot = registrations.ToArray();
-        var diagnostics = new List<PattrnDiagnostic>();
-        var ids = new HashSet<RegistrationId>();
-        var patterns = new List<ImmutableArray<PatternSegment<TSegment>>>();
-
-        for (var registrationIndex = 0; registrationIndex < snapshot.Length; registrationIndex++)
-        {
-            var registration = snapshot[registrationIndex] ?? throw new ArgumentException("Registrations cannot contain null entries.", nameof(registrations));
-            if (registration.Id.Value == Guid.Empty)
-            {
-                diagnostics.Add(new("PTRN1001", PattrnDiagnosticSeverity.Error, "Registration identity must not be empty.", registration.Id));
-            }
-            else if (!ids.Add(registration.Id))
-            {
-                diagnostics.Add(new("PTRN1002", PattrnDiagnosticSeverity.Error, "Registration identity is duplicated.", registration.Id));
-            }
-
-            var duplicateIndex = patterns.FindIndex(pattern => SamePattern(pattern, registration.Pattern, segmentEquality));
-            if (duplicateIndex >= 0 && options.DuplicatePatternPolicy != DuplicatePatternPolicy.Allow)
-            {
-                diagnostics.Add(new(
-                    "PTRN1003",
-                    options.DuplicatePatternPolicy == DuplicatePatternPolicy.Warn ? PattrnDiagnosticSeverity.Warning : PattrnDiagnosticSeverity.Error,
-                    "The canonical pattern is duplicated.",
-                    registration.Id));
-            }
-            patterns.Add(registration.Pattern);
-
-            var captureNames = new HashSet<string>(StringComparer.Ordinal);
-            for (var segmentIndex = 0; segmentIndex < registration.Pattern.Length; segmentIndex++)
-            {
-                var segment = registration.Pattern[segmentIndex];
-                if (segment.IsCatchAll && segmentIndex != registration.Pattern.Length - 1)
-                {
-                    diagnostics.Add(new("PTRN1004", PattrnDiagnosticSeverity.Error, "Catch-all segments must be terminal.", registration.Id, segmentIndex));
-                }
-
-                if (segment.ParameterName is not null && !captureNames.Add(segment.ParameterName))
-                {
-                    diagnostics.Add(new("PTRN1005", PattrnDiagnosticSeverity.Error, "Capture names must be unique within a pattern.", registration.Id, segmentIndex));
-                }
-            }
-        }
-
-        PattrnIndex<TSegment, TValue>? index = null;
-        if (!diagnostics.Any(d => d.Severity == PattrnDiagnosticSeverity.Error)
-            && !(options.TreatWarningsAsErrors && diagnostics.Any(d => d.Severity == PattrnDiagnosticSeverity.Warning)))
-        {
-            index = new PattrnIndex<TSegment, TValue>(
-                CompiledIndex<TSegment, TValue>.FromRegistrations(
-                    snapshot,
-                    segmentEquality,
-                    valueEquality,
-                    deduplicateValues: matchOptions.DeduplicateValues),
-                CountDistinctPatterns(snapshot, segmentEquality),
-                snapshot.Length,
-                matchOptions,
-                segmentEquality,
-                valueEquality);
-        }
-
-        var finalReport = new PattrnDiagnosticReport(diagnostics);
-        if (finalReport.HasWarnings && options.TreatWarningsAsErrors)
-        {
-            index = null;
-        }
-
-        return new PattrnCompileResult<TSegment, TValue>(index, finalReport);
-    }
-
-    private static int CountDistinctPatterns(
-        IReadOnlyList<PattrnRegistration<TSegment, TValue>> registrations,
-        IEqualityComparer<TSegment> comparer)
-    {
-        var patterns = new List<ImmutableArray<PatternSegment<TSegment>>>();
-        foreach (var registration in registrations)
-        {
-            if (!patterns.Any(pattern => SamePattern(pattern, registration.Pattern, comparer)))
-            {
-                patterns.Add(registration.Pattern);
-            }
-        }
-
-        return patterns.Count;
-    }
-
-    private static bool SamePattern(
-        ImmutableArray<PatternSegment<TSegment>> left,
-        ImmutableArray<PatternSegment<TSegment>> right,
-        IEqualityComparer<TSegment> comparer)
-    {
-        if (left.Length != right.Length) return false;
-        for (var i = 0; i < left.Length; i++)
-        {
-            left[i].Deconstruct(out var leftKind, out var leftLiteral, out var leftName);
-            right[i].Deconstruct(out var rightKind, out var rightLiteral, out var rightName);
-            if (leftKind != rightKind || (leftKind == PatternSegmentKind.Literal && !comparer.Equals(leftLiteral, rightLiteral)) ||
-                !string.Equals(leftName, rightName, StringComparison.Ordinal)) return false;
-        }
-        return true;
-    }
+        => PattrnIndexCompiler<TSegment, TValue>.CompileWithDiagnostics(
+            registrations,
+            options,
+            matchOptions,
+            segmentComparer,
+            valueComparer);
 
     private readonly CompiledNode[] _nodes;
+    private readonly CompiledIndex<TSegment, TValue> _storage;
     private readonly CompiledChild<TSegment>[] _children;
     private readonly int[] _childLookupSlots;
     private readonly TValue[] _values;
@@ -221,6 +117,7 @@ public sealed class PattrnIndex<TSegment, TValue>
         IEqualityComparer<TSegment> segmentComparer,
         IEqualityComparer<TValue> valueComparer)
     {
+        _storage = index;
         _nodes = index.Nodes;
         _children = index.Children;
         _childLookupSlots = index.ChildLookupSlots;
@@ -716,7 +613,7 @@ public sealed class PattrnIndex<TSegment, TValue>
         var captureUpperBound = GetCaptureCountUpperBound(path);
         var matches = MatchDetailedToArray(path);
         var rejectedCandidates = options.IncludeRejectedCandidates
-            ? CollectRejectedCandidates(path)
+            ? ExplanationCollector<TSegment, TValue>.Collect(_storage, _segmentComparer, path)
             : [];
 
         return new PatternMatchExplanation<TSegment, TValue>(
@@ -727,106 +624,6 @@ public sealed class PattrnIndex<TSegment, TValue>
             options,
             matchUpperBound,
             captureUpperBound);
-    }
-
-    private PatternRejectedCandidate[] CollectRejectedCandidates(ReadOnlySpan<TSegment> path)
-    {
-        var rejectedCandidates = new List<PatternRejectedCandidate>();
-
-        if (!_hasWildcardBranches)
-        {
-            CollectExactOnlyRejections(path, rejectedCandidates);
-            return rejectedCandidates.ToArray();
-        }
-
-        Span<TraversalFrame> initialFrames = stackalloc TraversalFrame[64];
-        var stack = new TraversalStack(initialFrames);
-        stack.Push(new TraversalFrame(0, 0));
-
-        try
-        {
-            while (!stack.IsEmpty)
-            {
-                var frame = stack.Pop();
-                ref readonly var node = ref _nodes[frame.NodeIndex];
-
-                if (frame.Depth == path.Length)
-                {
-                    if (GetValueCountIncludingTerminalCatchAll(frame.NodeIndex) == 0)
-                    {
-                        rejectedCandidates.Add(new PatternRejectedCandidate(
-                            frame.Depth,
-                            PatternRejectedCandidateReasonKind.PathTooShort,
-                            "The input ended before this branch reached a terminal registration."));
-                    }
-
-                    continue;
-                }
-
-                var hadCandidate = false;
-
-                if (node.CatchAllChild != CompiledNode.NoNode)
-                {
-                    hadCandidate = true;
-                    stack.Push(new TraversalFrame(node.CatchAllChild, path.Length));
-                }
-
-                if (node.WildcardChild != CompiledNode.NoNode)
-                {
-                    hadCandidate = true;
-                    stack.Push(new TraversalFrame(node.WildcardChild, frame.Depth + 1));
-                }
-
-                if (TryGetExactChild(frame.NodeIndex, path[frame.Depth], out var exactChildNodeIndex))
-                {
-                    hadCandidate = true;
-                    stack.Push(new TraversalFrame(exactChildNodeIndex, frame.Depth + 1));
-                }
-
-                if (!hadCandidate)
-                {
-                    rejectedCandidates.Add(new PatternRejectedCandidate(
-                        frame.Depth,
-                        PatternRejectedCandidateReasonKind.BranchNotMatched,
-                        "No literal, wildcard, or catch-all branch matched this input segment."));
-                }
-            }
-        }
-        finally
-        {
-            stack.Dispose();
-        }
-
-        return rejectedCandidates.ToArray();
-    }
-
-    private void CollectExactOnlyRejections(
-        ReadOnlySpan<TSegment> path,
-        List<PatternRejectedCandidate> rejectedCandidates)
-    {
-        var nodeIndex = 0;
-
-        for (var depth = 0; depth < path.Length; depth++)
-        {
-            if (!TryGetExactChild(nodeIndex, path[depth], out var childNodeIndex))
-            {
-                rejectedCandidates.Add(new PatternRejectedCandidate(
-                    depth,
-                    PatternRejectedCandidateReasonKind.LiteralMismatch,
-                    "No literal branch matched this input segment."));
-                return;
-            }
-
-            nodeIndex = childNodeIndex;
-        }
-
-        if (GetValues(nodeIndex).IsEmpty)
-        {
-            rejectedCandidates.Add(new PatternRejectedCandidate(
-                path.Length,
-                PatternRejectedCandidateReasonKind.PathTooShort,
-                "The input ended at a compiled node that has no terminal registration."));
-        }
     }
 
     private ReadOnlySpan<TValue> GetValues(int nodeIndex)
@@ -1563,46 +1360,7 @@ public sealed class PattrnIndex<TSegment, TValue>
     }
 
     private List<MatchCandidate<TValue>> CollectCandidates(ReadOnlySpan<TSegment> path, bool prefix)
-    {
-        var candidates = new List<MatchCandidate<TValue>>();
-        Span<TraversalFrame> initialFrames = stackalloc TraversalFrame[64];
-        var stack = new TraversalStack(initialFrames);
-        stack.Push(new TraversalFrame(0, 0));
-
-        try
-        {
-            while (!stack.IsEmpty)
-            {
-                var frame = stack.Pop();
-                if (frame.Depth == path.Length)
-                {
-                    AddCandidates(frame.NodeIndex, frame.Depth, path.Length, candidates);
-                    ref readonly var node = ref _nodes[frame.NodeIndex];
-                    if (node.CatchAllChild != CompiledNode.NoNode)
-                    {
-                        AddCandidates(node.CatchAllChild, frame.Depth, path.Length, candidates);
-                    }
-
-                    continue;
-                }
-
-                if (prefix)
-                {
-                    AddCandidates(frame.NodeIndex, frame.Depth, path.Length, candidates);
-                }
-
-                PushMatchingChildren(ref stack, frame.NodeIndex, path[frame.Depth], frame.Depth + 1, path.Length);
-            }
-        }
-        finally
-        {
-            stack.Dispose();
-        }
-
-        candidates.Sort((left, right) => CompareCandidates(left, right, prefix));
-
-        return candidates;
-    }
+        => new MatchTraversal<TSegment, TValue>(_storage, _segmentComparer).CollectCandidates(path, prefix);
 
     private void AddCandidates(int nodeIndex, int depth, int pathLength, List<MatchCandidate<TValue>> candidates)
     {
@@ -1885,44 +1643,7 @@ public sealed class PattrnIndex<TSegment, TValue>
         ReadOnlySpan<TSegment> path,
         bool prefix,
         Span<MatchCandidate<TValue>> destination)
-    {
-        var count = 0;
-        Span<TraversalFrame> initialFrames = stackalloc TraversalFrame[64];
-        var stack = new TraversalStack(initialFrames);
-        stack.Push(new TraversalFrame(0, 0));
-
-        try
-        {
-            while (!stack.IsEmpty)
-            {
-                var frame = stack.Pop();
-                if (frame.Depth == path.Length)
-                {
-                    count = AddCandidates(frame.NodeIndex, frame.Depth, path.Length, destination, count);
-                    ref readonly var node = ref _nodes[frame.NodeIndex];
-                    if (node.CatchAllChild != CompiledNode.NoNode)
-                    {
-                        count = AddCandidates(node.CatchAllChild, frame.Depth, path.Length, destination, count);
-                    }
-
-                    continue;
-                }
-
-                if (prefix)
-                {
-                    count = AddCandidates(frame.NodeIndex, frame.Depth, path.Length, destination, count);
-                }
-
-                PushMatchingChildren(ref stack, frame.NodeIndex, path[frame.Depth], frame.Depth + 1, path.Length);
-            }
-        }
-        finally
-        {
-            stack.Dispose();
-        }
-
-        return count;
-    }
+        => new MatchTraversal<TSegment, TValue>(_storage, _segmentComparer).CollectCandidatesInto(path, prefix, destination);
 
     private int AddCandidates(
         int nodeIndex,
