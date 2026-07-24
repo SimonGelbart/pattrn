@@ -9,7 +9,7 @@ namespace Pattrn.Builders;
 public sealed class PattrnIndexBuilder<TSegment, TValue>
     where TSegment : notnull
 {
-    private readonly List<PattrnRegistration<TSegment, TValue>> _registrations = [];
+    private readonly BuilderRegistrationState<TSegment, TValue> _registrationState = new();
     private readonly bool _usesWildcardSegmentToken;
 
     private PattrnIndexBuilder(
@@ -28,8 +28,8 @@ public sealed class PattrnIndexBuilder<TSegment, TValue>
     public bool UsesWildcardSegmentToken => _usesWildcardSegmentToken;
     public IEqualityComparer<TSegment> SegmentComparer { get; }
     public IEqualityComparer<TValue> ValueComparer { get; }
-    public int RegistrationCount => _registrations.Count;
-    public int PatternCount => CountDistinctPatterns(_registrations, SegmentComparer);
+    public int RegistrationCount => _registrationState.Count;
+    public int PatternCount => CountDistinctPatterns(_registrationState.Snapshot(), SegmentComparer);
     public int MatchCountUpperBound => RegistrationCount;
 
     public static PattrnIndexBuilder<TSegment, TValue> Create(
@@ -57,12 +57,12 @@ public sealed class PattrnIndexBuilder<TSegment, TValue>
     public RegistrationId Add(PattrnRegistration<TSegment, TValue> registration)
     {
         ArgumentNullException.ThrowIfNull(registration);
-        if (registration.Id.Value == Guid.Empty || _registrations.Any(existing => existing.Id == registration.Id))
+        if (registration.Id.Value == Guid.Empty || _registrationState.ContainsId(registration.Id))
         {
             throw new ArgumentException("Registration identity must be non-empty and unique in the builder.", nameof(registration));
         }
 
-        _registrations.Add(registration);
+        _registrationState.Add(registration);
         return registration.Id;
     }
 
@@ -188,31 +188,17 @@ public sealed class PattrnIndexBuilder<TSegment, TValue>
     public bool Replace(PattrnRegistration<TSegment, TValue> updatedRegistration)
     {
         ArgumentNullException.ThrowIfNull(updatedRegistration);
-        var index = _registrations.FindIndex(registration => registration.Id == updatedRegistration.Id);
-        if (index < 0)
-        {
-            return false;
-        }
-
-        _registrations[index] = updatedRegistration;
-        return true;
+        return _registrationState.Replace(updatedRegistration);
     }
 
     public bool Remove(RegistrationId id)
     {
-        var index = _registrations.FindIndex(registration => registration.Id == id);
-        if (index < 0)
-        {
-            return false;
-        }
-
-        _registrations.RemoveAt(index);
-        return true;
+        return _registrationState.Remove(id);
     }
 
-    public void Clear() => _registrations.Clear();
+    public void Clear() => _registrationState.Clear();
 
-    public ImmutableArray<PattrnRegistration<TSegment, TValue>> ToRegistrations() => [.. _registrations];
+    public ImmutableArray<PattrnRegistration<TSegment, TValue>> ToRegistrations() => _registrationState.Snapshot();
 
     public bool Contains(ReadOnlySpan<TSegment> pattern)
     {
@@ -230,7 +216,7 @@ public sealed class PattrnIndexBuilder<TSegment, TValue>
     public bool ContainsPattern(ReadOnlySpan<PatternSegment<TSegment>> pattern)
     {
         var requested = pattern.ToArray();
-        return _registrations.Any(registration => SamePattern(registration.Pattern, requested.ToImmutableArray(), SegmentComparer));
+        return _registrationState.ContainsPattern(requested, SegmentComparer);
     }
 
     public bool Contains(ReadOnlyMemory<TSegment> pattern) => Contains(pattern.Span);
