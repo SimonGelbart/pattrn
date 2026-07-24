@@ -3,6 +3,20 @@
 The generic package accepts segmented paths and keeps registration, compilation,
 and matching contracts separate.
 
+## Namespace organization
+
+Core contracts are grouped by ownership: `Pattrn.Patterns` contains pattern
+segments and captures, `Pattrn.Registrations` contains canonical registrations
+and IDs, `Pattrn.Matching` contains the immutable index and match families,
+`Pattrn.Builders` contains builders, and `Pattrn.Diagnostics` contains compile
+and explanation contracts. Implementation-only types are under
+`Pattrn.Internal.*` and are not part of the public API.
+
+Companion contracts use `Pattrn.Strings`, `Pattrn.Strings.Normalization`,
+`Pattrn.Routing.Templates`, `Pattrn.Routing.Constraints`,
+`Pattrn.Routing.Integration`, `Pattrn.DependencyInjection`, and
+`Pattrn.DependencyInjection.Registration`.
+
 ## Canonical registrations
 
 ```csharp

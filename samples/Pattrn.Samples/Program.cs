@@ -1,4 +1,6 @@
-using Pattrn;
+using Pattrn.Builders;
+using Pattrn.Matching;
+using Pattrn.Patterns;
 
 var subscriptions = PattrnIndex<string, string>
     .Builder()

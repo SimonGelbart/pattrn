@@ -1,6 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
-using Pattrn;
 using Pattrn.DependencyInjection;
+using Pattrn.Builders;
+using Pattrn.DependencyInjection.Registration;
+using Pattrn.Matching;
+using Pattrn.Patterns;
+using Pattrn.Strings;
+using Pattrn.Strings.Normalization;
 
 RunCoreSmoke();
 RunStringsSmoke();

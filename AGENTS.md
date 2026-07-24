@@ -78,3 +78,17 @@ The repository agents are role boundaries, not extra authorization. They must
 not push, publish, open pull requests, modify remote state, or alter unrelated
 worktree changes. Do not introduce a durable run ledger for ordinary changes;
 use one only when an explicitly unattended workflow needs persistent evidence.
+
+## Token-efficient verification
+
+- Do not stream verbose successful build, migration, reset, or test output into the conversation.
+- Capture complete verification output in an ignored local artifact.
+- Report only the command, exit status, duration, suite summary, warnings, and relevant failure excerpt.
+- On failure, inspect the smallest useful log section first and expand only when needed.
+- Preserve full logs locally when they are required as evidence.
+- When a verification command is still running, inspect its artifact only after completion. Read the smallest useful failure excerpt; never load full passing artifacts unless exact evidence is required.
+- Before loading long skill, browser, or tool documentation, read only the required instructions. If the tool requires its full documentation, keep it out of user-facing updates and summarize only the rules relevant to the task. Do not reload the same documentation in the same task.
+
+## Efficient tool batching
+
+In Code Mode, within each bounded stage, run independent, functions.exec-available tool calls concurrently in one functions.exec call. Use await Promise.allSettled([...]) when partial results are useful, and inspect every result; use await Promise.all([...]) only when any failure should abort the batch. Keep dependencies, waits/resumes, approvals, conflicting or interdependent mutations, and adaptive investigations where each result may change the next step sequential. Do not split otherwise batchable inspections across outer tool calls.

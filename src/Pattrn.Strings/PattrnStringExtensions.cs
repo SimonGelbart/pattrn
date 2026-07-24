@@ -1,4 +1,4 @@
-namespace Pattrn;
+namespace Pattrn.Strings;
 
 /// <summary>
 /// Convenience helpers for separated string paths.

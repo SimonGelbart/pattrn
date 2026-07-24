@@ -1,4 +1,4 @@
-namespace Pattrn;
+namespace Pattrn.Strings;
 
 /// <summary>
 /// Provides ergonomic string-path matching over an immutable string-segment index.

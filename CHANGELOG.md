@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Reorganized the public API into explicit contract namespaces and moved implementation types under `Pattrn.Internal.*`; this is an intentional pre-beta source-breaking change. See the [namespace migration guide](docs/reference/namespace-migration.md).
 - Audited documentation against the current implementation and public API snapshots.
 - Clarified the explicit prefix APIs, detailed capture slices, catch-all captures, and pre-beta package boundaries.
 - Removed unused alpha release-planning and API-review material from the documentation path.

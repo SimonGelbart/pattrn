@@ -1,4 +1,4 @@
-namespace Pattrn;
+namespace Pattrn.Strings;
 
 /// <summary>
 /// Provides an ergonomic string-facing builder over the generic string-segment core builder.
