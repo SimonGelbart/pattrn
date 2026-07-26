@@ -6,7 +6,7 @@ namespace Pattrn.Matching;
 /// </summary>
 public static partial class PattrnIndexExtensions
 {
-/// <summary>
+    /// <summary>
     /// Gets a path-specific upper bound for a memory-backed path.
     /// </summary>
     public static int GetMatchCountUpperBound<TSegment, TValue>(
@@ -18,7 +18,7 @@ public static partial class PattrnIndexExtensions
         return index.GetMatchCountUpperBound(path.Span);
     }
 
-public static bool TryMatchValues<TSegment, TValue>(
+    public static bool TryMatchValues<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path,
         Span<TValue> destination,
@@ -29,7 +29,7 @@ public static bool TryMatchValues<TSegment, TValue>(
         return index.TryMatchValues(path.Span, destination, out written);
     }
 
-public static bool TryMatch<TSegment, TValue>(
+    public static bool TryMatch<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path,
         Span<PatternMatch<TValue>> destination,
@@ -40,4 +40,3 @@ public static bool TryMatch<TSegment, TValue>(
         return index.TryMatch(path.Span, destination, out written);
     }
 }
-

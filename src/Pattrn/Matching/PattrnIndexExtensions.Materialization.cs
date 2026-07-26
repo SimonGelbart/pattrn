@@ -3,7 +3,7 @@ namespace Pattrn.Matching;
 
 public static partial class PattrnIndexExtensions
 {
-public static PatternMatch<TValue>[] MatchPrefixToArray<TSegment, TValue>(
+    public static PatternMatch<TValue>[] MatchPrefixToArray<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         IEnumerable<TSegment> path)
         where TSegment : notnull
@@ -13,7 +13,7 @@ public static PatternMatch<TValue>[] MatchPrefixToArray<TSegment, TValue>(
         return index.MatchPrefixToArray(path is TSegment[] array ? array.AsSpan() : path.ToArray().AsSpan());
     }
 
-public static PatternMatch<TValue>[] EnumeratePrefixMatchesToArray<TSegment, TValue>(
+    public static PatternMatch<TValue>[] EnumeratePrefixMatchesToArray<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path)
         where TSegment : notnull
@@ -22,7 +22,7 @@ public static PatternMatch<TValue>[] EnumeratePrefixMatchesToArray<TSegment, TVa
         return index.EnumeratePrefixMatchesToArray(path.Span);
     }
 
-public static TValue[] MatchPrefixValuesToArray<TSegment, TValue>(
+    public static TValue[] MatchPrefixValuesToArray<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         IEnumerable<TSegment> path)
         where TSegment : notnull
@@ -32,7 +32,7 @@ public static TValue[] MatchPrefixValuesToArray<TSegment, TValue>(
         return index.MatchPrefixValuesToArray(path is TSegment[] array ? array.AsSpan() : path.ToArray().AsSpan());
     }
 
-public static TValue[] EnumeratePrefixValuesToArray<TSegment, TValue>(
+    public static TValue[] EnumeratePrefixValuesToArray<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path)
         where TSegment : notnull
@@ -41,7 +41,7 @@ public static TValue[] EnumeratePrefixValuesToArray<TSegment, TValue>(
         return index.EnumeratePrefixValuesToArray(path.Span);
     }
 
-/// <summary>
+    /// <summary>
     /// Matches a memory-backed path and returns matching values as a new array.
     /// </summary>
     public static PatternMatch<TValue>[] MatchToArray<TSegment, TValue>(
@@ -53,7 +53,7 @@ public static TValue[] EnumeratePrefixValuesToArray<TSegment, TValue>(
         return index.MatchToArray(path.Span);
     }
 
-public static TValue[] MatchValuesToArray<TSegment, TValue>(
+    public static TValue[] MatchValuesToArray<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path)
         where TSegment : notnull
@@ -62,7 +62,7 @@ public static TValue[] MatchValuesToArray<TSegment, TValue>(
         return index.MatchValuesToArray(path.Span);
     }
 
-/// <summary>
+    /// <summary>
     /// Matches prefix registrations for a memory-backed path and returns matching values as a new array.
     /// </summary>
     public static PatternMatch<TValue>[] MatchPrefixToArray<TSegment, TValue>(
@@ -74,7 +74,7 @@ public static TValue[] MatchValuesToArray<TSegment, TValue>(
         return index.MatchPrefixToArray(path.Span);
     }
 
-public static TValue[] MatchPrefixValuesToArray<TSegment, TValue>(
+    public static TValue[] MatchPrefixValuesToArray<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path)
         where TSegment : notnull
@@ -83,7 +83,7 @@ public static TValue[] MatchPrefixValuesToArray<TSegment, TValue>(
         return index.MatchPrefixValuesToArray(path.Span);
     }
 
-/// <summary>
+    /// <summary>
     /// Matches an enumerable path and returns matching values as a new array.
     /// </summary>
     public static PatternMatch<TValue>[] MatchToArray<TSegment, TValue>(
@@ -102,7 +102,7 @@ public static TValue[] MatchPrefixValuesToArray<TSegment, TValue>(
         return index.MatchToArray(path.ToArray().AsSpan());
     }
 
-public static TValue[] MatchValuesToArray<TSegment, TValue>(
+    public static TValue[] MatchValuesToArray<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         IEnumerable<TSegment> path)
         where TSegment : notnull
@@ -112,4 +112,3 @@ public static TValue[] MatchValuesToArray<TSegment, TValue>(
         return index.MatchValuesToArray(path is TSegment[] array ? array.AsSpan() : path.ToArray().AsSpan());
     }
 }
-

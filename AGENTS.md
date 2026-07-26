@@ -46,8 +46,12 @@ routing behavior belongs in companion packages.
 
 ## Bounded agent workflow
 
-For a bounded change, use this sequence when the task benefits from multiple
-agents:
+Use multiple agents only when the change has independent unknowns, crosses a
+package or public-contract boundary, or has a material allocation, AOT, or
+behavioral risk. Do not turn a routine internal cleanup into a multi-agent
+workflow merely because agents are available.
+
+For a broad or higher-risk bounded change, use this sequence:
 
 ```text
 contract matrix and baseline
@@ -58,17 +62,43 @@ contract matrix and baseline
 → final affected gate
 ```
 
-Before writing, create a compact matrix connecting each requirement to its
-source, affected files/API, focused tests, validation command, and explicit
-deferral. Use it to expose issue/ADR conflicts and to track deviations.
+For every change, write a short acceptance checklist before editing. It must
+identify the invariant, affected files, focused tests, validation boundary,
+and explicit deferrals. For a broad or higher-risk change, expand it into a
+compact matrix connecting each requirement to its source, affected files/API,
+focused tests, validation command, and explicit deferral. State whether
+removing now-unreferenced internals is required by the milestone or is a
+follow-up; do not leave that decision to final review.
 
-Parallelize independent read-only exploration and final reviews, but never run
+For a routine internal refactor with no public-contract, package, or runtime
+posture change, prefer this lean path:
+
+```text
+baseline and acceptance checklist
+→ one writer with focused tests
+→ one independent review
+→ affected build/test and diff check
+```
+
+Parallelize independent read-only exploration and final reviews only when the
+expected information gain outweighs their coordination cost. Never run
 concurrent writers against overlapping product files or concurrent .NET
 commands that share `bin/` or `obj/` outputs. Keep each worker inside the
 declared package and invariant scope. After every bounded milestone, run the
 narrowest relevant tests, `git diff --check`, and a scoped diff inspection.
-If a reviewer identifies a fix, rerun the affected review after the last source
-change; earlier findings are stale evidence.
+
+Reviewers must label each note as **blocking**, **actionable in this
+milestone**, or **follow-up**. Collect actionable findings before returning to
+the writer and prefer one repair batch. A follow-up does not expand the
+milestone without an acceptance-checklist requirement or maintainer direction.
+After a source change, rerun only the reviews and validation affected by that
+change; earlier evidence is stale only for the changed surface. For example,
+a test-only change needs refreshed build/test evidence, not another AOT or
+benchmark run when product sources are unchanged.
+
+Stop after a second repair cycle unless a confirmed blocker remains. At that
+point, request an architectural or scope decision rather than repeatedly
+expanding the work.
 
 Stop for an architectural decision, non-converging repair, or a required
 validation capability that is unavailable; do not silently broaden the

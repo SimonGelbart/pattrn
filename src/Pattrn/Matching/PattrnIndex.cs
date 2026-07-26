@@ -97,17 +97,11 @@ public sealed class PattrnIndex<TSegment, TValue>
             segmentComparer,
             valueComparer);
 
-    private readonly CompiledNode[] _nodes;
     private readonly CompiledIndex<TSegment, TValue> _storage;
-    private readonly CompiledChild<TSegment>[] _children;
-    private readonly int[] _childLookupSlots;
-    private readonly TValue[] _values;
-    private readonly CompiledValueDetail[] _valueDetails;
     private readonly CaptureDescriptor[] _captureDescriptors;
     private readonly IEqualityComparer<TSegment> _segmentComparer;
     private readonly IEqualityComparer<TValue> _valueComparer;
     private readonly bool _deduplicateValues;
-    private readonly bool _hasWildcardBranches;
 
     internal PattrnIndex(
         CompiledIndex<TSegment, TValue> index,
@@ -118,11 +112,6 @@ public sealed class PattrnIndex<TSegment, TValue>
         IEqualityComparer<TValue> valueComparer)
     {
         _storage = index;
-        _nodes = index.Nodes;
-        _children = index.Children;
-        _childLookupSlots = index.ChildLookupSlots;
-        _values = index.Values;
-        _valueDetails = index.ValueDetails;
         _captureDescriptors = index.CaptureDescriptors;
         _segmentComparer = segmentComparer;
         _valueComparer = valueComparer;
@@ -131,7 +120,6 @@ public sealed class PattrnIndex<TSegment, TValue>
         MatchCountUpperBound = registrationCount;
         Options = options;
         _deduplicateValues = options.DeduplicateValues;
-        _hasWildcardBranches = index.HasWildcardBranches;
     }
 
     /// <summary>
@@ -199,11 +187,7 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// This method traverses only the branches that can match <paramref name="path"/>. When deduplication is enabled, the returned value can be larger than the final emitted value count because overlapping patterns may reach the same value.
     /// </remarks>
     public int GetMatchCountUpperBound(ReadOnlySpan<TSegment> path)
-    {
-        return !_hasWildcardBranches
-            ? CountExactOnly(path)
-            : CountExact(path);
-    }
+        => CreateTraversal().CountCandidates(path, CandidateTraversalKind.Exact);
 
     /// <summary>
     /// Gets a path-specific upper bound for the number of prefix matching values that matching this path can emit.
@@ -214,39 +198,44 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// This method traverses only the prefix branches that can match <paramref name="path"/>. When deduplication is enabled, the returned value can be larger than the final emitted value count because overlapping patterns may reach the same value.
     /// </remarks>
     public int GetPrefixMatchCountUpperBound(ReadOnlySpan<TSegment> path)
-    {
-        return CountBestPrefixCandidates(path);
-    }
+        => CreateTraversal().CountBestPrefixCandidates(path);
 
     /// <summary>Attempts exact matching into a caller-provided result span.</summary>
     public bool TryMatch(ReadOnlySpan<TSegment> path, Span<PatternMatch<TValue>> destination, out int written)
     {
-        return TryWritePathCandidates(path, prefix: false, bestPrefix: false, destination, out written);
+        return TryWritePathCandidates(path, CandidateTraversalKind.Exact, bestPrefix: false, destination, out written);
     }
 
     /// <summary>Returns all exact matches as owning result values.</summary>
     public PatternMatch<TValue>[] MatchToArray(ReadOnlySpan<TSegment> path)
     {
-        var candidates = CollectCandidates(path, prefix: false);
+        using var candidates = CreateTraversal().TraverseCandidates(
+            path,
+            CandidateTraversalKind.Exact,
+            bestPrefix: false);
         var results = new PatternMatch<TValue>[candidates.Count];
         var writer = new ResultMatchWriter<TValue>(results, _deduplicateValues, _valueComparer, throwOnInsufficientCapacity: true);
-        WriteCandidates(candidates, ref writer);
+        WriteCandidates(candidates.Candidates, ref writer);
         return writer.Count == results.Length ? results : results[..writer.Count];
     }
 
     /// <summary>Attempts exact value-only matching.</summary>
     public bool TryMatchValues(ReadOnlySpan<TSegment> path, Span<TValue> destination, out int written)
-        => TryWriteExactValueCandidates(path, destination, out written);
+        => TryWritePathValues(path, CandidateTraversalKind.Exact, bestPrefix: false, destination, out written);
 
     /// <summary>Returns exact values without constructing result descriptors.</summary>
     public TValue[] MatchValuesToArray(ReadOnlySpan<TSegment> path)
     {
-        var candidates = CollectCandidates(path, prefix: false);
+        using var candidates = CreateTraversal().TraverseCandidates(
+            path,
+            CandidateTraversalKind.Exact,
+            bestPrefix: false);
         var values = new TValue[candidates.Count];
         var writer = new SpanMatchWriter<TValue>(values, _deduplicateValues, _valueComparer, throwOnInsufficientCapacity: true);
-        foreach (var candidate in candidates)
+        var selected = candidates.Candidates;
+        for (var i = 0; i < selected.Length; i++)
         {
-            writer.AddValue(candidate.Value);
+            writer.AddValue(selected[i].Value);
         }
 
         return writer.Count == values.Length ? values : values[..writer.Count];
@@ -254,17 +243,21 @@ public sealed class PattrnIndex<TSegment, TValue>
 
     /// <summary>Attempts best-prefix value-only matching.</summary>
     public bool TryMatchPrefixValues(ReadOnlySpan<TSegment> path, Span<TValue> destination, out int written)
-        => TryWritePathValues(path, prefix: true, bestPrefix: true, destination, out written);
+        => TryWritePathValues(path, CandidateTraversalKind.AllPrefix, bestPrefix: true, destination, out written);
 
     /// <summary>Returns values from the deepest accepted prefix level.</summary>
     public TValue[] MatchPrefixValuesToArray(ReadOnlySpan<TSegment> path)
     {
-        var candidates = SelectBestPrefixCandidates(path);
+        using var candidates = CreateTraversal().TraverseCandidates(
+            path,
+            CandidateTraversalKind.AllPrefix,
+            bestPrefix: true);
         var values = new TValue[candidates.Count];
         var writer = new SpanMatchWriter<TValue>(values, _deduplicateValues, _valueComparer, throwOnInsufficientCapacity: true);
-        foreach (var candidate in candidates)
+        var selected = candidates.Candidates;
+        for (var i = 0; i < selected.Length; i++)
         {
-            writer.AddValue(candidate.Value);
+            writer.AddValue(selected[i].Value);
         }
 
         return writer.Count == values.Length ? values : values[..writer.Count];
@@ -272,17 +265,21 @@ public sealed class PattrnIndex<TSegment, TValue>
 
     /// <summary>Attempts all-prefix value-only enumeration.</summary>
     public bool TryEnumeratePrefixValues(ReadOnlySpan<TSegment> path, Span<TValue> destination, out int written)
-        => TryWritePathValues(path, prefix: true, bestPrefix: false, destination, out written);
+        => TryWritePathValues(path, CandidateTraversalKind.AllPrefix, bestPrefix: false, destination, out written);
 
     /// <summary>Returns values from every accepted prefix level.</summary>
     public TValue[] EnumeratePrefixValuesToArray(ReadOnlySpan<TSegment> path)
     {
-        var candidates = CollectCandidates(path, prefix: true);
+        using var candidates = CreateTraversal().TraverseCandidates(
+            path,
+            CandidateTraversalKind.AllPrefix,
+            bestPrefix: false);
         var values = new TValue[candidates.Count];
         var writer = new SpanMatchWriter<TValue>(values, _deduplicateValues, _valueComparer, throwOnInsufficientCapacity: true);
-        foreach (var candidate in candidates)
+        var selected = candidates.Candidates;
+        for (var i = 0; i < selected.Length; i++)
         {
-            writer.AddValue(candidate.Value);
+            writer.AddValue(selected[i].Value);
         }
 
         return writer.Count == values.Length ? values : values[..writer.Count];
@@ -291,106 +288,48 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// <summary>Attempts best-prefix matching into a caller-provided result span.</summary>
     public bool TryMatchPrefix(ReadOnlySpan<TSegment> path, Span<PatternMatch<TValue>> destination, out int written)
     {
-        return TryWritePathCandidates(path, prefix: true, bestPrefix: true, destination, out written);
+        return TryWritePathCandidates(path, CandidateTraversalKind.AllPrefix, bestPrefix: true, destination, out written);
     }
 
     /// <summary>Returns only the deepest accepted prefix matches.</summary>
     public PatternMatch<TValue>[] MatchPrefixToArray(ReadOnlySpan<TSegment> path)
     {
-        var candidates = SelectBestPrefixCandidates(path);
+        using var candidates = CreateTraversal().TraverseCandidates(
+            path,
+            CandidateTraversalKind.AllPrefix,
+            bestPrefix: true);
         var results = new PatternMatch<TValue>[candidates.Count];
         var writer = new ResultMatchWriter<TValue>(results, _deduplicateValues, _valueComparer, throwOnInsufficientCapacity: true);
-        WriteCandidates(candidates, ref writer);
+        WriteCandidates(candidates.Candidates, ref writer);
         return writer.Count == results.Length ? results : results[..writer.Count];
     }
 
     /// <summary>Gets an upper bound for all-prefix enumeration result matches.</summary>
     public int GetEnumeratePrefixMatchCountUpperBound(ReadOnlySpan<TSegment> path)
-    {
-        return CountPrefix(path);
-    }
+        => CreateTraversal().CountCandidates(path, CandidateTraversalKind.AllPrefix);
 
     /// <summary>Attempts all-prefix enumeration into a caller-provided result span.</summary>
     public bool TryEnumeratePrefixMatches(ReadOnlySpan<TSegment> path, Span<PatternMatch<TValue>> destination, out int written)
     {
-        return TryWritePathCandidates(path, prefix: true, bestPrefix: false, destination, out written);
+        return TryWritePathCandidates(path, CandidateTraversalKind.AllPrefix, bestPrefix: false, destination, out written);
     }
 
     /// <summary>Returns every accepted prefix match, from the root outward.</summary>
     public PatternMatch<TValue>[] EnumeratePrefixMatchesToArray(ReadOnlySpan<TSegment> path)
     {
-        var candidates = CollectCandidates(path, prefix: true);
+        using var candidates = CreateTraversal().TraverseCandidates(
+            path,
+            CandidateTraversalKind.AllPrefix,
+            bestPrefix: false);
         var results = new PatternMatch<TValue>[candidates.Count];
         var writer = new ResultMatchWriter<TValue>(results, _deduplicateValues, _valueComparer, throwOnInsufficientCapacity: true);
-        WriteCandidates(candidates, ref writer);
+        WriteCandidates(candidates.Candidates, ref writer);
         return writer.Count == results.Length ? results : results[..writer.Count];
-    }
-
-    private bool TryMatchExactOnlyDirect(ReadOnlySpan<TSegment> path, Span<TValue> destination, out int written)
-    {
-        var nodeIndex = TryDescendExactOnly(path);
-        if (nodeIndex == CompiledNode.NoNode)
-        {
-            written = 0;
-            return true;
-        }
-
-        var values = GetValues(nodeIndex);
-        if (values.Length > destination.Length)
-        {
-            written = 0;
-            return false;
-        }
-
-        values.CopyTo(destination);
-        written = values.Length;
-        return true;
-    }
-
-    private int MatchDetailedExactOnlyDirect(ReadOnlySpan<TSegment> path, Span<PatternMatchDetailedSlice<TValue>> matches)
-    {
-        var nodeIndex = TryDescendExactOnly(path);
-        if (nodeIndex == CompiledNode.NoNode)
-        {
-            return 0;
-        }
-
-        var values = GetValues(nodeIndex);
-        if (values.Length > matches.Length)
-        {
-            throw new ArgumentException("The destination match or capture span is too small for the match result.");
-        }
-
-        var details = GetValueDetails(nodeIndex);
-        for (var i = 0; i < values.Length; i++)
-        {
-            ref readonly var detail = ref details[i];
-            matches[i] = new PatternMatchDetailedSlice<TValue>(
-                values[i],
-                detail.RegistrationId,
-                path.Length,
-                CaptureStart: 0,
-                CaptureCount: 0);
-        }
-
-        return values.Length;
-    }
-
-    private void CollectPrefixValues(ReadOnlySpan<TSegment> path, ref SpanMatchWriter<TValue> writer)
-    {
-        if (!_hasWildcardBranches)
-        {
-            CollectPrefixExactOnly(path, ref writer);
-        }
-        else
-        {
-            CollectPrefix(path, ref writer);
-        }
     }
 
     private int GetDetailedMatchCountUpperBound(ReadOnlySpan<TSegment> path)
     {
-        return CountExact(path);
+        return CreateTraversal().CountCandidates(path, CandidateTraversalKind.Exact);
     }
 
     /// <summary>
@@ -400,7 +339,7 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// <returns>A safe upper bound for a capture destination span used with <see cref="MatchDetailed(ReadOnlySpan{TSegment}, Span{PatternMatchDetailedSlice{TValue}}, Span{PatternCaptureSlice{TSegment}}, out int)"/>.</returns>
     public int GetCaptureCountUpperBound(ReadOnlySpan<TSegment> path)
     {
-        return CountExactCaptures(path);
+        return CreateTraversal().CountCaptures(path, CandidateTraversalKind.Exact);
     }
 
     /// <summary>
@@ -410,7 +349,7 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// <returns>A safe upper bound for a capture destination span used with <see cref="MatchPrefixDetailed(ReadOnlySpan{TSegment}, Span{PatternMatchDetailedSlice{TValue}}, Span{PatternCaptureSlice{TSegment}}, out int)"/>.</returns>
     public int GetPrefixCaptureCountUpperBound(ReadOnlySpan<TSegment> path)
     {
-        return CountBestPrefixCaptures(path);
+        return CreateTraversal().CountBestPrefixCaptures(path);
     }
 
     /// <summary>
@@ -420,7 +359,7 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// <returns>A safe upper bound for a capture destination span used with <see cref="EnumeratePrefixDetailed(ReadOnlySpan{TSegment}, Span{PatternMatchDetailedSlice{TValue}}, Span{PatternCaptureSlice{TSegment}}, out int)"/>.</returns>
     public int GetEnumeratePrefixCaptureCountUpperBound(ReadOnlySpan<TSegment> path)
     {
-        return CountPrefixCaptures(path);
+        return CreateTraversal().CountCaptures(path, CandidateTraversalKind.AllPrefix);
     }
 
     /// <summary>
@@ -462,7 +401,7 @@ public sealed class PattrnIndex<TSegment, TValue>
         out int matchesWritten,
         out int capturesWritten)
     {
-        return TryWritePathDetailedCandidates(path, prefix: false, bestPrefix: false, matches, captures, out matchesWritten, out capturesWritten);
+        return TryWritePathDetailedCandidates(path, CandidateTraversalKind.Exact, bestPrefix: false, matches, captures, out matchesWritten, out capturesWritten);
     }
 
     /// <summary>
@@ -472,7 +411,11 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// <returns>An array containing all detailed matches.</returns>
     public PatternMatchDetailed<TSegment, TValue>[] MatchDetailedToArray(ReadOnlySpan<TSegment> path)
     {
-        return MaterializeDetailed(CollectCandidates(path, prefix: false), path);
+        using var candidates = CreateTraversal().TraverseCandidates(
+            path,
+            CandidateTraversalKind.Exact,
+            bestPrefix: false);
+        return MaterializeDetailed(candidates.Candidates, candidates.CaptureCountUpperBound, path);
     }
 
     /// <summary>Attempts best-prefix detailed matching into caller-provided buffers.</summary>
@@ -482,7 +425,7 @@ public sealed class PattrnIndex<TSegment, TValue>
         Span<PatternCaptureSlice<TSegment>> captures,
         out int matchesWritten,
         out int capturesWritten)
-        => TryWritePathDetailedCandidates(path, prefix: true, bestPrefix: true, matches, captures, out matchesWritten, out capturesWritten);
+        => TryWritePathDetailedCandidates(path, CandidateTraversalKind.AllPrefix, bestPrefix: true, matches, captures, out matchesWritten, out capturesWritten);
 
     /// <summary>Writes best-prefix detailed matches into caller-provided buffers.</summary>
     public int MatchPrefixDetailed(
@@ -501,7 +444,13 @@ public sealed class PattrnIndex<TSegment, TValue>
 
     /// <summary>Returns owning best-prefix detailed matches.</summary>
     public PatternMatchDetailed<TSegment, TValue>[] MatchPrefixDetailedToArray(ReadOnlySpan<TSegment> path)
-        => MaterializeDetailed(SelectBestPrefixCandidates(path), path);
+    {
+        using var candidates = CreateTraversal().TraverseCandidates(
+            path,
+            CandidateTraversalKind.AllPrefix,
+            bestPrefix: true);
+        return MaterializeDetailed(candidates.Candidates, candidates.CaptureCountUpperBound, path);
+    }
 
     /// <summary>Attempts all-prefix detailed enumeration into caller-provided buffers.</summary>
     public bool TryEnumeratePrefixDetailed(
@@ -510,7 +459,7 @@ public sealed class PattrnIndex<TSegment, TValue>
         Span<PatternCaptureSlice<TSegment>> captures,
         out int matchesWritten,
         out int capturesWritten)
-        => TryWritePathDetailedCandidates(path, prefix: true, bestPrefix: false, matches, captures, out matchesWritten, out capturesWritten);
+        => TryWritePathDetailedCandidates(path, CandidateTraversalKind.AllPrefix, bestPrefix: false, matches, captures, out matchesWritten, out capturesWritten);
 
     /// <summary>Writes all-prefix detailed matches into caller-provided buffers.</summary>
     public int EnumeratePrefixDetailed(
@@ -529,70 +478,12 @@ public sealed class PattrnIndex<TSegment, TValue>
 
     /// <summary>Returns owning all-prefix detailed matches.</summary>
     public PatternMatchDetailed<TSegment, TValue>[] EnumeratePrefixDetailedToArray(ReadOnlySpan<TSegment> path)
-        => MaterializeDetailed(CollectCandidates(path, prefix: true), path);
-
-    private bool TryMatchDetailedExactOnlyDirect(
-        ReadOnlySpan<TSegment> path,
-        Span<PatternMatchDetailedSlice<TValue>> matches,
-        out int matchesWritten)
     {
-        var nodeIndex = TryDescendExactOnly(path);
-        if (nodeIndex == CompiledNode.NoNode)
-        {
-            matchesWritten = 0;
-            return true;
-        }
-
-        var values = GetValues(nodeIndex);
-        if (values.Length > matches.Length)
-        {
-            matchesWritten = 0;
-            return false;
-        }
-
-        var details = GetValueDetails(nodeIndex);
-        for (var i = 0; i < values.Length; i++)
-        {
-            ref readonly var detail = ref details[i];
-            matches[i] = new PatternMatchDetailedSlice<TValue>(
-                values[i],
-                detail.RegistrationId,
-                path.Length,
-                CaptureStart: 0,
-                CaptureCount: 0);
-        }
-
-        matchesWritten = values.Length;
-        return true;
-    }
-
-    private PatternMatchDetailed<TSegment, TValue>[] MatchDetailedExactOnlyToArray(ReadOnlySpan<TSegment> path)
-    {
-        var nodeIndex = TryDescendExactOnly(path);
-        if (nodeIndex == CompiledNode.NoNode)
-        {
-            return [];
-        }
-
-        var values = GetValues(nodeIndex);
-        if (values.IsEmpty)
-        {
-            return [];
-        }
-
-        var details = GetValueDetails(nodeIndex);
-        var results = new PatternMatchDetailed<TSegment, TValue>[values.Length];
-        for (var i = 0; i < values.Length; i++)
-        {
-            ref readonly var detail = ref details[i];
-            results[i] = new PatternMatchDetailed<TSegment, TValue>(
-                values[i],
-                detail.RegistrationId,
-                path.Length,
-                []);
-        }
-
-        return results;
+        using var candidates = CreateTraversal().TraverseCandidates(
+            path,
+            CandidateTraversalKind.AllPrefix,
+            bestPrefix: false);
+        return MaterializeDetailed(candidates.Candidates, candidates.CaptureCountUpperBound, path);
     }
 
     /// <summary>
@@ -626,788 +517,8 @@ public sealed class PattrnIndex<TSegment, TValue>
             captureUpperBound);
     }
 
-    private ReadOnlySpan<TValue> GetValues(int nodeIndex)
-    {
-        ref readonly var node = ref _nodes[nodeIndex];
-        return _values.AsSpan(node.FirstValue, node.ValueCount);
-    }
-
-    private ReadOnlySpan<CompiledValueDetail> GetValueDetails(int nodeIndex)
-    {
-        ref readonly var node = ref _nodes[nodeIndex];
-        return _valueDetails.AsSpan(node.FirstValue, node.ValueCount);
-    }
-
-    private int GetCaptureCount(int nodeIndex, int pathLength)
-    {
-        var count = 0;
-        var details = GetValueDetails(nodeIndex);
-        for (var i = 0; i < details.Length; i++)
-        {
-            ref readonly var detail = ref details[i];
-            count += detail.CaptureCount;
-        }
-
-        return count;
-    }
-
-    private int GetValueCountIncludingTerminalCatchAll(int nodeIndex)
-    {
-        var count = GetValues(nodeIndex).Length;
-        ref readonly var node = ref _nodes[nodeIndex];
-        if (node.CatchAllChild != CompiledNode.NoNode)
-        {
-            count += GetValues(node.CatchAllChild).Length;
-        }
-
-        return count;
-    }
-
-    private int GetCaptureCountIncludingTerminalCatchAll(int nodeIndex, int pathLength)
-    {
-        var count = GetCaptureCount(nodeIndex, pathLength);
-        ref readonly var node = ref _nodes[nodeIndex];
-        if (node.CatchAllChild != CompiledNode.NoNode)
-        {
-            count += GetCaptureCount(node.CatchAllChild, pathLength);
-        }
-
-        return count;
-    }
-
-    private void AddValuesIncludingTerminalCatchAll(int nodeIndex, MatchAccumulator<TValue> accumulator)
-    {
-        accumulator.Add(GetValues(nodeIndex), _deduplicateValues);
-        ref readonly var node = ref _nodes[nodeIndex];
-        if (node.CatchAllChild != CompiledNode.NoNode)
-        {
-            accumulator.Add(GetValues(node.CatchAllChild), _deduplicateValues);
-        }
-    }
-
-    private void AddValuesIncludingTerminalCatchAll(int nodeIndex, ref SpanMatchWriter<TValue> writer)
-    {
-        writer.Add(GetValues(nodeIndex), _deduplicateValues);
-        if (!writer.Succeeded)
-        {
-            return;
-        }
-
-        ref readonly var node = ref _nodes[nodeIndex];
-        if (node.CatchAllChild != CompiledNode.NoNode)
-        {
-            writer.Add(GetValues(node.CatchAllChild), _deduplicateValues);
-        }
-    }
-
-    private void AddDetailedValuesIncludingTerminalCatchAll(
-        int nodeIndex,
-        ref DetailedMatchWriter<TSegment, TValue> writer,
-        int consumedSegmentCount)
-    {
-        AddDetailedValues(nodeIndex, ref writer, consumedSegmentCount);
-        if (!writer.Succeeded)
-        {
-            return;
-        }
-
-        ref readonly var node = ref _nodes[nodeIndex];
-        if (node.CatchAllChild != CompiledNode.NoNode)
-        {
-            AddDetailedValues(node.CatchAllChild, ref writer, consumedSegmentCount);
-        }
-    }
-
-    private bool TryGetExactChild(int nodeIndex, TSegment segment, out int childNodeIndex)
-    {
-        ref readonly var node = ref _nodes[nodeIndex];
-
-        if (node.HasLookup)
-        {
-            return TryGetExactChildFromLookup(in node, segment, out childNodeIndex);
-        }
-
-        return TryGetExactChildByLinearScan(in node, segment, out childNodeIndex);
-    }
-
-    private bool TryGetExactChildFromLookup(in CompiledNode node, TSegment segment, out int childNodeIndex)
-    {
-        var slotOffset = _segmentComparer.GetHashCode(segment) & node.LookupMask;
-
-        for (var probeCount = 0; probeCount <= node.LookupMask; probeCount++)
-        {
-            var childIndex = _childLookupSlots[node.FirstLookupSlot + slotOffset];
-            if (childIndex == CompiledNode.NoNode)
-            {
-                break;
-            }
-
-            ref readonly var child = ref _children[childIndex];
-            if (_segmentComparer.Equals(child.Segment, segment))
-            {
-                childNodeIndex = child.NodeIndex;
-                return true;
-            }
-
-            slotOffset = (slotOffset + 1) & node.LookupMask;
-        }
-
-        childNodeIndex = CompiledNode.NoNode;
-        return false;
-    }
-
-    private bool TryGetExactChildByLinearScan(in CompiledNode node, TSegment segment, out int childNodeIndex)
-    {
-        var end = node.FirstChild + node.ChildCount;
-
-        for (var i = node.FirstChild; i < end; i++)
-        {
-            ref readonly var child = ref _children[i];
-            if (!_segmentComparer.Equals(child.Segment, segment))
-            {
-                continue;
-            }
-
-            childNodeIndex = child.NodeIndex;
-            return true;
-        }
-
-        childNodeIndex = CompiledNode.NoNode;
-        return false;
-    }
-
-    private int TryDescendExactOnly(ReadOnlySpan<TSegment> path)
-    {
-        var nodeIndex = 0;
-
-        for (var depth = 0; depth < path.Length; depth++)
-        {
-            if (!TryGetExactChild(nodeIndex, path[depth], out var childNodeIndex))
-            {
-                return CompiledNode.NoNode;
-            }
-
-            nodeIndex = childNodeIndex;
-        }
-
-        return nodeIndex;
-    }
-
-    private int CountExactOnlyCaptures(ReadOnlySpan<TSegment> path)
-    {
-        var nodeIndex = TryDescendExactOnly(path);
-        return nodeIndex == CompiledNode.NoNode ? 0 : GetCaptureCount(nodeIndex, path.Length);
-    }
-
-    private int CountPrefixExactOnlyCaptures(ReadOnlySpan<TSegment> path)
-    {
-        var nodeIndex = 0;
-        var count = GetCaptureCount(nodeIndex, path.Length);
-
-        for (var depth = 0; depth < path.Length; depth++)
-        {
-            if (!TryGetExactChild(nodeIndex, path[depth], out var childNodeIndex))
-            {
-                return count;
-            }
-
-            nodeIndex = childNodeIndex;
-            count += GetCaptureCount(nodeIndex, path.Length);
-        }
-
-        return count;
-    }
-
-    private int CountExactOnly(ReadOnlySpan<TSegment> path)
-    {
-        var nodeIndex = TryDescendExactOnly(path);
-        return nodeIndex == CompiledNode.NoNode ? 0 : GetValues(nodeIndex).Length;
-    }
-
-    private int CountPrefixExactOnly(ReadOnlySpan<TSegment> path)
-    {
-        var nodeIndex = 0;
-        var count = GetValues(nodeIndex).Length;
-
-        for (var depth = 0; depth < path.Length; depth++)
-        {
-            if (!TryGetExactChild(nodeIndex, path[depth], out var childNodeIndex))
-            {
-                return count;
-            }
-
-            nodeIndex = childNodeIndex;
-            count += GetValues(nodeIndex).Length;
-        }
-
-        return count;
-    }
-
-    private void CollectExactOnly(ReadOnlySpan<TSegment> path, MatchAccumulator<TValue> accumulator)
-    {
-        var nodeIndex = TryDescendExactOnly(path);
-        if (nodeIndex != CompiledNode.NoNode)
-        {
-            accumulator.Add(GetValues(nodeIndex), _deduplicateValues);
-        }
-    }
-
-    private void CollectPrefixExactOnly(ReadOnlySpan<TSegment> path, MatchAccumulator<TValue> accumulator)
-    {
-        var nodeIndex = 0;
-        accumulator.Add(GetValues(nodeIndex), _deduplicateValues);
-
-        for (var depth = 0; depth < path.Length; depth++)
-        {
-            if (!TryGetExactChild(nodeIndex, path[depth], out var childNodeIndex))
-            {
-                return;
-            }
-
-            nodeIndex = childNodeIndex;
-            accumulator.Add(GetValues(nodeIndex), _deduplicateValues);
-        }
-    }
-
-    private void CollectExactOnly(ReadOnlySpan<TSegment> path, ref SpanMatchWriter<TValue> writer)
-    {
-        var nodeIndex = TryDescendExactOnly(path);
-        if (nodeIndex != CompiledNode.NoNode)
-        {
-            writer.Add(GetValues(nodeIndex), _deduplicateValues);
-        }
-    }
-
-    private void CollectPrefixExactOnly(ReadOnlySpan<TSegment> path, ref SpanMatchWriter<TValue> writer)
-    {
-        var nodeIndex = 0;
-        writer.Add(GetValues(nodeIndex), _deduplicateValues);
-        if (!writer.Succeeded)
-        {
-            return;
-        }
-
-        for (var depth = 0; depth < path.Length; depth++)
-        {
-            if (!TryGetExactChild(nodeIndex, path[depth], out var childNodeIndex))
-            {
-                return;
-            }
-
-            nodeIndex = childNodeIndex;
-            writer.Add(GetValues(nodeIndex), _deduplicateValues);
-            if (!writer.Succeeded)
-            {
-                return;
-            }
-        }
-    }
-
-    private int CountExactCaptures(ReadOnlySpan<TSegment> path)
-    {
-        var count = 0;
-        Span<TraversalFrame> initialFrames = stackalloc TraversalFrame[64];
-        var stack = new TraversalStack(initialFrames);
-        stack.Push(new TraversalFrame(0, 0));
-
-        try
-        {
-            while (!stack.IsEmpty)
-            {
-                var frame = stack.Pop();
-
-                if (frame.Depth == path.Length)
-                {
-                    count += GetCaptureCountIncludingTerminalCatchAll(frame.NodeIndex, path.Length);
-                    continue;
-                }
-
-                PushMatchingChildren(ref stack, frame.NodeIndex, path[frame.Depth], frame.Depth + 1, path.Length);
-            }
-        }
-        finally
-        {
-            stack.Dispose();
-        }
-
-        return count;
-    }
-
-    private int CountPrefixCaptures(ReadOnlySpan<TSegment> path)
-    {
-        var count = 0;
-        Span<TraversalFrame> initialFrames = stackalloc TraversalFrame[64];
-        var stack = new TraversalStack(initialFrames);
-        stack.Push(new TraversalFrame(0, 0));
-
-        try
-        {
-            while (!stack.IsEmpty)
-            {
-                var frame = stack.Pop();
-
-                if (frame.Depth == path.Length)
-                {
-                    count += GetCaptureCountIncludingTerminalCatchAll(frame.NodeIndex, path.Length);
-                    continue;
-                }
-
-                count += GetCaptureCount(frame.NodeIndex, path.Length);
-                PushMatchingChildren(ref stack, frame.NodeIndex, path[frame.Depth], frame.Depth + 1, path.Length);
-            }
-        }
-        finally
-        {
-            stack.Dispose();
-        }
-
-        return count;
-    }
-
-    private void AddDetailedValues(int nodeIndex, ref DetailedMatchWriter<TSegment, TValue> writer, int consumedSegmentCount)
-    {
-        writer.Add(GetValues(nodeIndex), GetValueDetails(nodeIndex), _captureDescriptors, consumedSegmentCount);
-    }
-
-    private void CollectDetailedExactOnly(ReadOnlySpan<TSegment> path, ref DetailedMatchWriter<TSegment, TValue> writer)
-    {
-        var nodeIndex = TryDescendExactOnly(path);
-        if (nodeIndex != CompiledNode.NoNode)
-        {
-            AddDetailedValues(nodeIndex, ref writer, path.Length);
-        }
-    }
-
-    private void CollectPrefixDetailedExactOnly(ReadOnlySpan<TSegment> path, ref DetailedMatchWriter<TSegment, TValue> writer)
-    {
-        var nodeIndex = 0;
-        AddDetailedValues(nodeIndex, ref writer, 0);
-        if (!writer.Succeeded)
-        {
-            return;
-        }
-
-        for (var depth = 0; depth < path.Length; depth++)
-        {
-            if (!TryGetExactChild(nodeIndex, path[depth], out var childNodeIndex))
-            {
-                return;
-            }
-
-            nodeIndex = childNodeIndex;
-            AddDetailedValues(nodeIndex, ref writer, depth + 1);
-            if (!writer.Succeeded)
-            {
-                return;
-            }
-        }
-    }
-
-    private void CollectDetailedWildcard(ReadOnlySpan<TSegment> path, ref DetailedMatchWriter<TSegment, TValue> writer)
-    {
-        Span<TraversalFrame> initialFrames = stackalloc TraversalFrame[64];
-        var stack = new TraversalStack(initialFrames);
-        stack.Push(new TraversalFrame(0, 0));
-
-        try
-        {
-            while (!stack.IsEmpty)
-            {
-                var frame = stack.Pop();
-
-                if (frame.Depth == path.Length)
-                {
-                    AddDetailedValuesIncludingTerminalCatchAll(frame.NodeIndex, ref writer, path.Length);
-                    if (!writer.Succeeded)
-                    {
-                        return;
-                    }
-
-                    continue;
-                }
-
-                PushMatchingChildren(ref stack, frame.NodeIndex, path[frame.Depth], frame.Depth + 1, path.Length);
-            }
-        }
-        finally
-        {
-            stack.Dispose();
-        }
-    }
-
-    private void CollectPrefixDetailed(ReadOnlySpan<TSegment> path, ref DetailedMatchWriter<TSegment, TValue> writer)
-    {
-        Span<TraversalFrame> initialFrames = stackalloc TraversalFrame[64];
-        var stack = new TraversalStack(initialFrames);
-        stack.Push(new TraversalFrame(0, 0));
-
-        try
-        {
-            while (!stack.IsEmpty)
-            {
-                var frame = stack.Pop();
-                if (frame.Depth == path.Length)
-                {
-                    AddDetailedValuesIncludingTerminalCatchAll(frame.NodeIndex, ref writer, path.Length);
-                    if (!writer.Succeeded)
-                    {
-                        return;
-                    }
-
-                    continue;
-                }
-
-                AddDetailedValues(frame.NodeIndex, ref writer, frame.Depth);
-                if (!writer.Succeeded)
-                {
-                    return;
-                }
-
-                PushMatchingChildren(ref stack, frame.NodeIndex, path[frame.Depth], frame.Depth + 1, path.Length);
-            }
-        }
-        finally
-        {
-            stack.Dispose();
-        }
-    }
-
-    private int CountExact(ReadOnlySpan<TSegment> path)
-    {
-        var count = 0;
-        Span<TraversalFrame> initialFrames = stackalloc TraversalFrame[64];
-        var stack = new TraversalStack(initialFrames);
-        stack.Push(new TraversalFrame(0, 0));
-
-        try
-        {
-            while (!stack.IsEmpty)
-            {
-                var frame = stack.Pop();
-
-                if (frame.Depth == path.Length)
-                {
-                    count += GetValueCountIncludingTerminalCatchAll(frame.NodeIndex);
-                    continue;
-                }
-
-                PushMatchingChildren(ref stack, frame.NodeIndex, path[frame.Depth], frame.Depth + 1, path.Length);
-            }
-        }
-        finally
-        {
-            stack.Dispose();
-        }
-
-        return count;
-    }
-
-    private int CountPrefix(ReadOnlySpan<TSegment> path)
-    {
-        var count = 0;
-        Span<TraversalFrame> initialFrames = stackalloc TraversalFrame[64];
-        var stack = new TraversalStack(initialFrames);
-        stack.Push(new TraversalFrame(0, 0));
-
-        try
-        {
-            while (!stack.IsEmpty)
-            {
-                var frame = stack.Pop();
-
-                if (frame.Depth == path.Length)
-                {
-                    count += GetValueCountIncludingTerminalCatchAll(frame.NodeIndex);
-                    continue;
-                }
-
-                count += GetValues(frame.NodeIndex).Length;
-                PushMatchingChildren(ref stack, frame.NodeIndex, path[frame.Depth], frame.Depth + 1, path.Length);
-            }
-        }
-        finally
-        {
-            stack.Dispose();
-        }
-
-        return count;
-    }
-
-    private int CountBestPrefixCandidates(ReadOnlySpan<TSegment> path)
-    {
-        var capacity = CountPrefix(path);
-        if (capacity == 0)
-        {
-            return 0;
-        }
-
-        var rented = ArrayPool<MatchCandidate<TValue>>.Shared.Rent(capacity);
-        try
-        {
-            var candidates = rented.AsSpan(0, capacity);
-            var count = CollectCandidatesInto(path, prefix: true, candidates);
-            SortCandidates(candidates[..count], prefix: true);
-            return SelectDeepestPrefixCandidates(candidates[..count]).Length;
-        }
-        finally
-        {
-            ArrayPool<MatchCandidate<TValue>>.Shared.Return(rented, clearArray: true);
-        }
-    }
-
-    private int CountBestPrefixCaptures(ReadOnlySpan<TSegment> path)
-    {
-        var capacity = CountPrefix(path);
-        if (capacity == 0)
-        {
-            return 0;
-        }
-
-        var rented = ArrayPool<MatchCandidate<TValue>>.Shared.Rent(capacity);
-        try
-        {
-            var candidates = rented.AsSpan(0, capacity);
-            var count = CollectCandidatesInto(path, prefix: true, candidates);
-            SortCandidates(candidates[..count], prefix: true);
-            var selected = SelectDeepestPrefixCandidates(candidates[..count]);
-            var captureCount = 0;
-            for (var i = 0; i < selected.Length; i++)
-            {
-                captureCount += selected[i].Detail.CaptureCount;
-            }
-
-            return captureCount;
-        }
-        finally
-        {
-            ArrayPool<MatchCandidate<TValue>>.Shared.Return(rented, clearArray: true);
-        }
-    }
-
-    private static ReadOnlySpan<MatchCandidate<TValue>> SelectDeepestPrefixCandidates(
-        Span<MatchCandidate<TValue>> candidates)
-    {
-        if (candidates.IsEmpty)
-        {
-            return ReadOnlySpan<MatchCandidate<TValue>>.Empty;
-        }
-
-        var deepestDepth = candidates[^1].ConsumedSegmentCount;
-        var first = candidates.Length - 1;
-        while (first > 0 && candidates[first - 1].ConsumedSegmentCount == deepestDepth)
-        {
-            first--;
-        }
-
-        return candidates[first..];
-    }
-
-    private void CollectExact(ReadOnlySpan<TSegment> path, MatchAccumulator<TValue> accumulator)
-    {
-        Span<TraversalFrame> initialFrames = stackalloc TraversalFrame[64];
-        var stack = new TraversalStack(initialFrames);
-        stack.Push(new TraversalFrame(0, 0));
-
-        try
-        {
-            while (!stack.IsEmpty)
-            {
-                var frame = stack.Pop();
-
-                if (frame.Depth == path.Length)
-                {
-                    AddValuesIncludingTerminalCatchAll(frame.NodeIndex, accumulator);
-                    continue;
-                }
-
-                PushMatchingChildren(ref stack, frame.NodeIndex, path[frame.Depth], frame.Depth + 1, path.Length);
-            }
-        }
-        finally
-        {
-            stack.Dispose();
-        }
-    }
-
-    private void CollectPrefix(ReadOnlySpan<TSegment> path, MatchAccumulator<TValue> accumulator)
-    {
-        Span<TraversalFrame> initialFrames = stackalloc TraversalFrame[64];
-        var stack = new TraversalStack(initialFrames);
-        stack.Push(new TraversalFrame(0, 0));
-
-        try
-        {
-            while (!stack.IsEmpty)
-            {
-                var frame = stack.Pop();
-
-                if (frame.Depth == path.Length)
-                {
-                    AddValuesIncludingTerminalCatchAll(frame.NodeIndex, accumulator);
-                    continue;
-                }
-
-                accumulator.Add(GetValues(frame.NodeIndex), _deduplicateValues);
-                PushMatchingChildren(ref stack, frame.NodeIndex, path[frame.Depth], frame.Depth + 1, path.Length);
-            }
-        }
-        finally
-        {
-            stack.Dispose();
-        }
-    }
-
-    private void CollectExact(ReadOnlySpan<TSegment> path, ref SpanMatchWriter<TValue> writer)
-    {
-        Span<TraversalFrame> initialFrames = stackalloc TraversalFrame[64];
-        var stack = new TraversalStack(initialFrames);
-        stack.Push(new TraversalFrame(0, 0));
-
-        try
-        {
-            while (!stack.IsEmpty)
-            {
-                var frame = stack.Pop();
-
-                if (frame.Depth == path.Length)
-                {
-                    AddValuesIncludingTerminalCatchAll(frame.NodeIndex, ref writer);
-                    if (!writer.Succeeded)
-                    {
-                        return;
-                    }
-
-                    continue;
-                }
-
-                PushMatchingChildren(ref stack, frame.NodeIndex, path[frame.Depth], frame.Depth + 1, path.Length);
-            }
-        }
-        finally
-        {
-            stack.Dispose();
-        }
-    }
-
-    private void CollectPrefix(ReadOnlySpan<TSegment> path, ref SpanMatchWriter<TValue> writer)
-    {
-        Span<TraversalFrame> initialFrames = stackalloc TraversalFrame[64];
-        var stack = new TraversalStack(initialFrames);
-        stack.Push(new TraversalFrame(0, 0));
-
-        try
-        {
-            while (!stack.IsEmpty)
-            {
-                var frame = stack.Pop();
-                if (frame.Depth == path.Length)
-                {
-                    AddValuesIncludingTerminalCatchAll(frame.NodeIndex, ref writer);
-                    if (!writer.Succeeded)
-                    {
-                        return;
-                    }
-
-                    continue;
-                }
-
-                writer.Add(GetValues(frame.NodeIndex), _deduplicateValues);
-                if (!writer.Succeeded)
-                {
-                    return;
-                }
-
-                PushMatchingChildren(ref stack, frame.NodeIndex, path[frame.Depth], frame.Depth + 1, path.Length);
-            }
-        }
-        finally
-        {
-            stack.Dispose();
-        }
-    }
-
-    private void PushMatchingChildren(ref TraversalStack stack, int nodeIndex, TSegment segment, int nextDepth, int terminalDepth)
-    {
-        ref readonly var node = ref _nodes[nodeIndex];
-
-        if (node.CatchAllChild != CompiledNode.NoNode)
-        {
-            stack.Push(new TraversalFrame(node.CatchAllChild, terminalDepth));
-        }
-
-        if (node.WildcardChild != CompiledNode.NoNode)
-        {
-            stack.Push(new TraversalFrame(node.WildcardChild, nextDepth));
-        }
-
-        if (TryGetExactChild(nodeIndex, segment, out var exactChildNodeIndex))
-        {
-            stack.Push(new TraversalFrame(exactChildNodeIndex, nextDepth));
-        }
-    }
-
-    private List<MatchCandidate<TValue>> SelectBestPrefixCandidates(ReadOnlySpan<TSegment> path)
-    {
-        var candidates = CollectCandidates(path, prefix: true);
-        if (candidates.Count == 0)
-        {
-            return candidates;
-        }
-
-        var depth = candidates.Max(candidate => candidate.ConsumedSegmentCount);
-        candidates.RemoveAll(candidate => candidate.ConsumedSegmentCount != depth);
-        return candidates;
-    }
-
-    private List<MatchCandidate<TValue>> CollectCandidates(ReadOnlySpan<TSegment> path, bool prefix)
-        => new MatchTraversal<TSegment, TValue>(_storage, _segmentComparer).CollectCandidates(path, prefix);
-
-    private void AddCandidates(int nodeIndex, int depth, int pathLength, List<MatchCandidate<TValue>> candidates)
-    {
-        var values = GetValues(nodeIndex);
-        var details = GetValueDetails(nodeIndex);
-        for (var i = 0; i < values.Length; i++)
-        {
-            candidates.Add(new MatchCandidate<TValue>(
-                values[i],
-                details[i],
-                depth,
-                details[i].TerminalCatchAllSegmentIndex == pathLength));
-        }
-    }
-
-    private bool TryWriteCandidates(
-        List<MatchCandidate<TValue>> candidates,
-        Span<PatternMatch<TValue>> destination,
-        out int written)
-    {
-        if (candidates.Count == 0)
-        {
-            written = 0;
-            return true;
-        }
-
-        var rented = ArrayPool<PatternMatch<TValue>>.Shared.Rent(candidates.Count);
-        try
-        {
-            var temporary = rented.AsSpan(0, candidates.Count);
-            var writer = new ResultMatchWriter<TValue>(temporary, _deduplicateValues, _valueComparer, throwOnInsufficientCapacity: false);
-            WriteCandidates(candidates, ref writer);
-            if (!writer.Succeeded || writer.Count > destination.Length)
-            {
-                written = 0;
-                return false;
-            }
-
-            temporary[..writer.Count].CopyTo(destination);
-            written = writer.Count;
-            return true;
-        }
-        finally
-        {
-            ArrayPool<PatternMatch<TValue>>.Shared.Return(rented, clearArray: true);
-        }
-    }
+    private MatchTraversal<TSegment, TValue> CreateTraversal()
+        => new(_storage, _segmentComparer);
 
     private bool TryWriteCandidates(
         ReadOnlySpan<MatchCandidate<TValue>> candidates,
@@ -1439,48 +550,6 @@ public sealed class PattrnIndex<TSegment, TValue>
         finally
         {
             ArrayPool<PatternMatch<TValue>>.Shared.Return(rented, clearArray: true);
-        }
-    }
-
-    private bool TryWriteValueCandidates(
-        List<MatchCandidate<TValue>> candidates,
-        Span<TValue> destination,
-        out int written)
-    {
-        if (candidates.Count == 0)
-        {
-            written = 0;
-            return true;
-        }
-
-        var rented = ArrayPool<TValue>.Shared.Rent(candidates.Count);
-        try
-        {
-            var temporary = rented.AsSpan(0, candidates.Count);
-            var writer = new SpanMatchWriter<TValue>(temporary, _deduplicateValues, _valueComparer, throwOnInsufficientCapacity: false);
-            foreach (var candidate in candidates)
-            {
-                writer.AddValue(candidate.Value);
-                if (!writer.Succeeded)
-                {
-                    written = 0;
-                    return false;
-                }
-            }
-
-            if (writer.Count > destination.Length)
-            {
-                written = 0;
-                return false;
-            }
-
-            temporary[..writer.Count].CopyTo(destination);
-            written = writer.Count;
-            return true;
-        }
-        finally
-        {
-            ArrayPool<TValue>.Shared.Return(rented, clearArray: true);
         }
     }
 
@@ -1528,100 +597,24 @@ public sealed class PattrnIndex<TSegment, TValue>
 
     private bool TryWritePathCandidates(
         ReadOnlySpan<TSegment> path,
-        bool prefix,
+        CandidateTraversalKind kind,
         bool bestPrefix,
         Span<PatternMatch<TValue>> destination,
         out int written)
     {
-        var capacity = prefix ? CountPrefix(path) : CountExact(path);
-        if (capacity == 0)
-        {
-            written = 0;
-            return true;
-        }
-
-        var rented = ArrayPool<MatchCandidate<TValue>>.Shared.Rent(capacity);
-        try
-        {
-            var candidates = rented.AsSpan(0, capacity);
-            var count = CollectCandidatesInto(path, prefix, candidates);
-            SortCandidates(candidates[..count], prefix);
-            var selected = bestPrefix ? SelectDeepestPrefixCandidates(candidates[..count]) : candidates[..count];
-            return TryWriteCandidates(selected, destination, out written);
-        }
-        finally
-        {
-            ArrayPool<MatchCandidate<TValue>>.Shared.Return(rented, clearArray: true);
-        }
+        using var candidates = CreateTraversal().TraverseCandidates(path, kind, bestPrefix);
+        return TryWriteCandidates(candidates.Candidates, destination, out written);
     }
 
     private bool TryWritePathValues(
         ReadOnlySpan<TSegment> path,
-        bool prefix,
+        CandidateTraversalKind kind,
         bool bestPrefix,
         Span<TValue> destination,
         out int written)
     {
-        var capacity = prefix ? CountPrefix(path) : CountExact(path);
-        if (capacity == 0)
-        {
-            written = 0;
-            return true;
-        }
-
-        var rented = ArrayPool<MatchCandidate<TValue>>.Shared.Rent(capacity);
-        try
-        {
-            var candidates = rented.AsSpan(0, capacity);
-            var count = CollectCandidatesInto(path, prefix, candidates);
-            SortCandidates(candidates[..count], prefix);
-            var selected = bestPrefix ? SelectDeepestPrefixCandidates(candidates[..count]) : candidates[..count];
-            return TryWriteValueCandidates(selected, destination, out written);
-        }
-        finally
-        {
-            ArrayPool<MatchCandidate<TValue>>.Shared.Return(rented, clearArray: true);
-        }
-    }
-
-    private bool TryWriteExactValueCandidates(
-        ReadOnlySpan<TSegment> path,
-        Span<TValue> destination,
-        out int written)
-    {
-        var capacity = CountExact(path);
-        if (capacity == 0)
-        {
-            written = 0;
-            return true;
-        }
-
-        var rented = ArrayPool<MatchCandidate<TValue>>.Shared.Rent(capacity);
-        try
-        {
-            var candidates = rented.AsSpan(0, capacity);
-            var count = CollectCandidatesInto(path, prefix: false, candidates);
-            SortCandidates(candidates[..count], prefix: false);
-            return TryWriteValueCandidates(candidates[..count], destination, out written);
-        }
-        finally
-        {
-            ArrayPool<MatchCandidate<TValue>>.Shared.Return(rented, clearArray: true);
-        }
-    }
-
-    private static void WriteCandidates(
-        List<MatchCandidate<TValue>> candidates,
-        ref ResultMatchWriter<TValue> writer)
-    {
-        foreach (var candidate in candidates)
-        {
-            writer.Add(candidate.Value, candidate.Detail, candidate.ConsumedSegmentCount);
-            if (!writer.Succeeded)
-            {
-                return;
-            }
-        }
+        using var candidates = CreateTraversal().TraverseCandidates(path, kind, bestPrefix);
+        return TryWriteValueCandidates(candidates.Candidates, destination, out written);
     }
 
     private static void WriteCandidates(
@@ -1639,156 +632,20 @@ public sealed class PattrnIndex<TSegment, TValue>
         }
     }
 
-    private int CollectCandidatesInto(
-        ReadOnlySpan<TSegment> path,
-        bool prefix,
-        Span<MatchCandidate<TValue>> destination)
-        => new MatchTraversal<TSegment, TValue>(_storage, _segmentComparer).CollectCandidatesInto(path, prefix, destination);
-
-    private int AddCandidates(
-        int nodeIndex,
-        int depth,
-        int pathLength,
-        Span<MatchCandidate<TValue>> destination,
-        int count)
-    {
-        var values = GetValues(nodeIndex);
-        var details = GetValueDetails(nodeIndex);
-        for (var i = 0; i < values.Length; i++)
-        {
-            destination[count++] = new MatchCandidate<TValue>(
-                values[i],
-                details[i],
-                depth,
-                details[i].TerminalCatchAllSegmentIndex == pathLength);
-        }
-
-        return count;
-    }
-
-    private static void SortCandidates(Span<MatchCandidate<TValue>> candidates, bool prefix)
-    {
-        for (var i = 1; i < candidates.Length; i++)
-        {
-            var candidate = candidates[i];
-            var j = i - 1;
-            while (j >= 0 && CompareCandidates(candidate, candidates[j], prefix) < 0)
-            {
-                candidates[j + 1] = candidates[j];
-                j--;
-            }
-
-            candidates[j + 1] = candidate;
-        }
-    }
-
-    private static int CompareCandidates(
-        MatchCandidate<TValue> left,
-        MatchCandidate<TValue> right,
-        bool prefix)
-    {
-        if (prefix)
-        {
-            var depth = left.ConsumedSegmentCount.CompareTo(right.ConsumedSegmentCount);
-            if (depth != 0)
-            {
-                return depth;
-            }
-        }
-
-        if (left.IsZeroLengthCatchAll != right.IsZeroLengthCatchAll)
-        {
-            return left.IsZeroLengthCatchAll ? 1 : -1;
-        }
-
-        var score = right.Detail.Score.CompareTo(left.Detail.Score);
-        return score != 0 ? score : left.Detail.RegistrationOrder.CompareTo(right.Detail.RegistrationOrder);
-    }
-
-    private bool TryWriteDetailedCandidates(
-        List<MatchCandidate<TValue>> candidates,
-        ReadOnlySpan<TSegment> path,
-        Span<PatternMatchDetailedSlice<TValue>> matches,
-        Span<PatternCaptureSlice<TSegment>> captures,
-        out int matchesWritten,
-        out int capturesWritten)
-    {
-        var captureUpperBound = 0;
-        foreach (var candidate in candidates)
-        {
-            captureUpperBound += candidate.Detail.CaptureCount;
-        }
-
-        var rentedMatches = ArrayPool<PatternMatchDetailedSlice<TValue>>.Shared.Rent(Math.Max(1, candidates.Count));
-        var rentedCaptures = ArrayPool<PatternCaptureSlice<TSegment>>.Shared.Rent(Math.Max(1, captureUpperBound));
-        try
-        {
-            var temporaryMatches = rentedMatches.AsSpan(0, candidates.Count);
-            var temporaryCaptures = rentedCaptures.AsSpan(0, captureUpperBound);
-            var matchCount = 0;
-            var captureCount = 0;
-
-            foreach (var candidate in candidates)
-            {
-                if (_deduplicateValues && ContainsValue(temporaryMatches[..matchCount], candidate.Value))
-                {
-                    continue;
-                }
-
-                var detail = candidate.Detail;
-                var captureStart = captureCount;
-                for (var i = 0; i < detail.CaptureCount; i++)
-                {
-                    var descriptor = _captureDescriptors[detail.FirstCapture + i];
-                    var segmentCount = descriptor.IsCatchAll
-                        ? Math.Max(0, path.Length - descriptor.SegmentIndex)
-                        : 1;
-                    temporaryCaptures[captureCount++] = new PatternCaptureSlice<TSegment>(
-                        descriptor.Name,
-                        descriptor.SegmentIndex,
-                        segmentCount);
-                }
-
-                temporaryMatches[matchCount++] = new PatternMatchDetailedSlice<TValue>(
-                    candidate.Value,
-                    detail.RegistrationId,
-                    candidate.ConsumedSegmentCount,
-                    captureStart,
-                    detail.CaptureCount);
-            }
-
-            if (matchCount > matches.Length || captureCount > captures.Length)
-            {
-                matchesWritten = 0;
-                capturesWritten = 0;
-                return false;
-            }
-
-            temporaryMatches[..matchCount].CopyTo(matches);
-            temporaryCaptures[..captureCount].CopyTo(captures);
-            matchesWritten = matchCount;
-            capturesWritten = captureCount;
-            return true;
-        }
-        finally
-        {
-            ArrayPool<PatternMatchDetailedSlice<TValue>>.Shared.Return(rentedMatches, clearArray: true);
-            ArrayPool<PatternCaptureSlice<TSegment>>.Shared.Return(rentedCaptures, clearArray: true);
-        }
-    }
-
     private bool TryWriteDetailedCandidates(
         ReadOnlySpan<MatchCandidate<TValue>> candidates,
+        int captureUpperBound,
         ReadOnlySpan<TSegment> path,
         Span<PatternMatchDetailedSlice<TValue>> matches,
         Span<PatternCaptureSlice<TSegment>> captures,
         out int matchesWritten,
         out int capturesWritten)
     {
-        var captureUpperBound = 0;
-        for (var i = 0; i < candidates.Length; i++)
+        if (candidates.IsEmpty)
         {
-            captureUpperBound += candidates[i].Detail.CaptureCount;
+            matchesWritten = 0;
+            capturesWritten = 0;
+            return true;
         }
 
         var rentedMatches = ArrayPool<PatternMatchDetailedSlice<TValue>>.Shared.Rent(Math.Max(1, candidates.Length));
@@ -1797,50 +654,39 @@ public sealed class PattrnIndex<TSegment, TValue>
         {
             var temporaryMatches = rentedMatches.AsSpan(0, candidates.Length);
             var temporaryCaptures = rentedCaptures.AsSpan(0, captureUpperBound);
-            var matchCount = 0;
-            var captureCount = 0;
+            var writer = new DetailedMatchWriter<TSegment, TValue>(
+                temporaryMatches,
+                temporaryCaptures,
+                path,
+                _deduplicateValues,
+                _valueComparer,
+                throwOnInsufficientCapacity: false);
 
             for (var candidateIndex = 0; candidateIndex < candidates.Length; candidateIndex++)
             {
                 var candidate = candidates[candidateIndex];
-                if (_deduplicateValues && ContainsValue(temporaryMatches[..matchCount], candidate.Value))
-                {
-                    continue;
-                }
-
-                var detail = candidate.Detail;
-                var captureStart = captureCount;
-                for (var i = 0; i < detail.CaptureCount; i++)
-                {
-                    var descriptor = _captureDescriptors[detail.FirstCapture + i];
-                    var segmentCount = descriptor.IsCatchAll
-                        ? Math.Max(0, path.Length - descriptor.SegmentIndex)
-                        : 1;
-                    temporaryCaptures[captureCount++] = new PatternCaptureSlice<TSegment>(
-                        descriptor.Name,
-                        descriptor.SegmentIndex,
-                        segmentCount);
-                }
-
-                temporaryMatches[matchCount++] = new PatternMatchDetailedSlice<TValue>(
+                writer.Add(
                     candidate.Value,
-                    detail.RegistrationId,
-                    candidate.ConsumedSegmentCount,
-                    captureStart,
-                    detail.CaptureCount);
+                    candidate.Detail,
+                    _captureDescriptors,
+                    candidate.ConsumedSegmentCount);
+                if (!writer.Succeeded)
+                {
+                    break;
+                }
             }
 
-            if (matchCount > matches.Length || captureCount > captures.Length)
+            if (!writer.Succeeded || writer.MatchCount > matches.Length || writer.CaptureCount > captures.Length)
             {
                 matchesWritten = 0;
                 capturesWritten = 0;
                 return false;
             }
 
-            temporaryMatches[..matchCount].CopyTo(matches);
-            temporaryCaptures[..captureCount].CopyTo(captures);
-            matchesWritten = matchCount;
-            capturesWritten = captureCount;
+            temporaryMatches[..writer.MatchCount].CopyTo(matches);
+            temporaryCaptures[..writer.CaptureCount].CopyTo(captures);
+            matchesWritten = writer.MatchCount;
+            capturesWritten = writer.CaptureCount;
             return true;
         }
         finally
@@ -1852,62 +698,44 @@ public sealed class PattrnIndex<TSegment, TValue>
 
     private bool TryWritePathDetailedCandidates(
         ReadOnlySpan<TSegment> path,
-        bool prefix,
+        CandidateTraversalKind kind,
         bool bestPrefix,
         Span<PatternMatchDetailedSlice<TValue>> matches,
         Span<PatternCaptureSlice<TSegment>> captures,
         out int matchesWritten,
         out int capturesWritten)
     {
-        var capacity = prefix ? CountPrefix(path) : CountExact(path);
-        if (capacity == 0)
-        {
-            matchesWritten = 0;
-            capturesWritten = 0;
-            return true;
-        }
-
-        var rented = ArrayPool<MatchCandidate<TValue>>.Shared.Rent(capacity);
-        try
-        {
-            var candidates = rented.AsSpan(0, capacity);
-            var count = CollectCandidatesInto(path, prefix, candidates);
-            SortCandidates(candidates[..count], prefix);
-            var selected = bestPrefix ? SelectDeepestPrefixCandidates(candidates[..count]) : candidates[..count];
-            return TryWriteDetailedCandidates(selected, path, matches, captures, out matchesWritten, out capturesWritten);
-        }
-        finally
-        {
-            ArrayPool<MatchCandidate<TValue>>.Shared.Return(rented, clearArray: true);
-        }
-    }
-
-    private bool ContainsValue(ReadOnlySpan<PatternMatchDetailedSlice<TValue>> matches, TValue value)
-    {
-        for (var i = 0; i < matches.Length; i++)
-        {
-            if (_valueComparer.Equals(matches[i].Value, value))
-            {
-                return true;
-            }
-        }
-
-        return false;
+        using var candidates = CreateTraversal().TraverseCandidates(path, kind, bestPrefix);
+        return TryWriteDetailedCandidates(
+            candidates.Candidates,
+            candidates.CaptureCountUpperBound,
+            path,
+            matches,
+            captures,
+            out matchesWritten,
+            out capturesWritten);
     }
 
     private PatternMatchDetailed<TSegment, TValue>[] MaterializeDetailed(
-        List<MatchCandidate<TValue>> candidates,
+        ReadOnlySpan<MatchCandidate<TValue>> candidates,
+        int captureUpperBound,
         ReadOnlySpan<TSegment> path)
     {
-        if (candidates.Count == 0)
+        if (candidates.IsEmpty)
         {
             return [];
         }
 
-        var matches = new PatternMatchDetailedSlice<TValue>[candidates.Count];
-        var captureUpperBound = candidates.Sum(candidate => candidate.Detail.CaptureCount);
+        var matches = new PatternMatchDetailedSlice<TValue>[candidates.Length];
         var captures = new PatternCaptureSlice<TSegment>[captureUpperBound];
-        if (!TryWriteDetailedCandidates(candidates, path, matches, captures, out var matchCount, out var captureCount))
+        if (!TryWriteDetailedCandidates(
+            candidates,
+            captureUpperBound,
+            path,
+            matches,
+            captures,
+            out var matchCount,
+            out var captureCount))
         {
             throw new InvalidOperationException("The internal detailed result buffer was unexpectedly too small.");
         }
@@ -1937,76 +765,4 @@ public sealed class PattrnIndex<TSegment, TValue>
         return results;
     }
 
-    private readonly struct TraversalFrame
-    {
-        internal TraversalFrame(int nodeIndex, int depth)
-        {
-            NodeIndex = nodeIndex;
-            Depth = depth;
-        }
-
-        internal int NodeIndex { get; }
-
-        internal int Depth { get; }
-    }
-
-    private ref struct TraversalStack
-    {
-        private Span<TraversalFrame> _items;
-        private TraversalFrame[]? _rentedItems;
-        private int _count;
-
-        internal TraversalStack(Span<TraversalFrame> initialItems)
-        {
-            _items = initialItems;
-            _rentedItems = null;
-            _count = 0;
-        }
-
-        internal readonly bool IsEmpty => _count == 0;
-
-        internal void Push(TraversalFrame frame)
-        {
-            if (_count == _items.Length)
-            {
-                Grow();
-            }
-
-            _items[_count] = frame;
-            _count++;
-        }
-
-        internal TraversalFrame Pop()
-        {
-            _count--;
-            return _items[_count];
-        }
-
-        internal void Dispose()
-        {
-            if (_rentedItems is not null)
-            {
-                ArrayPool<TraversalFrame>.Shared.Return(_rentedItems);
-                _rentedItems = null;
-            }
-
-            _items = default;
-            _count = 0;
-        }
-
-        private void Grow()
-        {
-            var newLength = _items.Length == 0 ? 4 : _items.Length * 2;
-            var rentedItems = ArrayPool<TraversalFrame>.Shared.Rent(newLength);
-            _items[.._count].CopyTo(rentedItems);
-
-            if (_rentedItems is not null)
-            {
-                ArrayPool<TraversalFrame>.Shared.Return(_rentedItems);
-            }
-
-            _items = rentedItems;
-            _rentedItems = rentedItems;
-        }
-    }
 }

@@ -46,6 +46,46 @@ public sealed class RankingContractTests
     }
 
     [Test]
+    public async Task SameDepthPrefixTiesUseRegistrationOrderAcrossProjections()
+    {
+        var first = PattrnRegistration<string, string>.Create(
+            [PatternSegment<string>.Literal("api"), PatternSegment<string>.Parameter("first")], "first");
+        var second = PattrnRegistration<string, string>.Create(
+            [PatternSegment<string>.Literal("api"), PatternSegment<string>.Parameter("second")], "second");
+        var index = PattrnIndex<string, string>.Compile([first, second]);
+        var path = new[] { "api", "orders", "tail" };
+
+        await AssertBestPrefixProjectionOrder(index, path, ["first", "second"]);
+        await AssertEnumeratedPrefixProjectionOrder(index, path, ["first", "second"]);
+        await Assert.That(index.MatchPrefixToArray(path).Select(match => match.RegistrationId))
+            .IsEquivalentTo([first.Id, second.Id], CollectionOrdering.Matching);
+        await Assert.That(index.EnumeratePrefixDetailedToArray(path).Select(match => match.RegistrationId))
+            .IsEquivalentTo([first.Id, second.Id], CollectionOrdering.Matching);
+    }
+
+    [Test]
+    public async Task DeduplicationPreservesTheFirstRankedCandidateAcrossProjections()
+    {
+        var wildcard = PattrnRegistration<string, string>.Create(
+            [PatternSegment<string>.Literal("api"), PatternSegment<string>.Wildcard()], "same");
+        var literal = PattrnRegistration<string, string>.Create(
+            [PatternSegment<string>.Literal("api"), PatternSegment<string>.Literal("orders")], "same");
+        var index = PattrnIndex<string, string>.Compile([wildcard, literal]);
+        var exactPath = new[] { "api", "orders" };
+        var prefixPath = new[] { "api", "orders", "tail" };
+
+        await AssertExactProjectionOrder(index, exactPath, ["same"]);
+        await AssertBestPrefixProjectionOrder(index, prefixPath, ["same"]);
+        await AssertEnumeratedPrefixProjectionOrder(index, prefixPath, ["same"]);
+        await Assert.That(index.MatchToArray(exactPath).Single().RegistrationId).IsEqualTo(literal.Id);
+        await Assert.That(index.MatchDetailedToArray(exactPath).Single().RegistrationId).IsEqualTo(literal.Id);
+        await Assert.That(index.MatchPrefixToArray(prefixPath).Single().RegistrationId).IsEqualTo(literal.Id);
+        await Assert.That(index.MatchPrefixDetailedToArray(prefixPath).Single().RegistrationId).IsEqualTo(literal.Id);
+        await Assert.That(index.EnumeratePrefixMatchesToArray(prefixPath).Single().RegistrationId).IsEqualTo(literal.Id);
+        await Assert.That(index.EnumeratePrefixDetailedToArray(prefixPath).Single().RegistrationId).IsEqualTo(literal.Id);
+    }
+
+    [Test]
     public async Task DuplicatePreservingOrderingRetainsTrueTieRegistrationOrder()
     {
         var first = PattrnRegistration<string, string>.Create(
@@ -160,4 +200,3 @@ public sealed class RankingContractTests
             .IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
 }
-
