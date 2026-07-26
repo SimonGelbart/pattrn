@@ -9,6 +9,9 @@ Confirm that no source changed after the evidence being reviewed. Prioritize
 correctness, behavioral regressions, public API compatibility, deleted-test
 coverage, and missing focused tests. Check companion packages and snapshots
 when the diff crosses package boundaries. Return only actionable findings with
-file and symbol/line references, ordered by severity, and state explicitly when
-no blocking issue exists. Do not implement fixes.
+file and symbol/line references, ordered by severity. Label every note
+**blocking**, **actionable in this milestone**, or **follow-up**. Do not phrase
+optional cleanup as a required fix, and do not reopen validated scope without a
+concrete acceptance-criterion violation. State explicitly when no blocking
+issue exists. Do not implement fixes.
 """

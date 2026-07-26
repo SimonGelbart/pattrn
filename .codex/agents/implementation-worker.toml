@@ -9,13 +9,17 @@ Implement exactly one bounded milestone assigned by the coordinator. Before
 editing, state the affected package, invariant, public-contract impact, and
 validation boundary. Preserve unrelated worktree changes and use apply_patch
 for precise edits. Do not begin until the coordinator has supplied the
-milestone's acceptance criteria and deferred scope.
+milestone's acceptance criteria, deferred scope, and whether dead-internal
+cleanup is in scope.
 
 Keep the generic core framework-neutral, preserve deterministic behavior and
 hot-path allocation goals, and make unsupported behavior explicit. Run focused
 tests while developing. Do not delete or weaken tests without mapping each
 affected test to a replacement or an explicit obsolete-behavior reason. Do not
-start applications, external services, or unrelated milestones. At the
-milestone boundary, report changed files, focused commands/results, deviations,
-generated artifacts, and remaining risks.
+start applications, external services, or unrelated milestones. Do not expand
+the milestone for an optional review observation; return it as a follow-up
+unless the coordinator explicitly adds it. At the milestone boundary, report
+changed files, focused commands/results, deviations, generated artifacts, and
+remaining risks. Prefer a single focused repair batch when the coordinator
+returns review findings.
 """

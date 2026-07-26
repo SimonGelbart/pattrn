@@ -2,7 +2,52 @@ using System.Buffers;
 
 namespace Pattrn.Internal.Matching;
 
-/// <summary>Allocation-free traversal over immutable compiled storage.</summary>
+/// <summary>Identifies the accepted path depths included in a candidate traversal.</summary>
+internal enum CandidateTraversalKind
+{
+    Exact,
+    AllPrefix
+}
+
+/// <summary>Owns a pooled, ordered candidate selection for the lifetime of a projection operation.</summary>
+internal ref struct TraversalCandidates<TValue>
+{
+    private MatchCandidate<TValue>[]? _rented;
+    private readonly int _start;
+
+    internal TraversalCandidates(
+        MatchCandidate<TValue>[] rented,
+        int start,
+        int count,
+        int captureCountUpperBound)
+    {
+        _rented = rented;
+        _start = start;
+        Count = count;
+        CaptureCountUpperBound = captureCountUpperBound;
+    }
+
+    internal readonly int Count { get; }
+
+    internal readonly int CaptureCountUpperBound { get; }
+
+    internal readonly ReadOnlySpan<MatchCandidate<TValue>> Candidates
+        => _rented is null
+            ? ReadOnlySpan<MatchCandidate<TValue>>.Empty
+            : _rented.AsSpan(_start, Count);
+
+    internal void Dispose()
+    {
+        var rented = _rented;
+        _rented = null;
+        if (rented is not null)
+        {
+            ArrayPool<MatchCandidate<TValue>>.Shared.Return(rented, clearArray: true);
+        }
+    }
+}
+
+/// <summary>Allocation-conscious traversal and ranking over immutable compiled storage.</summary>
 internal ref struct MatchTraversal<TSegment, TValue>
     where TSegment : notnull
 {
@@ -17,11 +62,45 @@ internal ref struct MatchTraversal<TSegment, TValue>
         _segmentComparer = segmentComparer;
     }
 
-    internal List<MatchCandidate<TValue>> CollectCandidates(
+    internal TraversalCandidates<TValue> TraverseCandidates(
         ReadOnlySpan<TSegment> path,
-        bool prefix)
+        CandidateTraversalKind kind,
+        bool bestPrefix)
     {
-        var candidates = new List<MatchCandidate<TValue>>();
+        var capacity = CountCandidates(path, kind);
+        if (capacity == 0)
+        {
+            return default;
+        }
+
+        var rented = ArrayPool<MatchCandidate<TValue>>.Shared.Rent(capacity);
+        try
+        {
+            var candidates = rented.AsSpan(0, capacity);
+            var count = CollectCandidatesInto(path, kind, candidates);
+            SortCandidates(candidates[..count], kind);
+
+            var start = 0;
+            if (bestPrefix)
+            {
+                var selected = SelectDeepestPrefixCandidates(candidates[..count]);
+                start = count - selected.Length;
+                count = selected.Length;
+            }
+
+            var captureCountUpperBound = CountCaptures(candidates.Slice(start, count));
+            return new TraversalCandidates<TValue>(rented, start, count, captureCountUpperBound);
+        }
+        catch
+        {
+            ArrayPool<MatchCandidate<TValue>>.Shared.Return(rented, clearArray: true);
+            throw;
+        }
+    }
+
+    internal int CountCandidates(ReadOnlySpan<TSegment> path, CandidateTraversalKind kind)
+    {
+        var count = 0;
         Span<TraversalFrame> initialFrames = stackalloc TraversalFrame[64];
         var stack = new TraversalStack(initialFrames);
         stack.Push(new TraversalFrame(0, 0));
@@ -33,19 +112,13 @@ internal ref struct MatchTraversal<TSegment, TValue>
                 var frame = stack.Pop();
                 if (frame.Depth == path.Length)
                 {
-                    AddCandidates(frame.NodeIndex, frame.Depth, path.Length, candidates);
-                    ref readonly var node = ref _index.Nodes[frame.NodeIndex];
-                    if (node.CatchAllChild != CompiledNode.NoNode)
-                    {
-                        AddCandidates(node.CatchAllChild, frame.Depth, path.Length, candidates);
-                    }
-
+                    count += GetValueCountIncludingTerminalCatchAll(frame.NodeIndex);
                     continue;
                 }
 
-                if (prefix)
+                if (kind == CandidateTraversalKind.AllPrefix)
                 {
-                    AddCandidates(frame.NodeIndex, frame.Depth, path.Length, candidates);
+                    count += GetValueCount(frame.NodeIndex);
                 }
 
                 ref readonly var currentNode = ref _index.Nodes[frame.NodeIndex];
@@ -70,13 +143,72 @@ internal ref struct MatchTraversal<TSegment, TValue>
             stack.Dispose();
         }
 
-        candidates.Sort((left, right) => CompareCandidates(left, right, prefix));
-        return candidates;
+        return count;
     }
 
-    internal int CollectCandidatesInto(
+    internal int CountCaptures(ReadOnlySpan<TSegment> path, CandidateTraversalKind kind)
+    {
+        var count = 0;
+        Span<TraversalFrame> initialFrames = stackalloc TraversalFrame[64];
+        var stack = new TraversalStack(initialFrames);
+        stack.Push(new TraversalFrame(0, 0));
+
+        try
+        {
+            while (!stack.IsEmpty)
+            {
+                var frame = stack.Pop();
+                if (frame.Depth == path.Length)
+                {
+                    count += GetCaptureCountIncludingTerminalCatchAll(frame.NodeIndex);
+                    continue;
+                }
+
+                if (kind == CandidateTraversalKind.AllPrefix)
+                {
+                    count += GetCaptureCount(frame.NodeIndex);
+                }
+
+                ref readonly var currentNode = ref _index.Nodes[frame.NodeIndex];
+                if (currentNode.CatchAllChild != CompiledNode.NoNode)
+                {
+                    stack.Push(new TraversalFrame(currentNode.CatchAllChild, path.Length));
+                }
+
+                if (currentNode.WildcardChild != CompiledNode.NoNode)
+                {
+                    stack.Push(new TraversalFrame(currentNode.WildcardChild, frame.Depth + 1));
+                }
+
+                if (TryGetExactChild(frame.NodeIndex, path[frame.Depth], out var exactChildNodeIndex))
+                {
+                    stack.Push(new TraversalFrame(exactChildNodeIndex, frame.Depth + 1));
+                }
+            }
+        }
+        finally
+        {
+            stack.Dispose();
+        }
+
+        return count;
+    }
+
+    internal int CountBestPrefixCandidates(ReadOnlySpan<TSegment> path)
+    {
+        using var candidates = TraverseCandidates(path, CandidateTraversalKind.AllPrefix, bestPrefix: true);
+        return candidates.Count;
+    }
+
+    internal int CountBestPrefixCaptures(ReadOnlySpan<TSegment> path)
+    {
+        using var candidates = TraverseCandidates(path, CandidateTraversalKind.AllPrefix, bestPrefix: true);
+        return candidates.CaptureCountUpperBound;
+    }
+
+    private int CollectCandidatesInto(
         ReadOnlySpan<TSegment> path,
-        bool prefix,
+        CandidateTraversalKind kind,
         Span<MatchCandidate<TValue>> destination)
     {
         var count = 0;
@@ -101,7 +233,7 @@ internal ref struct MatchTraversal<TSegment, TValue>
                     continue;
                 }
 
-                if (prefix)
+                if (kind == CandidateTraversalKind.AllPrefix)
                 {
                     count = AddCandidates(frame.NodeIndex, frame.Depth, path.Length, destination, count);
                 }
@@ -131,68 +263,23 @@ internal ref struct MatchTraversal<TSegment, TValue>
         return count;
     }
 
-    internal int Count(ReadOnlySpan<TSegment> path, bool prefix)
+    private static void SortCandidates(Span<MatchCandidate<TValue>> candidates, CandidateTraversalKind kind)
     {
-        var count = 0;
-        Span<TraversalFrame> initialFrames = stackalloc TraversalFrame[64];
-        var stack = new TraversalStack(initialFrames);
-        stack.Push(new TraversalFrame(0, 0));
-
-        try
+        for (var i = 1; i < candidates.Length; i++)
         {
-            while (!stack.IsEmpty)
+            var candidate = candidates[i];
+            var j = i - 1;
+            while (j >= 0 && CompareCandidates(candidate, candidates[j], kind) < 0)
             {
-                var frame = stack.Pop();
-                if (frame.Depth == path.Length)
-                {
-                    count += GetValueCountIncludingTerminalCatchAll(frame.NodeIndex);
-                    continue;
-                }
-
-                if (prefix)
-                {
-                    count += GetValues(frame.NodeIndex).Length;
-                }
-
-                ref readonly var node = ref _index.Nodes[frame.NodeIndex];
-                if (node.CatchAllChild != CompiledNode.NoNode)
-                {
-                    stack.Push(new TraversalFrame(node.CatchAllChild, path.Length));
-                }
-
-                if (node.WildcardChild != CompiledNode.NoNode)
-                {
-                    stack.Push(new TraversalFrame(node.WildcardChild, frame.Depth + 1));
-                }
-
-                if (TryGetExactChild(frame.NodeIndex, path[frame.Depth], out var exactChildNodeIndex))
-                {
-                    stack.Push(new TraversalFrame(exactChildNodeIndex, frame.Depth + 1));
-                }
+                candidates[j + 1] = candidates[j];
+                j--;
             }
-        }
-        finally
-        {
-            stack.Dispose();
-        }
 
-        return count;
+            candidates[j + 1] = candidate;
+        }
     }
 
-    internal List<MatchCandidate<TValue>> SelectBestPrefixCandidates(ReadOnlySpan<TSegment> path)
-    {
-        var candidates = CollectCandidates(path, prefix: true);
-        if (candidates.Count == 0)
-        {
-            return candidates;
-        }
-
-        var depth = candidates[^1].ConsumedSegmentCount;
-        candidates.RemoveAll(candidate => candidate.ConsumedSegmentCount != depth);
-        return candidates;
-    }
-
-    internal static ReadOnlySpan<MatchCandidate<TValue>> SelectDeepestPrefixCandidates(
+    private static ReadOnlySpan<MatchCandidate<TValue>> SelectDeepestPrefixCandidates(
         Span<MatchCandidate<TValue>> candidates)
     {
         if (candidates.IsEmpty)
@@ -210,25 +297,40 @@ internal ref struct MatchTraversal<TSegment, TValue>
         return candidates[first..];
     }
 
-    private ReadOnlySpan<TValue> GetValues(int nodeIndex)
-    {
-        ref readonly var node = ref _index.Nodes[nodeIndex];
-        return _index.Values.AsSpan(node.FirstValue, node.ValueCount);
-    }
-
-    private ReadOnlySpan<CompiledValueDetail> GetValueDetails(int nodeIndex)
-    {
-        ref readonly var node = ref _index.Nodes[nodeIndex];
-        return _index.ValueDetails.AsSpan(node.FirstValue, node.ValueCount);
-    }
-
     private int GetValueCountIncludingTerminalCatchAll(int nodeIndex)
     {
-        var count = GetValues(nodeIndex).Length;
+        var count = GetValueCount(nodeIndex);
         ref readonly var node = ref _index.Nodes[nodeIndex];
         if (node.CatchAllChild != CompiledNode.NoNode)
         {
-            count += GetValues(node.CatchAllChild).Length;
+            count += GetValueCount(node.CatchAllChild);
+        }
+
+        return count;
+    }
+
+    private int GetCaptureCountIncludingTerminalCatchAll(int nodeIndex)
+    {
+        var count = GetCaptureCount(nodeIndex);
+        ref readonly var node = ref _index.Nodes[nodeIndex];
+        if (node.CatchAllChild != CompiledNode.NoNode)
+        {
+            count += GetCaptureCount(node.CatchAllChild);
+        }
+
+        return count;
+    }
+
+    private int GetValueCount(int nodeIndex) => _index.Nodes[nodeIndex].ValueCount;
+
+    private int GetCaptureCount(int nodeIndex)
+    {
+        var count = 0;
+        ref readonly var node = ref _index.Nodes[nodeIndex];
+        var details = _index.ValueDetails.AsSpan(node.FirstValue, node.ValueCount);
+        for (var i = 0; i < details.Length; i++)
+        {
+            count += details[i].CaptureCount;
         }
 
         return count;
@@ -276,22 +378,15 @@ internal ref struct MatchTraversal<TSegment, TValue>
         return false;
     }
 
-    private void AddCandidates(
-        int nodeIndex,
-        int depth,
-        int pathLength,
-        List<MatchCandidate<TValue>> candidates)
+    private static int CountCaptures(ReadOnlySpan<MatchCandidate<TValue>> candidates)
     {
-        var values = GetValues(nodeIndex);
-        var details = GetValueDetails(nodeIndex);
-        for (var i = 0; i < values.Length; i++)
+        var count = 0;
+        for (var i = 0; i < candidates.Length; i++)
         {
-            candidates.Add(new MatchCandidate<TValue>(
-                values[i],
-                details[i],
-                depth,
-                details[i].TerminalCatchAllSegmentIndex == pathLength));
+            count += candidates[i].Detail.CaptureCount;
         }
+
+        return count;
     }
 
     private int AddCandidates(
@@ -301,8 +396,9 @@ internal ref struct MatchTraversal<TSegment, TValue>
         Span<MatchCandidate<TValue>> destination,
         int count)
     {
-        var values = GetValues(nodeIndex);
-        var details = GetValueDetails(nodeIndex);
+        ref readonly var node = ref _index.Nodes[nodeIndex];
+        var values = _index.Values.AsSpan(node.FirstValue, node.ValueCount);
+        var details = _index.ValueDetails.AsSpan(node.FirstValue, node.ValueCount);
         for (var i = 0; i < values.Length; i++)
         {
             destination[count++] = new MatchCandidate<TValue>(
@@ -318,9 +414,9 @@ internal ref struct MatchTraversal<TSegment, TValue>
     private static int CompareCandidates(
         MatchCandidate<TValue> left,
         MatchCandidate<TValue> right,
-        bool prefix)
+        CandidateTraversalKind kind)
     {
-        if (prefix)
+        if (kind == CandidateTraversalKind.AllPrefix)
         {
             var depth = left.ConsumedSegmentCount.CompareTo(right.ConsumedSegmentCount);
             if (depth != 0)

@@ -3,8 +3,6 @@ namespace Pattrn.Internal.Writing;
 internal ref struct DetailedMatchWriter<TSegment, TValue>
     where TSegment : notnull
 {
-    private const int OrderedBlockDedupThreshold = 8;
-
     private readonly Span<PatternMatchDetailedSlice<TValue>> _matches;
     private readonly Span<PatternCaptureSlice<TSegment>> _captures;
     private readonly ReadOnlySpan<TSegment> _path;
@@ -41,52 +39,38 @@ internal ref struct DetailedMatchWriter<TSegment, TValue>
     internal readonly bool Succeeded => _succeeded;
 
     internal void Add(
-        ReadOnlySpan<TValue> values,
-        ReadOnlySpan<CompiledValueDetail> details,
+        TValue value,
+        CompiledValueDetail detail,
         ReadOnlySpan<CaptureDescriptor> captureDescriptors,
         int consumedSegmentCount)
     {
-        if (values.IsEmpty || !_succeeded)
+        if (!_succeeded)
         {
             return;
         }
 
-        if (_deduplicateValues && IsAlreadyWrittenOrderedBlock(values))
+        if (_deduplicateValues && Contains(value))
         {
             return;
         }
 
-        for (var i = 0; i < values.Length; i++)
+        var actualCaptureCount = detail.CaptureCount;
+        if (_matchCount >= _matches.Length || _captureCount + actualCaptureCount > _captures.Length)
         {
-            if (_deduplicateValues && Contains(values[i]))
-            {
-                continue;
-            }
-
-            ref readonly var detail = ref details[i];
-            var actualCaptureCount = GetActualCaptureCount(detail, captureDescriptors);
-            if (_matchCount >= _matches.Length || _captureCount + actualCaptureCount > _captures.Length)
-            {
-                Fail();
-                return;
-            }
-
-            var captureStart = _captureCount;
-            WriteCaptures(detail, captureDescriptors);
-
-            _matches[_matchCount] = new PatternMatchDetailedSlice<TValue>(
-                values[i],
-                detail.RegistrationId,
-                consumedSegmentCount,
-                captureStart,
-                actualCaptureCount);
-            _matchCount++;
+            Fail();
+            return;
         }
-    }
 
-    private readonly int GetActualCaptureCount(CompiledValueDetail detail, ReadOnlySpan<CaptureDescriptor> captureDescriptors)
-    {
-        return detail.CaptureCount;
+        var captureStart = _captureCount;
+        WriteCaptures(detail, captureDescriptors);
+
+        _matches[_matchCount] = new PatternMatchDetailedSlice<TValue>(
+            value,
+            detail.RegistrationId,
+            consumedSegmentCount,
+            captureStart,
+            actualCaptureCount);
+        _matchCount++;
     }
 
     private void WriteCaptures(CompiledValueDetail detail, ReadOnlySpan<CaptureDescriptor> captureDescriptors)
@@ -99,7 +83,7 @@ internal ref struct DetailedMatchWriter<TSegment, TValue>
                 _captures[_captureCount] = new PatternCaptureSlice<TSegment>(
                     descriptor.Name,
                     descriptor.SegmentIndex,
-                    _path.Length - descriptor.SegmentIndex);
+                    Math.Max(0, _path.Length - descriptor.SegmentIndex));
                 _captureCount++;
                 continue;
             }
@@ -110,24 +94,6 @@ internal ref struct DetailedMatchWriter<TSegment, TValue>
                 1);
             _captureCount++;
         }
-    }
-
-    private readonly bool IsAlreadyWrittenOrderedBlock(ReadOnlySpan<TValue> values)
-    {
-        if (values.Length < OrderedBlockDedupThreshold || _matchCount < values.Length)
-        {
-            return false;
-        }
-
-        for (var i = 0; i < values.Length; i++)
-        {
-            if (!_valueComparer.Equals(_matches[i].Value, values[i]))
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     private readonly bool Contains(TValue value)

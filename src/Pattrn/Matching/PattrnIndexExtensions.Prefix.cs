@@ -3,7 +3,7 @@ namespace Pattrn.Matching;
 
 public static partial class PattrnIndexExtensions
 {
-/// <summary>
+    /// <summary>
     /// Gets a path-specific prefix match upper bound for a memory-backed path.
     /// </summary>
     public static int GetPrefixMatchCountUpperBound<TSegment, TValue>(
@@ -15,7 +15,7 @@ public static partial class PattrnIndexExtensions
         return index.GetPrefixMatchCountUpperBound(path.Span);
     }
 
-public static bool TryMatchPrefixValues<TSegment, TValue>(
+    public static bool TryMatchPrefixValues<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path,
         Span<TValue> destination,
@@ -26,7 +26,7 @@ public static bool TryMatchPrefixValues<TSegment, TValue>(
         return index.TryMatchPrefixValues(path.Span, destination, out written);
     }
 
-public static bool TryMatchPrefix<TSegment, TValue>(
+    public static bool TryMatchPrefix<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path,
         Span<PatternMatch<TValue>> destination,
@@ -37,7 +37,7 @@ public static bool TryMatchPrefix<TSegment, TValue>(
         return index.TryMatchPrefix(path.Span, destination, out written);
     }
 
-public static bool TryEnumeratePrefixMatches<TSegment, TValue>(
+    public static bool TryEnumeratePrefixMatches<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path,
         Span<PatternMatch<TValue>> destination,
@@ -48,7 +48,7 @@ public static bool TryEnumeratePrefixMatches<TSegment, TValue>(
         return index.TryEnumeratePrefixMatches(path.Span, destination, out written);
     }
 
-public static bool TryEnumeratePrefixValues<TSegment, TValue>(
+    public static bool TryEnumeratePrefixValues<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path,
         Span<TValue> destination,
@@ -59,4 +59,3 @@ public static bool TryEnumeratePrefixValues<TSegment, TValue>(
         return index.TryEnumeratePrefixValues(path.Span, destination, out written);
     }
 }
-

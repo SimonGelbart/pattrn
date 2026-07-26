@@ -3,7 +3,7 @@ namespace Pattrn.Matching;
 
 public static partial class PattrnIndexExtensions
 {
-/// <summary>
+    /// <summary>
     /// Gets a path-specific capture upper bound for a memory-backed path.
     /// </summary>
     public static int GetCaptureCountUpperBound<TSegment, TValue>(
@@ -15,7 +15,7 @@ public static partial class PattrnIndexExtensions
         return index.GetCaptureCountUpperBound(path.Span);
     }
 
-/// <summary>
+    /// <summary>
     /// Gets a path-specific best-prefix capture upper bound for a memory-backed path.
     /// </summary>
     public static int GetPrefixCaptureCountUpperBound<TSegment, TValue>(
@@ -27,7 +27,7 @@ public static partial class PattrnIndexExtensions
         return index.GetPrefixCaptureCountUpperBound(path.Span);
     }
 
-/// <summary>
+    /// <summary>
     /// Gets a path-specific all-prefix capture upper bound for a memory-backed path.
     /// </summary>
     public static int GetEnumeratePrefixCaptureCountUpperBound<TSegment, TValue>(
@@ -39,7 +39,7 @@ public static partial class PattrnIndexExtensions
         return index.GetEnumeratePrefixCaptureCountUpperBound(path.Span);
     }
 
-/// <summary>
+    /// <summary>
     /// Matches a memory-backed path and writes detailed matches and captures into caller-provided destination spans.
     /// </summary>
     public static int MatchDetailed<TSegment, TValue>(
@@ -54,7 +54,7 @@ public static partial class PattrnIndexExtensions
         return index.MatchDetailed(path.Span, matches, captures, out capturesWritten);
     }
 
-/// <summary>
+    /// <summary>
     /// Attempts to match a memory-backed path and write detailed matches and captures into caller-provided destination spans.
     /// </summary>
     public static bool TryMatchDetailed<TSegment, TValue>(
@@ -70,7 +70,7 @@ public static partial class PattrnIndexExtensions
         return index.TryMatchDetailed(path.Span, matches, captures, out matchesWritten, out capturesWritten);
     }
 
-public static bool TryMatchPrefixDetailed<TSegment, TValue>(
+    public static bool TryMatchPrefixDetailed<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path,
         Span<PatternMatchDetailedSlice<TValue>> matches,
@@ -83,7 +83,7 @@ public static bool TryMatchPrefixDetailed<TSegment, TValue>(
         return index.TryMatchPrefixDetailed(path.Span, matches, captures, out matchesWritten, out capturesWritten);
     }
 
-public static bool TryEnumeratePrefixDetailed<TSegment, TValue>(
+    public static bool TryEnumeratePrefixDetailed<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path,
         Span<PatternMatchDetailedSlice<TValue>> matches,
@@ -96,7 +96,7 @@ public static bool TryEnumeratePrefixDetailed<TSegment, TValue>(
         return index.TryEnumeratePrefixDetailed(path.Span, matches, captures, out matchesWritten, out capturesWritten);
     }
 
-/// <summary>
+    /// <summary>
     /// Matches a memory-backed path and returns detailed matches as a new array.
     /// </summary>
     public static PatternMatchDetailed<TSegment, TValue>[] MatchDetailedToArray<TSegment, TValue>(
@@ -108,7 +108,7 @@ public static bool TryEnumeratePrefixDetailed<TSegment, TValue>(
         return index.MatchDetailedToArray(path.Span);
     }
 
-/// <summary>
+    /// <summary>
     /// Matches an enumerable path and returns detailed matches as a new array.
     /// </summary>
     public static PatternMatchDetailed<TSegment, TValue>[] MatchDetailedToArray<TSegment, TValue>(
@@ -127,7 +127,7 @@ public static bool TryEnumeratePrefixDetailed<TSegment, TValue>(
         return index.MatchDetailedToArray(path.ToArray().AsSpan());
     }
 
-public static PatternMatchDetailed<TSegment, TValue>[] MatchPrefixDetailedToArray<TSegment, TValue>(
+    public static PatternMatchDetailed<TSegment, TValue>[] MatchPrefixDetailedToArray<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path)
         where TSegment : notnull
@@ -136,7 +136,7 @@ public static PatternMatchDetailed<TSegment, TValue>[] MatchPrefixDetailedToArra
         return index.MatchPrefixDetailedToArray(path.Span);
     }
 
-public static PatternMatchDetailed<TSegment, TValue>[] EnumeratePrefixDetailedToArray<TSegment, TValue>(
+    public static PatternMatchDetailed<TSegment, TValue>[] EnumeratePrefixDetailedToArray<TSegment, TValue>(
         this PattrnIndex<TSegment, TValue> index,
         ReadOnlyMemory<TSegment> path)
         where TSegment : notnull
@@ -145,4 +145,3 @@ public static PatternMatchDetailed<TSegment, TValue>[] EnumeratePrefixDetailedTo
         return index.EnumeratePrefixDetailedToArray(path.Span);
     }
 }
-

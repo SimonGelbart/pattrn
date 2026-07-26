@@ -3,7 +3,7 @@ namespace Pattrn.Matching;
 
 public static partial class PattrnIndexExtensions
 {
-/// <summary>
+    /// <summary>
     /// Explains matching behavior for a memory-backed path using diagnostics-oriented allocation-friendly results.
     /// </summary>
     public static PatternMatchExplanation<TSegment, TValue> Explain<TSegment, TValue>(
@@ -16,7 +16,7 @@ public static partial class PattrnIndexExtensions
         return index.Explain(path.Span, options);
     }
 
-/// <summary>
+    /// <summary>
     /// Explains matching behavior for an enumerable path using diagnostics-oriented allocation-friendly results.
     /// </summary>
     public static PatternMatchExplanation<TSegment, TValue> Explain<TSegment, TValue>(
@@ -36,4 +36,3 @@ public static partial class PattrnIndexExtensions
         return index.Explain(path.ToArray().AsSpan(), options);
     }
 }
-
