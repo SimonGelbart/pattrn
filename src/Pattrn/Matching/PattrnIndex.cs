@@ -214,12 +214,12 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// This method traverses only the prefix branches that can match <paramref name="path"/>. When deduplication is enabled, the returned value can be larger than the final emitted value count because overlapping patterns may reach the same value.
     /// </remarks>
     public int GetPrefixMatchCountUpperBound(ReadOnlySpan<TSegment> path)
-        => CreateTraversal().CountBestPrefixCandidates(path);
+        => CountBestPrefixCandidates(path);
 
     /// <summary>Attempts exact matching into a caller-provided result span.</summary>
     public bool TryMatch(ReadOnlySpan<TSegment> path, Span<PatternMatch<TValue>> destination, out int written)
     {
-        return TryWritePathCandidates(path, CandidateTraversalKind.Exact, bestPrefix: false, destination, out written);
+        return TryWritePathCandidates(path, prefix: false, bestPrefix: false, destination, out written);
     }
 
     /// <summary>Returns all exact matches as owning result values.</summary>
@@ -259,7 +259,7 @@ public sealed class PattrnIndex<TSegment, TValue>
 
     /// <summary>Attempts best-prefix value-only matching.</summary>
     public bool TryMatchPrefixValues(ReadOnlySpan<TSegment> path, Span<TValue> destination, out int written)
-        => TryWritePathValues(path, CandidateTraversalKind.AllPrefix, bestPrefix: true, destination, out written);
+        => TryWritePathValues(path, prefix: true, bestPrefix: true, destination, out written);
 
     /// <summary>Returns values from the deepest accepted prefix level.</summary>
     public TValue[] MatchPrefixValuesToArray(ReadOnlySpan<TSegment> path)
@@ -281,7 +281,7 @@ public sealed class PattrnIndex<TSegment, TValue>
 
     /// <summary>Attempts all-prefix value-only enumeration.</summary>
     public bool TryEnumeratePrefixValues(ReadOnlySpan<TSegment> path, Span<TValue> destination, out int written)
-        => TryWritePathValues(path, CandidateTraversalKind.AllPrefix, bestPrefix: false, destination, out written);
+        => TryWritePathValues(path, prefix: true, bestPrefix: false, destination, out written);
 
     /// <summary>Returns values from every accepted prefix level.</summary>
     public TValue[] EnumeratePrefixValuesToArray(ReadOnlySpan<TSegment> path)
@@ -304,7 +304,7 @@ public sealed class PattrnIndex<TSegment, TValue>
     /// <summary>Attempts best-prefix matching into a caller-provided result span.</summary>
     public bool TryMatchPrefix(ReadOnlySpan<TSegment> path, Span<PatternMatch<TValue>> destination, out int written)
     {
-        return TryWritePathCandidates(path, CandidateTraversalKind.AllPrefix, bestPrefix: true, destination, out written);
+        return TryWritePathCandidates(path, prefix: true, bestPrefix: true, destination, out written);
     }
 
     /// <summary>Returns only the deepest accepted prefix matches.</summary>
@@ -322,12 +322,12 @@ public sealed class PattrnIndex<TSegment, TValue>
 
     /// <summary>Gets an upper bound for all-prefix enumeration result matches.</summary>
     public int GetEnumeratePrefixMatchCountUpperBound(ReadOnlySpan<TSegment> path)
-        => CreateTraversal().CountCandidates(path, CandidateTraversalKind.AllPrefix);
+        => CountPrefix(path);
 
     /// <summary>Attempts all-prefix enumeration into a caller-provided result span.</summary>
     public bool TryEnumeratePrefixMatches(ReadOnlySpan<TSegment> path, Span<PatternMatch<TValue>> destination, out int written)
     {
-        return TryWritePathCandidates(path, CandidateTraversalKind.AllPrefix, bestPrefix: false, destination, out written);
+        return TryWritePathCandidates(path, prefix: true, bestPrefix: false, destination, out written);
     }
 
     /// <summary>Returns every accepted prefix match, from the root outward.</summary>
@@ -671,6 +671,77 @@ public sealed class PattrnIndex<TSegment, TValue>
         return count;
     }
 
+    private int CountPrefix(ReadOnlySpan<TSegment> path)
+    {
+        var count = 0;
+        Span<TraversalFrame> initialFrames = stackalloc TraversalFrame[64];
+        var stack = new TraversalStack(initialFrames);
+        stack.Push(new TraversalFrame(0, 0));
+
+        try
+        {
+            while (!stack.IsEmpty)
+            {
+                var frame = stack.Pop();
+
+                if (frame.Depth == path.Length)
+                {
+                    count += GetValueCountIncludingTerminalCatchAll(frame.NodeIndex);
+                    continue;
+                }
+
+                count += GetValues(frame.NodeIndex).Length;
+                PushMatchingChildren(ref stack, frame.NodeIndex, path[frame.Depth], frame.Depth + 1, path.Length);
+            }
+        }
+        finally
+        {
+            stack.Dispose();
+        }
+
+        return count;
+    }
+
+    private int CountBestPrefixCandidates(ReadOnlySpan<TSegment> path)
+    {
+        var capacity = CountPrefix(path);
+        if (capacity == 0)
+        {
+            return 0;
+        }
+
+        var rented = ArrayPool<MatchCandidate<TValue>>.Shared.Rent(capacity);
+        try
+        {
+            var candidates = rented.AsSpan(0, capacity);
+            var count = CollectCandidatesInto(path, prefix: true, candidates);
+            SortCandidates(candidates[..count], prefix: true);
+            return SelectDeepestPrefixCandidates(candidates[..count]).Length;
+        }
+        finally
+        {
+            ArrayPool<MatchCandidate<TValue>>.Shared.Return(rented, clearArray: true);
+        }
+    }
+
+    private static ReadOnlySpan<MatchCandidate<TValue>> SelectDeepestPrefixCandidates(
+        Span<MatchCandidate<TValue>> candidates)
+    {
+        if (candidates.IsEmpty)
+        {
+            return ReadOnlySpan<MatchCandidate<TValue>>.Empty;
+        }
+
+        var deepestDepth = candidates[^1].ConsumedSegmentCount;
+        var first = candidates.Length - 1;
+        while (first > 0 && candidates[first - 1].ConsumedSegmentCount == deepestDepth)
+        {
+            first--;
+        }
+
+        return candidates[first..];
+    }
+
     private void PushMatchingChildren(
         ref TraversalStack stack,
         int nodeIndex,
@@ -902,24 +973,60 @@ public sealed class PattrnIndex<TSegment, TValue>
 
     private bool TryWritePathCandidates(
         ReadOnlySpan<TSegment> path,
-        CandidateTraversalKind kind,
+        bool prefix,
         bool bestPrefix,
         Span<PatternMatch<TValue>> destination,
         out int written)
     {
-        using var candidates = CreateTraversal().TraverseCandidates(path, kind, bestPrefix);
-        return TryWriteCandidates(candidates.Candidates, destination, out written);
+        var capacity = prefix ? CountPrefix(path) : CountExact(path);
+        if (capacity == 0)
+        {
+            written = 0;
+            return true;
+        }
+
+        var rented = ArrayPool<MatchCandidate<TValue>>.Shared.Rent(capacity);
+        try
+        {
+            var candidates = rented.AsSpan(0, capacity);
+            var count = CollectCandidatesInto(path, prefix, candidates);
+            SortCandidates(candidates[..count], prefix);
+            var selected = bestPrefix ? SelectDeepestPrefixCandidates(candidates[..count]) : candidates[..count];
+            return TryWriteCandidates(selected, destination, out written);
+        }
+        finally
+        {
+            ArrayPool<MatchCandidate<TValue>>.Shared.Return(rented, clearArray: true);
+        }
     }
 
     private bool TryWritePathValues(
         ReadOnlySpan<TSegment> path,
-        CandidateTraversalKind kind,
+        bool prefix,
         bool bestPrefix,
         Span<TValue> destination,
         out int written)
     {
-        using var candidates = CreateTraversal().TraverseCandidates(path, kind, bestPrefix);
-        return TryWriteValueCandidates(candidates.Candidates, destination, out written);
+        var capacity = prefix ? CountPrefix(path) : CountExact(path);
+        if (capacity == 0)
+        {
+            written = 0;
+            return true;
+        }
+
+        var rented = ArrayPool<MatchCandidate<TValue>>.Shared.Rent(capacity);
+        try
+        {
+            var candidates = rented.AsSpan(0, capacity);
+            var count = CollectCandidatesInto(path, prefix, candidates);
+            SortCandidates(candidates[..count], prefix);
+            var selected = bestPrefix ? SelectDeepestPrefixCandidates(candidates[..count]) : candidates[..count];
+            return TryWriteValueCandidates(selected, destination, out written);
+        }
+        finally
+        {
+            ArrayPool<MatchCandidate<TValue>>.Shared.Return(rented, clearArray: true);
+        }
     }
 
     private static void WriteCandidates(
