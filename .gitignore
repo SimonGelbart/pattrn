@@ -19,3 +19,11 @@ Thumbs.db
 
 # Local generated restore config
 eng/NuGet.local.config
+
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+
+# APM dependencies
+apm_modules/
