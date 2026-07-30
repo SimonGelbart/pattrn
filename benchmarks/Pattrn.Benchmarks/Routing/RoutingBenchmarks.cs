@@ -4,6 +4,7 @@ using Pattrn.Routing.Integration;
 namespace Pattrn.Benchmarks.Routing;
 
 [MemoryDiagnoser]
+[BenchmarkCategory("Routing")]
 public class RoutingBenchmarks
 {
     private PattrnIndex<string, int> _index = null!;
@@ -122,4 +123,3 @@ public class RoutingBenchmarks
         return _index.MatchRouteDetailedToArray(_path);
     }
 }
-
