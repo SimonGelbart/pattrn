@@ -3,6 +3,7 @@ using BenchmarkDotNet.Attributes;
 namespace Pattrn.Benchmarks.Core;
 
 [MemoryDiagnoser]
+[BenchmarkCategory("Branching")]
 public class PattrnIndexBenchmarks
 {
     private readonly List<Registration> _registrations = [];
@@ -17,8 +18,6 @@ public class PattrnIndexBenchmarks
         BenchmarkScenario.ExactOnlyWideFanOut,
         BenchmarkScenario.WildcardSparse,
         BenchmarkScenario.WildcardDense,
-        BenchmarkScenario.PrefixExactOnly,
-        BenchmarkScenario.PrefixWildcard,
         BenchmarkScenario.DuplicateHeavyDeduplicate,
         BenchmarkScenario.DuplicateHeavyPreserveDuplicates,
         BenchmarkScenario.NoMatch,
@@ -32,12 +31,9 @@ public class PattrnIndexBenchmarks
         _registrations.Clear();
 
         var builder = PattrnIndex<string, int>.Builder("*");
-        var options = Scenario switch
-        {
-            BenchmarkScenario.PrefixExactOnly or BenchmarkScenario.PrefixWildcard => MatchOptions.Default,
-            BenchmarkScenario.DuplicateHeavyPreserveDuplicates => MatchOptions.PreserveDuplicates,
-            _ => MatchOptions.Default
-        };
+        var options = Scenario == BenchmarkScenario.DuplicateHeavyPreserveDuplicates
+            ? MatchOptions.PreserveDuplicates
+            : MatchOptions.Default;
 
         switch (Scenario)
         {
@@ -52,23 +48,13 @@ public class PattrnIndexBenchmarks
                 break;
 
             case BenchmarkScenario.WildcardSparse:
-                AddMarketData(builder, marketCount: 16, symbolCount: 16, includeWildcards: true, includePrefixes: false);
+                AddMarketData(builder, marketCount: 16, symbolCount: 16, includeWildcards: true);
                 _path = ["market", "M8", "S8"];
                 break;
 
             case BenchmarkScenario.WildcardDense:
-                AddMarketData(builder, marketCount: 80, symbolCount: 80, includeWildcards: true, includePrefixes: false);
+                AddMarketData(builder, marketCount: 80, symbolCount: 80, includeWildcards: true);
                 _path = ["market", "M42", "S42"];
-                break;
-
-            case BenchmarkScenario.PrefixExactOnly:
-                AddMarketData(builder, marketCount: 80, symbolCount: 80, includeWildcards: false, includePrefixes: true);
-                _path = ["market", "M42", "S42", "quote"];
-                break;
-
-            case BenchmarkScenario.PrefixWildcard:
-                AddMarketData(builder, marketCount: 80, symbolCount: 80, includeWildcards: true, includePrefixes: true);
-                _path = ["market", "M42", "S42", "quote"];
                 break;
 
             case BenchmarkScenario.DuplicateHeavyDeduplicate:
@@ -78,7 +64,7 @@ public class PattrnIndexBenchmarks
                 break;
 
             case BenchmarkScenario.NoMatch:
-                AddMarketData(builder, marketCount: 80, symbolCount: 80, includeWildcards: false, includePrefixes: false);
+                AddMarketData(builder, marketCount: 80, symbolCount: 80, includeWildcards: false);
                 _path = ["market", "missing", "symbol"];
                 break;
 
@@ -91,9 +77,15 @@ public class PattrnIndexBenchmarks
                 AddCatchAllHeavy(builder, routeCount: 2048);
                 _path = ["files", "tenant-512", "a", "b", "c.txt"];
                 break;
+
+            default:
+                throw new InvalidOperationException($"{Scenario} is not a valid exact matching benchmark scenario.");
         }
 
-        _index = builder.Build(options);
+        _index = PattrnIndex<string, int>.Compile(
+            builder.ToRegistrations(),
+            new PattrnCompileOptions { DuplicatePatternPolicy = DuplicatePatternPolicy.Allow },
+            options);
         var matchUpperBound = _index.GetMatchCountUpperBound(_path);
         _valueDestination = new int[Math.Max(1, matchUpperBound)];
         _matchDestination = new PatternMatchDetailedSlice<int>[Math.Max(1, matchUpperBound)];
@@ -101,13 +93,14 @@ public class PattrnIndexBenchmarks
     }
 
     [Benchmark(Baseline = true)]
+    [BenchmarkCategory("Owning")]
     public int[] NaiveScan_MatchValuesToArray()
     {
         var matches = new List<int>();
 
         foreach (var registration in _registrations)
         {
-            if (!Matches(registration.Pattern, _path, Scenario is BenchmarkScenario.PrefixExactOnly or BenchmarkScenario.PrefixWildcard))
+            if (!Matches(registration.Pattern, _path))
             {
                 continue;
             }
@@ -130,31 +123,28 @@ public class PattrnIndexBenchmarks
     }
 
     [Benchmark]
+    [BenchmarkCategory("CallerBuffer")]
     public int Trie_MatchToSpan()
     {
         return _index.TryMatchValues(_path, _valueDestination, out var written) ? written : -1;
     }
 
     [Benchmark]
-    public int Trie_TryMatchToSpan_SufficientDestination()
-    {
-        var succeeded = _index.TryMatchValues(_path, _valueDestination, out var written);
-        return succeeded ? written : -1;
-    }
-
-    [Benchmark]
+    [BenchmarkCategory("Owning")]
     public int[] Trie_MatchValuesToArray()
     {
         return _index.MatchValuesToArray(_path);
     }
 
     [Benchmark]
+    [BenchmarkCategory("Detailed", "CallerBuffer")]
     public int Trie_MatchDetailedToSpans()
     {
         return _index.MatchDetailed(_path, _matchDestination, _captureDestination, out _);
     }
 
     [Benchmark]
+    [BenchmarkCategory("Detailed", "Owning")]
     public PatternMatchDetailed<string, int>[] Trie_MatchDetailedToArray()
     {
         return _index.MatchDetailedToArray(_path);
@@ -164,18 +154,12 @@ public class PattrnIndexBenchmarks
         PattrnIndexBuilder<string, int> builder,
         int marketCount,
         int symbolCount,
-        bool includeWildcards,
-        bool includePrefixes)
+        bool includeWildcards)
     {
         var value = 0;
 
         for (var market = 0; market < marketCount; market++)
         {
-            if (includePrefixes)
-            {
-                Add(builder, ["market", $"M{market}"], value++);
-            }
-
             for (var symbol = 0; symbol < symbolCount; symbol++)
             {
                 Add(builder, ["market", $"M{market}", $"S{symbol}"], value++);
@@ -284,7 +268,7 @@ public class PattrnIndexBenchmarks
         return segments;
     }
 
-    private static bool Matches(PatternSegment<string>[] pattern, string[] path, bool includePrefixMatches)
+    private static bool Matches(PatternSegment<string>[] pattern, string[] path)
     {
         var depth = 0;
 
@@ -293,7 +277,7 @@ public class PattrnIndexBenchmarks
             var segment = pattern[i];
             if (segment.IsCatchAll)
             {
-                return includePrefixMatches || true;
+                return true;
             }
 
             if (depth >= path.Length)
@@ -309,9 +293,8 @@ public class PattrnIndexBenchmarks
             depth++;
         }
 
-        return includePrefixMatches || depth == path.Length;
+        return depth == path.Length;
     }
 
     private sealed record Registration(PatternSegment<string>[] Pattern, int Value);
 }
-

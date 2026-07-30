@@ -3,6 +3,7 @@ using BenchmarkDotNet.Attributes;
 namespace Pattrn.Benchmarks.Strings;
 
 [MemoryDiagnoser]
+[BenchmarkCategory("Strings")]
 public class StringHelperBenchmarks
 {
     private PattrnIndex<string, int> _index = null!;
@@ -72,4 +73,3 @@ public class StringHelperBenchmarks
         return _normalizedIndex.MatchSeparated(_normalizedPath, _normalizedValueDestination, _normalizationOptions);
     }
 }
-

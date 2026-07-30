@@ -3,6 +3,7 @@ using BenchmarkDotNet.Attributes;
 namespace Pattrn.Benchmarks.Core;
 
 [MemoryDiagnoser]
+[BenchmarkCategory("CallerBuffer")]
 public class PattrnIndexTryMatchFailureBenchmarks
 {
     public IEnumerable<BenchmarkScenario> TryMatchFailureScenarios()
@@ -11,8 +12,6 @@ public class PattrnIndexTryMatchFailureBenchmarks
         yield return BenchmarkScenario.ExactOnlyWideFanOut;
         yield return BenchmarkScenario.WildcardSparse;
         yield return BenchmarkScenario.WildcardDense;
-        yield return BenchmarkScenario.PrefixExactOnly;
-        yield return BenchmarkScenario.PrefixWildcard;
         yield return BenchmarkScenario.DuplicateHeavyDeduplicate;
         yield return BenchmarkScenario.DuplicateHeavyPreserveDuplicates;
         yield return BenchmarkScenario.ParameterCaptures;
@@ -31,12 +30,9 @@ public class PattrnIndexTryMatchFailureBenchmarks
     public void Setup()
     {
         var builder = PattrnIndex<string, int>.Builder("*");
-        var options = Scenario switch
-        {
-            BenchmarkScenario.PrefixExactOnly or BenchmarkScenario.PrefixWildcard => MatchOptions.Default,
-            BenchmarkScenario.DuplicateHeavyPreserveDuplicates => MatchOptions.PreserveDuplicates,
-            _ => MatchOptions.Default
-        };
+        var options = Scenario == BenchmarkScenario.DuplicateHeavyPreserveDuplicates
+            ? MatchOptions.PreserveDuplicates
+            : MatchOptions.Default;
 
         switch (Scenario)
         {
@@ -51,23 +47,13 @@ public class PattrnIndexTryMatchFailureBenchmarks
                 break;
 
             case BenchmarkScenario.WildcardSparse:
-                AddMarketData(builder, marketCount: 16, symbolCount: 16, includeWildcards: true, includePrefixes: false);
+                AddMarketData(builder, marketCount: 16, symbolCount: 16, includeWildcards: true);
                 _path = ["market", "M8", "S8"];
                 break;
 
             case BenchmarkScenario.WildcardDense:
-                AddMarketData(builder, marketCount: 80, symbolCount: 80, includeWildcards: true, includePrefixes: false);
+                AddMarketData(builder, marketCount: 80, symbolCount: 80, includeWildcards: true);
                 _path = ["market", "M42", "S42"];
-                break;
-
-            case BenchmarkScenario.PrefixExactOnly:
-                AddMarketData(builder, marketCount: 80, symbolCount: 80, includeWildcards: false, includePrefixes: true);
-                _path = ["market", "M42", "S42", "quote"];
-                break;
-
-            case BenchmarkScenario.PrefixWildcard:
-                AddMarketData(builder, marketCount: 80, symbolCount: 80, includeWildcards: true, includePrefixes: true);
-                _path = ["market", "M42", "S42", "quote"];
                 break;
 
             case BenchmarkScenario.DuplicateHeavyDeduplicate:
@@ -91,13 +77,20 @@ public class PattrnIndexTryMatchFailureBenchmarks
                 throw new InvalidOperationException($"{Scenario} is not a valid TryMatch failure-path benchmark scenario.");
         }
 
-        _index = builder.Build(options);
+        _index = PattrnIndex<string, int>.Compile(
+            builder.ToRegistrations(),
+            new PattrnCompileOptions { DuplicatePatternPolicy = DuplicatePatternPolicy.Allow },
+            options);
         _valueDestination = new int[Math.Max(1, _index.GetMatchCountUpperBound(_path))];
         _insufficientValueDestination = [];
 
         if (!_index.TryMatchValues(_path, _valueDestination, out var expectedCount))
         {
             throw new InvalidOperationException("Expected benchmark destination to hold all matches.");
+        }
+        if (expectedCount == 0)
+        {
+            throw new InvalidOperationException("TryMatch failure benchmark scenario must produce at least one exact match.");
         }
         if (expectedCount <= _insufficientValueDestination.Length)
         {
@@ -122,18 +115,12 @@ public class PattrnIndexTryMatchFailureBenchmarks
         PattrnIndexBuilder<string, int> builder,
         int marketCount,
         int symbolCount,
-        bool includeWildcards,
-        bool includePrefixes)
+        bool includeWildcards)
     {
         var value = 0;
 
         for (var market = 0; market < marketCount; market++)
         {
-            if (includePrefixes)
-            {
-                builder.Add(["market", $"M{market}"], value++);
-            }
-
             for (var symbol = 0; symbol < symbolCount; symbol++)
             {
                 builder.Add(["market", $"M{market}", $"S{symbol}"], value++);
@@ -217,4 +204,3 @@ public class PattrnIndexTryMatchFailureBenchmarks
         }
     }
 }
-

@@ -3,6 +3,7 @@ using BenchmarkDotNet.Attributes;
 namespace Pattrn.Benchmarks.Builders;
 
 [MemoryDiagnoser]
+[BenchmarkCategory("Builder")]
 public class BuilderBenchmarks
 {
     private (PatternSegment<string>[] Pattern, int Value)[] _registrations = [];
@@ -105,4 +106,3 @@ public class BuilderBenchmarks
         return registrations;
     }
 }
-
