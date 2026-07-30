@@ -500,9 +500,6 @@ public sealed class PattrnIndex<TSegment, TValue>
             captureUpperBound);
     }
 
-    private MatchTraversal<TSegment, TValue> CreateTraversal()
-        => new(_storage, _segmentComparer);
-
     private ReadOnlySpan<TValue> GetValues(int nodeIndex)
     {
         ref readonly var node = ref _nodes[nodeIndex];
