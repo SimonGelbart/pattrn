@@ -7,14 +7,14 @@ using TUnit.Assertions.Enums;
 // TODO: Add subscription removal tests
 namespace Homework.Routing
 {
-    public class MessageRouterTests
+    public abstract class MessageRouterTests
     {
-        private readonly SubscriptionIndex _subscriptionIndex;
+        private readonly ISubscriptionIndex _subscriptionIndex;
         private readonly MessageRouter _router;
 
-        public MessageRouterTests()
+        protected MessageRouterTests(ISubscriptionIndex subscriptionIndex)
         {
-            _subscriptionIndex = new SubscriptionIndex();
+            _subscriptionIndex = subscriptionIndex;
             _router = new MessageRouter(_subscriptionIndex);
         }
 
@@ -365,6 +365,24 @@ namespace Homework.Routing
 
             // Assert
             await Assert.That(clientIds).IsEquivalentTo(new[] { clientId }, CollectionOrdering.Matching);
+        }
+    }
+
+    [InheritsTests]
+    public sealed class CustomTreeMessageRouterTests : MessageRouterTests
+    {
+        public CustomTreeMessageRouterTests()
+            : base(new SubscriptionIndex())
+        {
+        }
+    }
+
+    [InheritsTests]
+    public sealed class PattrnMessageRouterTests : MessageRouterTests
+    {
+        public PattrnMessageRouterTests()
+            : base(new PattrnSubscriptionIndex())
+        {
         }
     }
 }
