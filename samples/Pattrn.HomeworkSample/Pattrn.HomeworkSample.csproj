@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Pattrn.HomeworkSample</AssemblyName>
+    <RootNamespace>Homework</RootNamespace>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="IMPORT.md" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="README.md" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="docs\Answers.md" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="docs\images\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
