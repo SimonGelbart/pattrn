@@ -25,7 +25,7 @@ To test the deletion of a *Subscription*
 *`ShouldNotFindMatchingRoutableSubscriptionWithPatternTooLong`*  
 To test border case when a user put a pattern that makes no sens (too long)
 
-![image info](./images/CodeCoverage.jpg)
+![image info](./images/CodeCoverage.JPG)
 
 - A3.  Briefly document your approach here (max: 500 words)
 
@@ -53,7 +53,7 @@ My first approach while designing the SubscriptionIndex was to have a fast solut
 It was a simple `HashSet<Subscription>` (Not thread-safe)  
 In this case we had to check all the element of the list, with the number of subscription in the benchmark it was really poorly designed.
 
-![image info](./images/FindSubscriptionV1.jpg)
+![image info](./images/FindSubscriptionV1.JPG)
 
 | Method       |     Mean |   Error |   StdDev |
 |--------------|---------:|--------:|---------:|
@@ -63,7 +63,7 @@ In my second approach, I tried to decreased the number of Subscription to check.
 I stored them in a `ConcurrentDictionary<MessageTypeId,HashSet<Subscription>>`  
 In this case we only check the element for a given MessageType, it is already much better performance wise
 
-![image info](./images/FindSubscriptionV2.jpg)
+![image info](./images/FindSubscriptionV2.JPG)
 
 | Method       |     Mean |     Error |    StdDev |
 |--------------|---------:|----------:|----------:|
@@ -75,7 +75,7 @@ I changed the HashSet to a custom tree structure following the ContentPattern an
 You can find the implementation in `Routing/SubscriptionTree.cs`  
 With this way I only have to follow the next node that contains  
 
-![image info](./images/FindSubscriptionV3.jpg)
+![image info](./images/FindSubscriptionV3.JPG)
 
 |       Method |     Mean |     Error |    StdDev |
 |------------- |---------:|----------:|----------:|
@@ -93,7 +93,7 @@ With this way I only have to follow the next node that contains
 
 *Tree Representation*
 
-![image info](./images/tree.png)
+![image info](./images/Tree.PNG)
 
 
 ------
