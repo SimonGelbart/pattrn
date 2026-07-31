@@ -111,29 +111,32 @@ namespace Homework.Routing
             AddPathToTree(nextNode, path, subscription);
         }
 
-        private void GetSubscriptionFromPathTree(TreeNode<string, Subscription> node, IList<string> path, ref List<Subscription> subscriptions)
+        private void GetSubscriptionFromPathTree(
+            TreeNode<string, Subscription> node,
+            IList<string> path,
+            int pathIndex,
+            List<Subscription> subscriptions)
         {
             subscriptions.AddRange(node.Data);
-            if (path.Count == 0)
+            if (pathIndex == path.Count)
                 return;
 
-            var nextData = path[0];
+            var nextData = path[pathIndex];
             TreeNode<string, Subscription> childNode;
             bool isChildNodeSearchNeeded = node.Children.TryGetValue(nextData, out childNode!);
 
             TreeNode<string, Subscription> starNode;
             bool isStarNodeSearchNeeded =node.Children.TryGetValue("*", out starNode!);
-            path.RemoveAt(0);
             if (isChildNodeSearchNeeded)
-                GetSubscriptionFromPathTree(childNode, path, ref subscriptions);
+                GetSubscriptionFromPathTree(childNode, path, pathIndex + 1, subscriptions);
             if (isStarNodeSearchNeeded)
-                GetSubscriptionFromPathTree(starNode, path, ref subscriptions);
+                GetSubscriptionFromPathTree(starNode, path, pathIndex + 1, subscriptions);
         }
 
         public List<Subscription> GetSubscriptions(IList<string> path)
         {
             List<Subscription> result = new List<Subscription>();
-            GetSubscriptionFromPathTree(_children, path, ref result);
+            GetSubscriptionFromPathTree(_children, path, 0, result);
             return result;
         }
     }
