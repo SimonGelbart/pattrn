@@ -1,5 +1,6 @@
 using Homework.Benchmarks.Scenarios;
 using Homework.Routing;
+using System.Diagnostics;
 
 namespace Homework.Benchmarks;
 
@@ -23,7 +24,9 @@ internal static class RetainedMemoryProbe
             new HomeworkLookupScenario(registrationCount, distribution, matchCount));
         ForceCollection();
         var before = GC.GetTotalMemory(forceFullCollection: true);
+        var stopwatch = Stopwatch.StartNew();
         var index = HomeworkBenchmarkDataFactory.CreateIndex(implementation, data.Registrations);
+        stopwatch.Stop();
         ForceCollection();
         var after = GC.GetTotalMemory(forceFullCollection: true);
         var retained = after - before;
@@ -31,7 +34,8 @@ internal static class RetainedMemoryProbe
 
         Console.WriteLine(
             $"implementation={implementation} distribution={distribution} registrations={registrationCount} "
-            + $"matches={matches} retainedBytes={retained}");
+            + $"matches={matches} buildMilliseconds={stopwatch.Elapsed.TotalMilliseconds:F3} "
+            + $"retainedBytes={retained}");
         GC.KeepAlive(index);
         GC.KeepAlive(data);
         return 0;
