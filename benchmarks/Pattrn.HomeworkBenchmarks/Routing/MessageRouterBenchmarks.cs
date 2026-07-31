@@ -7,33 +7,44 @@ namespace Homework.Routing
     [MemoryDiagnoser]
     public class MessageRouterBenchmarks
     {
-        private readonly MessageRouter _router;
+        private MessageRouter _customRouter = null!;
+        private MessageRouter _pattrnRouter = null!;
+        private RoutableMessage0 _message = null!;
 
-        public MessageRouterBenchmarks()
+        [GlobalSetup]
+        public void Setup()
         {
-            var subscriptionIndex = BuildSubscriptionIndex();
-
-            _router = new MessageRouter(subscriptionIndex);
+            var subscriptions = BuildSubscriptions();
+            var customIndex = new SubscriptionIndex();
+            customIndex.AddSubscriptions(subscriptions);
+            var pattrnIndex = new PattrnSubscriptionIndex();
+            pattrnIndex.AddSubscriptions(subscriptions);
+            _customRouter = new MessageRouter(customIndex);
+            _pattrnRouter = new MessageRouter(pattrnIndex);
+            _message = new RoutableMessage0 { Id = 999, Value = 1234m };
         }
 
-        private static SubscriptionIndex BuildSubscriptionIndex()
+        private static Subscription[] BuildSubscriptions()
         {
-            var subscriptionIndex = new SubscriptionIndex();
             var baseTypeName = typeof(RoutableMessage0).FullName!.TrimEnd('0');
 
-            var subscriptions = from clientIndex in Enumerable.Range(0, 30)
-                                let clientId = new ClientId($"Client.{clientIndex}")
-                                from typeIndex in Enumerable.Range(0, 10)
-                                let messageTypeId = new MessageTypeId($"{baseTypeName}{typeIndex}")
-                                from contentIndex in Enumerable.Range(0, 4_000)
-                                select new Subscription(clientId, messageTypeId, new ContentPattern(contentIndex.ToString()));
-
-            subscriptionIndex.AddSubscriptions(subscriptions);
-            return subscriptionIndex;
+            return (from clientIndex in Enumerable.Range(0, 30)
+                    let clientId = new ClientId($"Client.{clientIndex}")
+                    from typeIndex in Enumerable.Range(0, 10)
+                    let messageTypeId = new MessageTypeId($"{baseTypeName}{typeIndex}")
+                    from contentIndex in Enumerable.Range(0, 4_000)
+                    select new Subscription(
+                        clientId,
+                        messageTypeId,
+                        new ContentPattern(contentIndex.ToString())))
+                .ToArray();
         }
 
         [Benchmark(Baseline = true)]
-        public List<ClientId> GetConsumers() => _router.GetConsumers(new RoutableMessage0 { Id = 999, Value = 1234m }).ToList();
+        public List<ClientId> CustomTree_GetConsumers() => _customRouter.GetConsumers(_message).ToList();
+
+        [Benchmark]
+        public List<ClientId> Pattrn_GetConsumers() => _pattrnRouter.GetConsumers(_message).ToList();
 
         public class RoutableMessage0 : IRoutableMessage
         {

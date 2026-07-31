@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\benchmarks\Pattrn.HomeworkBenchmarks\Pattrn.HomeworkBenchmarks.csproj" />
     <ProjectReference Include="..\..\samples\Pattrn.HomeworkSample\Pattrn.HomeworkSample.csproj" />
   </ItemGroup>
 
