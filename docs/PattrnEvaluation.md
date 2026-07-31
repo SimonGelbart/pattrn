@@ -107,9 +107,10 @@ compiled data and compilation cost:
 | 1,200,000 | Custom tree | not timed in this probe | 4.33 GB |
 | 1,200,000 | Pattrn | did not complete within 6 minutes | not available |
 
-Pattrn's retained memory is far below the requested 2x ceiling, but build time
-crosses the one-second ceiling around 10,000 registrations and becomes
-non-viable at larger high-cardinality workloads.
+In the completed 10,000- and 100,000-registration probes, Pattrn's retained
+memory is far below the requested 2x ceiling. The 1,200,000-registration ratio
+is unknown. Build time crosses the one-second ceiling around 10,000
+registrations and becomes non-viable at larger high-cardinality workloads.
 
 ## Matrix status and stopping decision
 
@@ -158,8 +159,9 @@ simpler than the custom tree.
 
 ## Recommendation
 
-Correctness, package isolation, snapshot safety, and retained memory are strong.
-Lookup meets the absolute latency target but misses both relative read gates;
+Correctness, package isolation, snapshot safety, and retained-memory results
+through 100,000 registrations are strong. Lookup meets the absolute latency
+target but misses both relative read gates;
 ordinary updates miss the mutation gate by 18x to 270x, and large compiles are
 not operationally viable. Do not replace Homework's tree or delete either
 implementation from this experiment. A future experiment should begin with an

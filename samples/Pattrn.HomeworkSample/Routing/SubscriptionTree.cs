@@ -129,7 +129,7 @@ namespace Homework.Routing
             bool isStarNodeSearchNeeded =node.Children.TryGetValue("*", out starNode!);
             if (isChildNodeSearchNeeded)
                 GetSubscriptionFromPathTree(childNode, path, pathIndex + 1, subscriptions);
-            if (isStarNodeSearchNeeded)
+            if (isStarNodeSearchNeeded && !ReferenceEquals(childNode, starNode))
                 GetSubscriptionFromPathTree(starNode, path, pathIndex + 1, subscriptions);
         }
 

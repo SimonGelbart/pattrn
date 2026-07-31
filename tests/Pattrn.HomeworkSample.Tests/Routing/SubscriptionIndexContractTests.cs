@@ -49,6 +49,23 @@ public abstract class SubscriptionIndexContractTests
     }
 
     [Test]
+    public async Task WildcardValuedContentReturnsEachSubscriptionExactlyOnce()
+    {
+        var index = _createIndex();
+        var subscription = Subscription.Of<RoutableMessages.PriceUpdated>(
+            new ClientId("wildcard-content"),
+            new ContentPattern("*"));
+        index.AddSubscriptions([subscription]);
+
+        var actual = index.FindSubscriptions(
+            subscription.MessageTypeId,
+            new MessageRoutingContent("*")).ToArray();
+
+        await Assert.That(actual).IsEquivalentTo([subscription]);
+        await Assert.That(actual.Length).IsEqualTo(1);
+    }
+
+    [Test]
     public async Task PreservesLiteralEmptySegmentsAndRejectsLongerPatterns()
     {
         var index = _createIndex();
