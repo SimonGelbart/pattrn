@@ -1,5 +1,7 @@
 using System.Collections.Immutable;
 
+using Pattrn.Internal.Compilation;
+
 #pragma warning disable CS1591
 namespace Pattrn.Builders;
 
@@ -252,40 +254,14 @@ public sealed class PattrnIndexBuilder<TSegment, TValue>
         IReadOnlyList<PattrnRegistration<TSegment, TValue>> registrations,
         IEqualityComparer<TSegment> comparer)
     {
-        var distinct = new List<ImmutableArray<PatternSegment<TSegment>>>();
+        var distinct = new HashSet<ImmutableArray<PatternSegment<TSegment>>>(
+            new PatternSequenceComparer<TSegment>(comparer));
         foreach (var registration in registrations)
         {
-            if (!distinct.Any(existing => SamePattern(existing, registration.Pattern, comparer)))
-            {
-                distinct.Add(registration.Pattern);
-            }
+            distinct.Add(registration.Pattern);
         }
 
         return distinct.Count;
     }
 
-    private static bool SamePattern(
-        ImmutableArray<PatternSegment<TSegment>> left,
-        ImmutableArray<PatternSegment<TSegment>> right,
-        IEqualityComparer<TSegment> comparer)
-    {
-        if (left.Length != right.Length)
-        {
-            return false;
-        }
-
-        for (var i = 0; i < left.Length; i++)
-        {
-            left[i].Deconstruct(out var leftKind, out var leftLiteral, out var leftName);
-            right[i].Deconstruct(out var rightKind, out var rightLiteral, out var rightName);
-            if (leftKind != rightKind
-                || (leftKind == PatternSegmentKind.Literal && !comparer.Equals(leftLiteral, rightLiteral))
-                || !string.Equals(leftName, rightName, StringComparison.Ordinal))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
 }
