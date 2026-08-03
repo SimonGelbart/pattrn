@@ -41,6 +41,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pattrn.HomeworkSample.Tests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pattrn.HomeworkBenchmarks", "benchmarks\Pattrn.HomeworkBenchmarks\Pattrn.HomeworkBenchmarks.csproj", "{0FFF2E29-CAA4-4795-AD53-E55040FE6569}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pattrn.LeanCoreBenchmarks", "benchmarks\Pattrn.LeanCoreBenchmarks\Pattrn.LeanCoreBenchmarks.csproj", "{06774821-C715-4801-AF3D-CD787385E276}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -231,6 +233,18 @@ Global
 		{0FFF2E29-CAA4-4795-AD53-E55040FE6569}.Release|x64.Build.0 = Release|Any CPU
 		{0FFF2E29-CAA4-4795-AD53-E55040FE6569}.Release|x86.ActiveCfg = Release|Any CPU
 		{0FFF2E29-CAA4-4795-AD53-E55040FE6569}.Release|x86.Build.0 = Release|Any CPU
+		{06774821-C715-4801-AF3D-CD787385E276}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06774821-C715-4801-AF3D-CD787385E276}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06774821-C715-4801-AF3D-CD787385E276}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{06774821-C715-4801-AF3D-CD787385E276}.Debug|x64.Build.0 = Debug|Any CPU
+		{06774821-C715-4801-AF3D-CD787385E276}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{06774821-C715-4801-AF3D-CD787385E276}.Debug|x86.Build.0 = Debug|Any CPU
+		{06774821-C715-4801-AF3D-CD787385E276}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06774821-C715-4801-AF3D-CD787385E276}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06774821-C715-4801-AF3D-CD787385E276}.Release|x64.ActiveCfg = Release|Any CPU
+		{06774821-C715-4801-AF3D-CD787385E276}.Release|x64.Build.0 = Release|Any CPU
+		{06774821-C715-4801-AF3D-CD787385E276}.Release|x86.ActiveCfg = Release|Any CPU
+		{06774821-C715-4801-AF3D-CD787385E276}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -250,5 +264,6 @@ Global
 		{1443C08A-9DE3-42AA-A9F4-B0C7CDEE43EE} = {5D20AA90-6969-D8BD-9DCD-8634F4692FDA}
 		{9E650152-28AF-4F5E-B1D0-7FFB907D1C1C} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{0FFF2E29-CAA4-4795-AD53-E55040FE6569} = {66320409-64EC-F7C5-3DEF-65E7510DAAD1}
+		{06774821-C715-4801-AF3D-CD787385E276} = {66320409-64EC-F7C5-3DEF-65E7510DAAD1}
 	EndGlobalSection
 EndGlobal

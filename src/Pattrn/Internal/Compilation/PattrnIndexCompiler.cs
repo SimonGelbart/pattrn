@@ -25,7 +25,8 @@ internal static class PattrnIndexCompiler<TSegment, TValue>
         var snapshot = registrations.ToArray();
         var diagnostics = new List<PattrnDiagnostic>();
         var ids = new HashSet<RegistrationId>();
-        var patterns = new List<ImmutableArray<PatternSegment<TSegment>>>();
+        var distinctPatterns = new HashSet<ImmutableArray<PatternSegment<TSegment>>>(
+            new PatternSequenceComparer<TSegment>(segmentEquality));
 
         for (var registrationIndex = 0; registrationIndex < snapshot.Length; registrationIndex++)
         {
@@ -39,8 +40,8 @@ internal static class PattrnIndexCompiler<TSegment, TValue>
                 diagnostics.Add(new("PTRN1002", PattrnDiagnosticSeverity.Error, "Registration identity is duplicated.", registration.Id));
             }
 
-            var duplicateIndex = patterns.FindIndex(pattern => SamePattern(pattern, registration.Pattern, segmentEquality));
-            if (duplicateIndex >= 0 && options.DuplicatePatternPolicy != DuplicatePatternPolicy.Allow)
+            var isDuplicatePattern = !distinctPatterns.Add(registration.Pattern);
+            if (isDuplicatePattern && options.DuplicatePatternPolicy != DuplicatePatternPolicy.Allow)
             {
                 diagnostics.Add(new(
                     "PTRN1003",
@@ -48,8 +49,6 @@ internal static class PattrnIndexCompiler<TSegment, TValue>
                     "The canonical pattern is duplicated.",
                     registration.Id));
             }
-            patterns.Add(registration.Pattern);
-
             var captureNames = new HashSet<string>(StringComparer.Ordinal);
             for (var segmentIndex = 0; segmentIndex < registration.Pattern.Length; segmentIndex++)
             {
@@ -76,7 +75,7 @@ internal static class PattrnIndexCompiler<TSegment, TValue>
                     segmentEquality,
                     valueEquality,
                     deduplicateValues: matchOptions.DeduplicateValues),
-                CountDistinctPatterns(snapshot, segmentEquality),
+                distinctPatterns.Count,
                 snapshot.Length,
                 matchOptions,
                 segmentEquality,
@@ -92,44 +91,4 @@ internal static class PattrnIndexCompiler<TSegment, TValue>
         return new PattrnCompileResult<TSegment, TValue>(index, finalReport);
     }
 
-    private static int CountDistinctPatterns(
-        IReadOnlyList<PattrnRegistration<TSegment, TValue>> registrations,
-        IEqualityComparer<TSegment> comparer)
-    {
-        var patterns = new List<ImmutableArray<PatternSegment<TSegment>>>();
-        foreach (var registration in registrations)
-        {
-            if (!patterns.Any(pattern => SamePattern(pattern, registration.Pattern, comparer)))
-            {
-                patterns.Add(registration.Pattern);
-            }
-        }
-
-        return patterns.Count;
-    }
-
-    private static bool SamePattern(
-        ImmutableArray<PatternSegment<TSegment>> left,
-        ImmutableArray<PatternSegment<TSegment>> right,
-        IEqualityComparer<TSegment> comparer)
-    {
-        if (left.Length != right.Length)
-        {
-            return false;
-        }
-
-        for (var i = 0; i < left.Length; i++)
-        {
-            left[i].Deconstruct(out var leftKind, out var leftLiteral, out var leftName);
-            right[i].Deconstruct(out var rightKind, out var rightLiteral, out var rightName);
-            if (leftKind != rightKind
-                || (leftKind == PatternSegmentKind.Literal && !comparer.Equals(leftLiteral, rightLiteral))
-                || !string.Equals(leftName, rightName, StringComparison.Ordinal))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
 }
