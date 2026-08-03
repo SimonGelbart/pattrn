@@ -4,22 +4,26 @@ Benchmark results are evidence for maintainers, not a user-facing performance pr
 
 ## What is protected
 
-The benchmark suite covers:
+The supported benchmark project covers a bounded set of core scenarios:
 
-- core exact matching and caller-provided TryMatch buffers;
-- explicit prefix matching;
-- detailed matching and Explain separately;
-- string splitting and normalization;
-- route helpers while routing remains preview;
-- builder construction and duplicate-heavy registrations.
+- compilation and canonical pattern analysis;
+- literal and wildcard exact matching;
+- best-prefix and all-prefix operations;
+- caller-provided buffers and owning value results;
+- focused detailed and diagnostic scenarios.
 
-Diagnostics and explanations must remain separate from the normal matching groups because they intentionally allocate and perform extra work.
+Diagnostics and explanations remain separate from the normal matching path
+because they intentionally allocate and perform extra work. String, routing,
+and Homework experiments are not supported benchmark baselines.
 
 ## CI workflow
 
-The Benchmarks workflow runs BenchmarkDotNet and uploads raw reports, metadata, grouped summaries, and job summaries. Full single-run mode is the comparable baseline. Sharded mode is useful for coverage but may run groups on different runners.
+The benchmark workflow is manual and focused. It runs selected BenchmarkDotNet
+filters and uploads raw reports, metadata, grouped summaries, and job summaries.
+It does not run a complete Cartesian matrix or enforce performance thresholds.
 
-The workflow supports focused groups such as Core, Strings, Routing, Builder, and Diagnostics. Use the workflow inputs rather than treating a local report as current product evidence.
+Use the workflow inputs for focused core or compilation runs rather than treating
+a local report as current product evidence.
 
 ## Local investigation
 

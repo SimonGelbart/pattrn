@@ -9,7 +9,6 @@ This reference records Pattrn's package-level trimming and Native AOT support po
 | `Pattrn` | Supported | Supported | The stable candidate core is dependency-light and does not use reflection, dynamic code generation, or linker-sensitive APIs. |
 | `Pattrn.Strings` | Supported | Supported | String helpers use explicit splitting, normalization delegates supplied by callers, and the generic core. |
 | `Pattrn.DependencyInjection` | Supported | Supported | The DI package uses `Microsoft.Extensions.DependencyInjection` registrations and keyed-service resolution. Consumers remain responsible for the trim/AOT safety of their own services, registration-source implementations, callbacks, comparers, and value types. |
-| `Pattrn.Routing` | Out of scope | Out of scope | Routing remains preview and is intentionally excluded from the stable-package validation harness. |
 
 ## Audit summary
 
@@ -23,7 +22,7 @@ The stable candidate packages were audited for reflection APIs, dynamic code gen
 - `src/Pattrn.Strings/Pattrn.Strings.csproj`
 - `src/Pattrn.DependencyInjection/Pattrn.DependencyInjection.csproj`
 
-The harness does not reference packed NuGet artifacts and does not include `Pattrn.Routing`.
+The harness does not reference packed NuGet artifacts.
 
 The application smoke-tests representative stable-package behavior:
 

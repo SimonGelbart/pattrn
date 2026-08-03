@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Superseded
 
 ## Date
 
@@ -14,14 +14,15 @@ Pattrn needs useful string, dependency-injection, and route-template ergonomics 
 
 ## Decision
 
-Keep domain helpers in companion packages:
+Keep domain helpers in thin companion packages:
 
 - `Pattrn.Strings` owns string splitting and normalization.
 - `Pattrn.DependencyInjection` owns thin service-registration helpers.
-- `Pattrn.Routing` owns framework-neutral route-template parsing and route-layer validation, and remains preview.
+- Route-template parsing is retained only as historical experimental content and
+  is not part of the supported package pipeline.
 - ASP.NET Core endpoint behavior is not part of the core or routing companion.
 
-Companion packages translate their syntax into the generic segmented core and must not redefine core matching or framework precedence.
+Companion packages translate their syntax into the generic segmented core and must not redefine core matching or framework precedence. The supported package story is limited to the core, string convenience, and DI convenience packages.
 
 ## Consequences
 

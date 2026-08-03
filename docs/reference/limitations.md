@@ -1,5 +1,9 @@
 # Known limitations
 
+The authoritative limitations list now lives at [../limitations.md](../limitations.md).
+The details below describe the same supported scope for compatibility with the
+existing reference route.
+
 This document records current product boundaries.
 
 ## .NET target
@@ -9,10 +13,6 @@ This document records current product boundaries.
 ## Core stays segmented and generic
 
 The core package works with already-segmented paths and patterns. String parsing and normalization belong in `Pattrn.Strings`; route-template parsing, URL normalization, OpenAPI semantics, and ASP.NET Core integration belong in companion packages or applications.
-
-## Routing package is preview
-
-`Pattrn.Routing` currently supports literal route segments, named parameters, terminal catch-alls, preserved constraint/default/optional metadata, structured parse diagnostics, and optional/defaulted suffix expansion. Constraint validation, URL decoding, ASP.NET Core integration, OpenAPI behavior, and broader optional route semantics are intentionally deferred.
 
 ## Constraints are not enforced by the core
 

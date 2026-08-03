@@ -9,7 +9,7 @@ ADRs record decisions that constrain the architecture or public contracts. Curre
 | [0001](0001-core-remains-segmented-and-domain-neutral.md) | Keep the core segmented and domain-neutral. |
 | [0002](0002-target-dotnet-10-only.md) | Target .NET 10 during the current product cycle. |
 | [0003](0003-explicit-pattern-segments-are-primary.md) | Make explicit pattern segments the primary core model. |
-| [0004](0004-companion-packages.md) | Keep domain helpers in companion packages and framework boundaries outside the core. |
+| [0004](0004-companion-packages.md) | Superseded: keep only thin supported companions around the framework-neutral core. |
 | [0005](0005-compiled-index-internals-are-private.md) | Keep compiled-index internals private and non-serializable. |
 | [0006](0006-hot-path-matching-policy.md) | Keep normal matching synchronous and diagnostics off the hot path. |
 | [0007](0007-use-fixed-ranking-with-consumer-side-sorting.md) | Use fixed generic ranking and consumer-side sorting. |

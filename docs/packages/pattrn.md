@@ -1,10 +1,8 @@
 # Pattrn
 
-Fast immutable segmented-pattern matching for .NET 10.
-
-`Pattrn` indexes segmented patterns once, then resolves matching inputs quickly and predictably. The core package is generic and dependency-light; string paths, dependency-injection helpers, and route-template syntax live in companion packages.
-
-Pattrn is pre-beta. The public surface may still change before beta.
+`Pattrn` is the supported immutable segmented-pattern index. It accepts
+already-segmented input, compiles registrations into a deterministic snapshot,
+and supports exact, best-prefix, and all-prefix matching.
 
 ## Install
 
@@ -12,34 +10,12 @@ Pattrn is pre-beta. The public surface may still change before beta.
 <PackageReference Include="Pattrn" Version="0.1.0-alpha.1" />
 ```
 
+## Core model
 
-## Packages
-
-| Package | Purpose | Status |
-|---|---|---|
-| `Pattrn` | Core immutable segmented-pattern index. | Pre-beta stable candidate. |
-| `Pattrn.Strings` | String splitting, normalization, and string-path ergonomics. | Pre-beta stable candidate. |
-| `Pattrn.DependencyInjection` | Thin Microsoft.Extensions.DependencyInjection integration. | Pre-beta stable candidate. |
-| `Pattrn.Routing` | Framework-neutral route-template parsing helpers built on the generic core. | Preview. |
-
-## Which package should I install?
-
-This table is the canonical package-selection reference.
-
-| If you need... | Install | Then add |
-|---|---|---|
-| Generic segmented matching on already-split segments | `Pattrn` | Nothing else |
-| Dotted/slashed string-path helpers and normalization | `Pattrn` + `Pattrn.Strings` | String normalization options and string-builder facade |
-| Microsoft.Extensions.DependencyInjection helpers | `Pattrn` + `Pattrn.DependencyInjection` | DI registration extensions |
-| Route-template parsing/expansion helpers | `Pattrn` + `Pattrn.Routing` | Route-specific helper APIs (preview) |
-
-## Core usage
-
-The primary core model is explicit generic pattern segments. This avoids reserving a magic segment value for wildcards and keeps the core independent from route, glob, URL, filesystem, or application semantics.
+Use explicit `PatternSegment<TSegment>` values for literals, wildcards,
+parameters, and terminal catch-alls:
 
 ```csharp
-using Pattrn.Builders;
-using Pattrn.Diagnostics;
 using Pattrn.Matching;
 using Pattrn.Patterns;
 
@@ -47,164 +23,57 @@ var index = PattrnIndex<string, string>
     .Builder()
     .AddPattern(
         [
-            PatternSegment<string>.Literal("market"),
-            PatternSegment<string>.Literal("NASDAQ"),
-            PatternSegment<string>.Literal("MSFT")
+            PatternSegment<string>.Literal("orders"),
+            PatternSegment<string>.Parameter("id")
         ],
-        "exact-msft",
-        name: "market-nasdaq-msft")
-    .AddPattern(
-        [
-            PatternSegment<string>.Literal("market"),
-            PatternSegment<string>.Literal("NASDAQ"),
-            PatternSegment<string>.Wildcard()
-        ],
-        "any-nasdaq")
+        "order-handler")
     .Build();
 
-var matches = index.MatchValuesToArray(["market", "NASDAQ", "MSFT"]);
-```
-
-For hot paths, prefer caller-provided buffers:
-
-```csharp
-var path = new[] { "market", "NASDAQ", "MSFT" };
-var buffer = new string[index.GetMatchCountUpperBound(path)];
-var matched = index.TryMatchValues(path, buffer, out var written);
-```
-
-## Generic pattern segments
-
-`PatternSegment<TSegment>` is the documentation-first registration model for the core package. It represents literals, anonymous wildcards, named parameters, and terminal catch-alls without relying on string syntax or a reserved token.
-
-Tokenized segmented APIs still exist as opt-in compact convenience APIs. They use a configured wildcard segment value, such as `"*"`, as a single-segment wildcard. The default builder is tokenless, so `Add(...)` registers literal-only segments unless the builder was created with a wildcard token.
-
-```csharp
-var builder = PattrnIndex<string, string>.Builder();
-
-builder.AddPattern(
-    [
-        PatternSegment<string>.Literal("orders"),
-        PatternSegment<string>.Parameter("id")
-    ],
-    "order-handler");
-
-var index = builder.Build();
 var matches = index.MatchValuesToArray(["orders", "123"]);
 ```
 
-Named parameters and catch-alls are exposed through detailed matches:
+The core does not parse URLs, route templates, filesystem globs, or arbitrary
+expressions. Tokenized literal-only convenience methods remain available when
+an application intentionally configures a wildcard token.
 
-```csharp
-var detailed = index.MatchDetailedToArray(["orders", "123"]);
-var id = detailed[0].Captures.Single(capture => capture.Name == "id").Value;
-```
+## Match families
 
-For troubleshooting and tooling, use diagnostics-oriented explanation APIs. Rejected-candidate diagnostics are opt-in so the default hot path stays allocation-conscious:
+- `Match...` methods require complete input consumption.
+- `MatchPrefix...` methods select the deepest accepted prefix.
+- `EnumeratePrefix...` methods return all accepted prefix depths.
+- `...Values` methods project values and apply the configured duplicate-value
+  behavior.
+- `Try...` methods write into caller-owned buffers.
+- Detailed methods expose registration identity and named captures.
 
-```csharp
-var explanation = index.Explain(
-    ["orders", "123"],
-    PatternExplanationOptions.IncludeRejections);
+See [the semantic contract](../semantics.md) for ordering, duplicates, empty
+paths, comparer behavior, and capture rules.
 
-var accepted = explanation.Matches;
-var rejected = explanation.RejectedCandidates;
-```
+## Immutable lifecycle
 
-Terminal catch-alls are generic and segmented:
-
-```csharp
-builder.AddPattern(
-    [
-        PatternSegment<string>.Literal("files"),
-        PatternSegment<string>.CatchAll("path")
-    ],
-    "file-handler");
-```
-
-Named catch-alls return one `PatternCapture<TSegment>` whose `Values` contains all captured segments; a zero-segment named catch-all has empty `Values`. `PatternCapture.Value` is single-segment-only and throws for zero-segment or multi-segment captures. Caller-buffer detailed APIs use `PatternCaptureSlice<TSegment>` to preserve zero-allocation matching when buffers are sufficient. String joining, URL decoding, optional route syntax, and constraint parsing belong in companion packages.
-
-## Trimming and Native AOT
-
-`Pattrn` is supported for trimming and Native AOT when validated with the repository AOT compatibility harness. The core package is dependency-light and does not use reflection, dynamic code generation, or linker-sensitive APIs in its matching implementation. See [trimming and Native AOT compatibility](../reference/aot-trimming.md) for validation scope, commands, warning policy, and limits.
+Builders are single-writer registration sources. `Build` or `Compile` validates
+the complete set and returns an immutable index suitable for concurrent reads.
+For updates, build a replacement snapshot and publish it at the application
+boundary.
 
 ## Companion packages
 
-### Strings
+`Pattrn.Strings` is a maintenance-only convenience layer for splitting and
+normalizing strings before matching. `Pattrn.DependencyInjection` is a
+maintenance-only registration helper for compiled indexes. The experimental
+`Pattrn.Routing` package is not part of the supported core product story.
 
-```csharp
-using Pattrn.Matching;
-using Pattrn.Patterns;
-using Pattrn.Strings;
+## Trimming and Native AOT
 
-var index = StringPattrnIndexBuilder
-    .CreateTokenized<string>('.', "*")
-    .Add("market.NASDAQ.*", "client-a")
-    .Build();
+The repository validates `Pattrn` with the trimming and Native AOT harness. The
+core implementation does not use reflection or dynamic code generation. See
+[the validation reference](../reference/aot-trimming.md) for the exact harness,
+warning policy, and limits.
 
-var matches = index.MatchValuesToArray("market.NASDAQ.MSFT");
-```
+## Performance posture
 
-String helpers allocate because they split strings into segments. Keep hot paths on the core span APIs. Use `StringNormalizationOptions` and the string-path facade when a string domain needs explicit separators, case-insensitive matching, trimming, empty-segment handling, or custom segment normalization.
-
-### Dependency injection
-
-```csharp
-using Microsoft.Extensions.DependencyInjection;
-using Pattrn.Matching;
-using Pattrn.DependencyInjection;
-
-services.AddPattrnIndex<string, string>(registration => registration
-    .UseWildcard("*")
-    .Configure(builder => builder.Add(["market", "NASDAQ", "*"], "client-a")));
-
-var index = provider.GetRequiredService<PattrnIndex<string, string>>();
-```
-
-### Routing
-
-Route-like string syntax lives in `Pattrn.Routing`, not in the core package.
-
-```csharp
-using Pattrn.Matching;
-using Pattrn.Routing.Integration;
-
-var index = PattrnIndex<string, string>
-    .Builder()
-    .AddRoute("/orders/{id}", "order-handler")
-    .AddRoute("/files/{*path}", "file-handler")
-    .Build();
-
-var matches = index.MatchRouteDetailedToArray("/orders/123");
-```
-
-The routing package supports literal segments, named parameters, terminal named catch-alls, preserved constraints/defaults/optional suffix metadata, optional/defaulted suffix expansion metadata through `RouteTemplateExpansion`, and optional route-layer constraint validation. URL decoding, ASP.NET Core integration, OpenAPI semantics, and endpoint metadata remain outside the generic core.
-
-## Design principles
-
-The core package intentionally stays small:
-
-- no DI dependency;
-- no string parsing dependency;
-- no async matching API;
-- immutable compiled index for concurrent reads;
-- span-based hot path for low-allocation matching;
-- optional diagnostics outside the default matching path.
-
-## Documentation
-
-Start with the [documentation index](../README.md).
-
-Key pages:
-
-- [Architecture decisions](../adr/README.md)
-- [Validation](../reference/validation.md)
-- [API overview](../reference/api.md)
-- [Matching semantics](../reference/matching-semantics.md)
-- [Duplicate behavior](../reference/duplicate-behavior.md)
-- [Diagnostics](../reference/diagnostics.md)
-- [Benchmarks](../reference/benchmarks.md)
-
-## Product direction
-
-Routing remains preview. Framework-specific routing, globbing, source generators, analyzers, and domain-specific ranking remain outside the core package.
+The core is intended for read-heavy workloads. Caller-buffer APIs can avoid
+owning result arrays, while owning and detailed APIs allocate by contract.
+Compilation is a complete snapshot build; frequent individual mutations are not
+the target workload. Benchmark your own registration count, comparer, input
+shape, result count, and update cadence.

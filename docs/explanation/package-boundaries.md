@@ -34,11 +34,13 @@ String helpers are convenience APIs. They split strings into segments before del
 
 `Pattrn.DependencyInjection` owns service registration helpers. It lets applications build immutable indexes at startup and register them as services without putting DI concepts into the core matcher.
 
-## Routing preview
+## Routing compatibility
 
-`Pattrn.Routing` owns framework-neutral route-template parsing and route-layer validation. It compiles route templates into the generic core model, but it is not an ASP.NET Core router and does not implement framework route precedence.
+`Pattrn.Routing` is retained only as experimental compatibility content. It is
+not part of the supported package story and does not turn the core into an HTTP
+router or implement framework route precedence.
 
-Routing remains preview until explicitly stabilized.
+Active routing feature work is paused.
 
 ## Why this split matters
 

@@ -6,9 +6,9 @@ const withBase = (path: string) => `${base}${path}`;
 <PattrnLayout current="overview">
   <section class="hero">
     <p class="eyebrow">Pattrn project site</p>
-    <h1>Explicit segmented-pattern matching for .NET.</h1>
-    <p class="lede">Pattrn is a pre-beta .NET library experiment for explicit segmented-pattern matching.</p>
-    <p class="lede">It indexes segmented patterns once, then resolves matching inputs predictably through explicit semantics, package boundaries, diagnostics, and CI-owned benchmark evidence.</p>
+    <h1>An immutable segmented-pattern index for .NET.</h1>
+    <p class="lede">Pattrn is maintained as a focused index for read-heavy applications where lookups greatly outnumber registration changes.</p>
+    <p class="lede">It compiles explicit segmented registrations into deterministic snapshots for exact, best-prefix, and all-prefix matching.</p>
     <div class="actions">
       <a class="button" href={withBase('/docs/')}>Read the docs</a>
       <a class="button" href={withBase('/adr/')}>View ADRs</a>
@@ -16,9 +16,9 @@ const withBase = (path: string) => `${base}${path}`;
     </div>
     <dl class="hero-metadata">
       <div><dt>Platform</dt><dd>.NET 10</dd></div>
-      <div><dt>Status</dt><dd>Pre-beta product shaping</dd></div>
+      <div><dt>Status</dt><dd>Maintained; feature expansion paused</dd></div>
       <div><dt>Core model</dt><dd>Explicit pattern segments</dd></div>
-      <div><dt>Evidence</dt><dd>Docs, ADRs, tests, CI benchmarks</dd></div>
+      <div><dt>Evidence</dt><dd>Contracts, tests, packages, CI</dd></div>
     </dl>
   </section>
 
@@ -44,7 +44,6 @@ const withBase = (path: string) => `${base}${path}`;
       <article class="card"><p class="meta-line">Core</p><h3><code>Pattrn</code></h3><p>Immutable segmented-pattern index, detailed matches, captures, duplicate behavior, ranking metadata, and diagnostics.</p></article>
       <article class="card"><p class="meta-line">String ergonomics</p><h3><code>Pattrn.Strings</code></h3><p>String splitting, separators, case sensitivity, trimming, normalization, and compact string-path builders.</p></article>
       <article class="card"><p class="meta-line">Application integration</p><h3><code>Pattrn.DependencyInjection</code></h3><p>Thin Microsoft.Extensions.DependencyInjection registration for singleton indexes and named or keyed indexes.</p></article>
-      <article class="card"><p class="meta-line">Preview</p><h3><code>Pattrn.Routing</code></h3><p>Framework-neutral route-template parsing helpers built on top of the generic core.</p></article>
     </div>
   </section>
 
@@ -90,6 +89,6 @@ const withBase = (path: string) => `${base}${path}`;
   </section>
 
   <section class="section section-compact">
-    <aside class="note"><p><strong>Current status:</strong> Pattrn is pre-beta and pre-1.0. The public surface may still change before beta.</p></aside>
+    <aside class="note"><p><strong>Current status:</strong> Active feature expansion is paused. Correctness, compatibility, packaging, and documentation fixes remain welcome.</p></aside>
   </section>
 </PattrnLayout>

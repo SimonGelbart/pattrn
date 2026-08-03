@@ -1,8 +1,8 @@
-# Dependency injection
+# Dependency injection (maintenance-only)
 
 `Pattrn.DependencyInjection` integrates the core index with `Microsoft.Extensions.DependencyInjection`.
 
-The package is pre-beta. The fluent registration model is the stable-candidate surface. Named-index provider and registration-source APIs remain preview until beta.
+The package is maintenance-only. It remains a thin convenience layer around immutable core indexes; active feature expansion is paused.
 
 ## Design goals
 
@@ -126,4 +126,4 @@ Preview:
 - `IPattrnRegistrationSource<TSegment, TValue>`.
 - `PattrnRegistrationContext<TSegment, TValue>`.
 
-The package is pre-beta; its registration helpers remain intentionally thin.
+Its registration helpers remain intentionally thin; active feature expansion is paused.

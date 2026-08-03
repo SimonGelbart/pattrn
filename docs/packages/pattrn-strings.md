@@ -1,12 +1,12 @@
-# Pattrn.Strings
+# Pattrn.Strings (maintenance-only)
 
 `Pattrn.Strings` contains convenience helpers for separated string paths such as dotted topics, configuration keys, command paths, or slash-separated names.
 
-The core package works with already-segmented paths, for example `ReadOnlySpan<string>`. This companion package converts strings into segments before delegating to the core index. The conversion policy is explicit so URL, filesystem, route, and application-specific semantics do not leak into the generic core.
+The core package works with already-segmented paths, for example `ReadOnlySpan<string>`. This maintenance-only companion converts strings into segments before delegating to the core index. The conversion policy is explicit so URL, filesystem, route, and application-specific semantics do not leak into the generic core.
 
 ## Install
 
-Install both packages when you want string helpers. Use the current pre-beta package version from the package feed or repository package metadata:
+Install both packages when you want string helpers. Use the current package version from the package feed or repository package metadata:
 
 ```xml
 <PackageReference Include="Pattrn" Version="..." />

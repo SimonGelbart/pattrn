@@ -1,5 +1,9 @@
 # Matching semantics
 
+The authoritative semantic contract now lives at [../semantics.md](../semantics.md).
+This reference page remains as a compatibility link for existing documentation
+URLs.
+
 Pattrn matches segmented paths against an ordered immutable set of canonical
 registrations. Literal segments match through the configured segment comparer;
 wildcards and parameters consume one segment; terminal catch-alls consume zero

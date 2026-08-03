@@ -2,11 +2,10 @@
 
 This tutorial introduces the core `Pattrn` package. It uses explicit pattern segments, which avoid reserving a segment value for wildcard behavior.
 
-Use companion packages only after the segmented core model is clear:
+Use convenience packages only after the segmented core model is clear:
 
 - use `Pattrn.Strings` when your input starts as separated strings;
 - use `Pattrn.DependencyInjection` when the index should be built by Microsoft.Extensions.DependencyInjection;
-- use `Pattrn.Routing` when you need preview route-template syntax.
 
 ## 1. Create a builder
 
@@ -78,4 +77,3 @@ Detailed matches expose pattern shape, values, and captures. Results are already
 - Read [matching semantics](../reference/matching-semantics.md).
 - Use [string helpers](../packages/pattrn-strings.md) for separated string paths.
 - Use [dependency injection](../packages/pattrn-dependency-injection.md) for service registration.
-- Use [routing](../packages/pattrn-routing.md) only when preview route-template syntax is appropriate.
