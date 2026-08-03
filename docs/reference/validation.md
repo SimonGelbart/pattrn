@@ -18,7 +18,7 @@ Supporting instructions and skills must link to these definitions rather than re
 
 CI is the authoritative verification path for pull requests and protected branches.
 
-The current CI workflow uses `actions/setup-dotnet` with `global-json-file: global.json`, then restores, builds, runs the Python benchmark-tool tests, and runs the .NET test assemblies with Microsoft.Testing.Platform. Documentation publishing is handled by the documentation workflow. Local commands are optional preflight checks and should not be reported as CI-equivalent proof.
+The current CI workflow uses `actions/setup-dotnet` with `global-json-file: global.json`, then restores, builds, runs the Python benchmark-tool tests, runs the .NET test assemblies with Microsoft.Testing.Platform, packs the supported packages, and builds a clean local-feed consumer. Documentation publishing is handled by the documentation workflow. Local commands are optional preflight checks and should not be reported as CI-equivalent proof.
 
 SDK selection is controlled by the root `global.json` `sdk` section. The repository currently pins the .NET SDK feature band and allows roll-forward to a later .NET 10 feature band so local development and CI use a compatible .NET 10 SDK while remaining pre-beta-friendly.
 
@@ -49,9 +49,15 @@ dotnet restore Pattrn.sln
 dotnet build Pattrn.sln --configuration Release --no-restore
 python -m unittest discover tools/benchmarks/tests
 dotnet test --test-modules "tests/**/bin/Release/net10.0/*.Tests.dll" --root-directory . --results-directory TestResults -- --report-trx
+dotnet pack src/Pattrn/Pattrn.csproj --configuration Release --no-build --no-restore --output <local-feed>
 ```
 
 The final `dotnet test` command intentionally uses Microsoft.Testing.Platform test modules from the Release build output so the workflow can collect TRX results under `TestResults/`.
+
+CI also packs `Pattrn`, `Pattrn.Strings`, and `Pattrn.DependencyInjection` into a
+temporary local feed and restores a temporary consumer against that feed plus
+NuGet.org. The consumer build verifies package metadata and transitive package
+references without adding a durable sample project.
 
 ## Local preflight
 

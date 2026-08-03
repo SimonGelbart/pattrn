@@ -1,72 +1,40 @@
-name: Benchmarks
+name: Focused benchmarks
 
 on:
   workflow_dispatch:
     inputs:
-      mode:
-        description: 'Benchmark execution mode'
-        required: false
-        default: 'single'
-        type: choice
-        options:
-          - single
-          - full
-          - sharded
-      group:
-        description: 'Benchmark group for single mode'
-        required: false
-        default: 'custom'
-        type: choice
-        options:
-          - custom
-          - full
-          - core
-          - detailed
-          - strings
-          - routing
-          - builder
-          - diagnostics
       filter:
-        description: 'Custom BenchmarkDotNet filter used when group is custom'
+        description: 'BenchmarkDotNet filter for a supported core scenario'
         required: false
-        default: '*'
-      strategy:
-        description: 'BenchmarkDotNet run strategy'
+        default: '*PattrnIndexBenchmarks*'
+      job:
+        description: 'BenchmarkDotNet job preset'
         required: false
-        default: 'Throughput'
+        default: Dry
         type: choice
         options:
-          - Throughput
-          - ColdStart
-          - Monitoring
-  push:
-    tags:
-      - 'v*.*.*'
+          - Dry
+          - Short
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.inputs.mode || 'full' }}-${{ github.event.inputs.group || 'full' }}-${{ github.event.inputs.filter || 'tag' }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
-
-env:
-  DOTNET_CLI_TELEMETRY_OPTOUT: '1'
-  DOTNET_NOLOGO: 'true'
 
 jobs:
   benchmarks:
-    name: Run BenchmarkDotNet benchmarks
-    if: ${{ github.event_name == 'push' || github.event.inputs.mode != 'sharded' }}
+    name: Run focused core benchmarks
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     env:
-      BENCHMARK_INPUT_MODE: ${{ github.event.inputs.mode || 'full' }}
-      BENCHMARK_INPUT_GROUP: ${{ github.event.inputs.group || 'full' }}
-      BENCHMARK_INPUT_FILTER: ${{ github.event.inputs.filter || '*' }}
-      BENCHMARK_STRATEGY: ${{ github.event.inputs.strategy || 'Throughput' }}
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      DOTNET_NOLOGO: 'true'
+      BENCHMARK_FILTER: ${{ github.event.inputs.filter || '*PattrnIndexBenchmarks*' }}
+      BENCHMARK_JOB: ${{ github.event.inputs.job || 'Dry' }}
       BENCHMARK_ARTIFACTS: ${{ github.workspace }}/BenchmarkDotNet.Artifacts
-      BENCHMARK_CI_RESULTS: ${{ github.workspace }}/benchmark-ci-results
+      BENCHMARK_SUMMARY: ${{ github.workspace }}/benchmark-summary
 
     steps:
       - name: Checkout
@@ -75,46 +43,12 @@ jobs:
       - name: Set up .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.x'
-
-      - name: Resolve benchmark mode and filter
-        run: |
-          set -euo pipefail
-          mode="$BENCHMARK_INPUT_MODE"
-          group="$BENCHMARK_INPUT_GROUP"
-          filter="$BENCHMARK_INPUT_FILTER"
-
-          if [ "$mode" = "full" ]; then
-            group="full"
-            filter="*"
-          elif [ "$mode" = "single" ]; then
-            case "$group" in
-              custom) filter="$BENCHMARK_INPUT_FILTER" ;;
-              full) filter="*" ;;
-              core) filter="*PattrnIndex*" ;;
-              detailed) filter="*PattrnIndex*" ;;
-              strings) filter="*StringHelperBenchmarks*" ;;
-              routing) filter="*RoutingBenchmarks*" ;;
-              builder) filter="*BuilderBenchmarks*" ;;
-              diagnostics) filter="*ExplainBenchmarks*" ;;
-              *) echo "Unsupported benchmark group: $group" >&2; exit 1 ;;
-            esac
-          else
-            echo "Unsupported benchmark mode for this job: $mode" >&2
-            exit 1
-          fi
-
-          {
-            echo "BENCHMARK_MODE=$mode"
-            echo "BENCHMARK_GROUP=$group"
-            echo "BENCHMARK_FILTER=$filter"
-          } >> "$GITHUB_ENV"
-          echo "Resolved benchmark mode=$mode group=$group filter=$filter"
+          global-json-file: global.json
 
       - name: Restore benchmark project
         run: dotnet restore benchmarks/Pattrn.Benchmarks/Pattrn.Benchmarks.csproj
 
-      - name: Run benchmarks
+      - name: Run focused benchmarks
         run: >-
           dotnet run
           --project benchmarks/Pattrn.Benchmarks/Pattrn.Benchmarks.csproj
@@ -122,278 +56,29 @@ jobs:
           --no-restore
           --
           --filter "$BENCHMARK_FILTER"
-          --join
+          --job "$BENCHMARK_JOB"
           --exporters JSON GitHub
-          --strategy "$BENCHMARK_STRATEGY"
           --artifacts "$BENCHMARK_ARTIFACTS"
 
-      - name: Verify BenchmarkDotNet JSON report
-        run: |
-          set -euo pipefail
-          report="$(find "$BENCHMARK_ARTIFACTS/results" -maxdepth 1 -name '*-report-full-compressed.json' -print -quit)"
-          if [ -z "$report" ]; then
-            echo "No BenchmarkDotNet full compressed JSON report found under $BENCHMARK_ARTIFACTS/results" >&2
-            find "$BENCHMARK_ARTIFACTS" -maxdepth 4 -type f -print >&2 || true
-            exit 1
-          fi
-          echo "Using benchmark report: $report"
-
-      - name: Prepare CI benchmark artifact layout
-        run: |
-          set -euo pipefail
-          mkdir -p "$BENCHMARK_CI_RESULTS/raw" "$BENCHMARK_CI_RESULTS/summaries"
-          cp -R "$BENCHMARK_ARTIFACTS" "$BENCHMARK_CI_RESULTS/raw/BenchmarkDotNet.Artifacts"
-
-          cat > "$BENCHMARK_CI_RESULTS/metadata.json" <<JSON
-          {
-            "repository": "${GITHUB_REPOSITORY}",
-            "ref": "${GITHUB_REF}",
-            "sha": "${GITHUB_SHA}",
-            "run_id": "${GITHUB_RUN_ID}",
-            "run_attempt": "${GITHUB_RUN_ATTEMPT}",
-            "benchmark_mode": "${BENCHMARK_MODE}",
-            "benchmark_group": "${BENCHMARK_GROUP}",
-            "benchmark_filter": "${BENCHMARK_FILTER}",
-            "benchmark_strategy": "${BENCHMARK_STRATEGY}"
-          }
-          JSON
-
-      - name: Generate grouped benchmark summaries
-        run: >-
-          python tools/benchmarks/summarize_benchmarks.py
-          --artifacts "$BENCHMARK_ARTIFACTS"
-          --output "$BENCHMARK_CI_RESULTS"
-
-      - name: Write benchmark job summary
-        run: |
-          set -euo pipefail
-          cat "$BENCHMARK_CI_RESULTS/summaries/grouped-summary.md" >> "$GITHUB_STEP_SUMMARY"
-          {
-            echo
-            echo "## Artifact contents"
-            find "$BENCHMARK_CI_RESULTS" -maxdepth 5 -type f -print | sort | sed 's#^#- #'
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: List benchmark artifacts
+      - name: Generate optional grouped summary
         if: always()
         run: |
-          find "$BENCHMARK_CI_RESULTS" -maxdepth 5 -type f -print || true
+          set -euo pipefail
+          if find "$BENCHMARK_ARTIFACTS/results" -maxdepth 1 -name '*-report-full-compressed.json' -print -quit | grep -q .; then
+            python tools/benchmarks/summarize_benchmarks.py \
+              --artifacts "$BENCHMARK_ARTIFACTS" \
+              --output "$BENCHMARK_SUMMARY"
+            cat "$BENCHMARK_SUMMARY/summaries/grouped-summary.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'No full compressed report was produced by this focused run; raw artifacts remain available.' >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Upload benchmark artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: benchmark-results-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ env.BENCHMARK_CI_RESULTS }}/**
-          if-no-files-found: error
-
-  benchmark-shards:
-    name: Run ${{ matrix.group }} benchmark shard
-    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'sharded' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - group: core
-            filter: '*PattrnIndex*'
-          - group: strings
-            filter: '*StringHelperBenchmarks*'
-          - group: routing
-            filter: '*RoutingBenchmarks*'
-          - group: builder
-            filter: '*BuilderBenchmarks*'
-          - group: diagnostics
-            filter: '*ExplainBenchmarks*'
-    env:
-      BENCHMARK_MODE: sharded
-      BENCHMARK_GROUP: ${{ matrix.group }}
-      BENCHMARK_FILTER: ${{ matrix.filter }}
-      BENCHMARK_STRATEGY: ${{ github.event.inputs.strategy || 'Throughput' }}
-      BENCHMARK_ARTIFACTS: ${{ github.workspace }}/BenchmarkDotNet.Artifacts
-      BENCHMARK_CI_RESULTS: ${{ github.workspace }}/benchmark-ci-results
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up .NET SDK
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
-
-      - name: Restore benchmark project
-        run: dotnet restore benchmarks/Pattrn.Benchmarks/Pattrn.Benchmarks.csproj
-
-      - name: Run benchmark shard
-        run: >-
-          dotnet run
-          --project benchmarks/Pattrn.Benchmarks/Pattrn.Benchmarks.csproj
-          --configuration Release
-          --no-restore
-          --
-          --filter "$BENCHMARK_FILTER"
-          --join
-          --exporters JSON GitHub
-          --strategy "$BENCHMARK_STRATEGY"
-          --artifacts "$BENCHMARK_ARTIFACTS"
-
-      - name: Verify BenchmarkDotNet JSON report
-        run: |
-          set -euo pipefail
-          report="$(find "$BENCHMARK_ARTIFACTS/results" -maxdepth 1 -name '*-report-full-compressed.json' -print -quit)"
-          if [ -z "$report" ]; then
-            echo "No BenchmarkDotNet full compressed JSON report found under $BENCHMARK_ARTIFACTS/results" >&2
-            find "$BENCHMARK_ARTIFACTS" -maxdepth 4 -type f -print >&2 || true
-            exit 1
-          fi
-          echo "Using benchmark report: $report"
-
-      - name: Prepare shard artifact layout
-        run: |
-          set -euo pipefail
-          mkdir -p "$BENCHMARK_CI_RESULTS/raw" "$BENCHMARK_CI_RESULTS/summaries"
-          cp -R "$BENCHMARK_ARTIFACTS" "$BENCHMARK_CI_RESULTS/raw/BenchmarkDotNet.Artifacts"
-
-          cat > "$BENCHMARK_CI_RESULTS/metadata.json" <<JSON
-          {
-            "repository": "${GITHUB_REPOSITORY}",
-            "ref": "${GITHUB_REF}",
-            "sha": "${GITHUB_SHA}",
-            "run_id": "${GITHUB_RUN_ID}",
-            "run_attempt": "${GITHUB_RUN_ATTEMPT}",
-            "benchmark_mode": "${BENCHMARK_MODE}",
-            "benchmark_group": "${BENCHMARK_GROUP}",
-            "benchmark_filter": "${BENCHMARK_FILTER}",
-            "benchmark_strategy": "${BENCHMARK_STRATEGY}"
-          }
-          JSON
-
-      - name: Generate grouped benchmark summaries
-        run: >-
-          python tools/benchmarks/summarize_benchmarks.py
-          --artifacts "$BENCHMARK_ARTIFACTS"
-          --output "$BENCHMARK_CI_RESULTS"
-
-      - name: Write shard job summary
-        run: |
-          set -euo pipefail
-          cat "$BENCHMARK_CI_RESULTS/summaries/grouped-summary.md" >> "$GITHUB_STEP_SUMMARY"
-          {
-            echo
-            echo "## Shard artifact"
-            echo "- Group: $BENCHMARK_GROUP"
-            echo "- Effective filter: \`$BENCHMARK_FILTER\`"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: List shard artifacts
-        if: always()
-        run: |
-          find "$BENCHMARK_CI_RESULTS" -maxdepth 5 -type f -print || true
-
-      - name: Upload shard benchmark artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: benchmark-results-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.group }}
-          path: ${{ env.BENCHMARK_CI_RESULTS }}/**
-          if-no-files-found: error
-
-  aggregate-shards:
-    name: Aggregate benchmark shard reports
-    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'sharded' && always() }}
-    needs: benchmark-shards
-    runs-on: ubuntu-latest
-    env:
-      BENCHMARK_AGGREGATE: ${{ github.workspace }}/benchmark-ci-aggregate
-      BENCHMARK_SHARD_DOWNLOADS: ${{ github.workspace }}/benchmark-shard-artifacts
-      BENCHMARK_STRATEGY: ${{ github.event.inputs.strategy || 'Throughput' }}
-
-    steps:
-      - name: Download shard artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: ${{ env.BENCHMARK_SHARD_DOWNLOADS }}
-          pattern: benchmark-results-${{ github.run_id }}-${{ github.run_attempt }}-*
-
-      - name: Build aggregate manifest and summary
-        run: |
-          set -euo pipefail
-          mkdir -p "$BENCHMARK_AGGREGATE"
-          python - <<'PY'
-          import json
-          import os
-          from pathlib import Path
-
-          root = Path(os.environ["BENCHMARK_SHARD_DOWNLOADS"])
-          out = Path(os.environ["BENCHMARK_AGGREGATE"])
-          shards = []
-          for artifact_dir in sorted(p for p in root.iterdir() if p.is_dir()):
-              metadata_path = artifact_dir / "metadata.json"
-              metadata = json.loads(metadata_path.read_text(encoding="utf-8")) if metadata_path.exists() else {}
-              summaries = artifact_dir / "summaries"
-              grouped = summaries / "grouped-results.json"
-              row_count = None
-              if grouped.exists():
-                  data = json.loads(grouped.read_text(encoding="utf-8"))
-                  row_count = len(data.get("benchmarks", []))
-              shards.append({
-                  "group": metadata.get("benchmark_group", artifact_dir.name.rsplit("-", 1)[-1]),
-                  "effective_filter": metadata.get("benchmark_filter", ""),
-                  "artifact_name": artifact_dir.name,
-                  "artifact_path": str(artifact_dir),
-                  "row_count": row_count,
-              })
-
-          manifest = {
-              "repository": os.environ.get("GITHUB_REPOSITORY", ""),
-              "ref": os.environ.get("GITHUB_REF", ""),
-              "sha": os.environ.get("GITHUB_SHA", ""),
-              "run_id": os.environ.get("GITHUB_RUN_ID", ""),
-              "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT", ""),
-              "benchmark_mode": "sharded",
-              "benchmark_strategy": os.environ.get("BENCHMARK_STRATEGY", ""),
-              "honesty_note": "This is an aggregate of benchmark group shards. Each group may have run in a separate job/runner. Use full single-run mode when same-run comparability matters.",
-              "shard_groups": [s["group"] for s in shards],
-              "shards": shards,
-          }
-          (out / "aggregate-metadata.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-          (out / "shard-manifest.json").write_text(json.dumps({"shards": shards}, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-
-          lines = [
-              "# Benchmark Shard Aggregate Summary",
-              "",
-              manifest["honesty_note"],
-              "",
-              "## Run metadata",
-              "",
-              f"- Repository: `{manifest['repository']}`",
-              f"- Ref: `{manifest['ref']}`",
-              f"- SHA: `{manifest['sha']}`",
-              f"- Run ID: `{manifest['run_id']}`",
-              f"- Run attempt: `{manifest['run_attempt']}`",
-              f"- Mode: `{manifest['benchmark_mode']}`",
-              f"- Strategy: `{manifest['benchmark_strategy']}`",
-              "",
-              "## Shards",
-              "",
-              "| Group | Effective filter | Rows | Artifact |",
-              "|---|---|---:|---|",
-          ]
-          for shard in shards:
-              rows = "Unknown" if shard["row_count"] is None else str(shard["row_count"])
-              lines.append(f"| {shard['group']} | `{shard['effective_filter']}` | {rows} | `{shard['artifact_name']}` |")
-          lines.append("")
-          (out / "aggregate-summary.md").write_text("\n".join(lines), encoding="utf-8")
-          PY
-
-      - name: Write aggregate job summary
-        run: cat "$BENCHMARK_AGGREGATE/aggregate-summary.md" >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Upload aggregate benchmark artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: benchmark-results-${{ github.run_id }}-${{ github.run_attempt }}-aggregate
-          path: ${{ env.BENCHMARK_AGGREGATE }}/**
-          if-no-files-found: error
+          name: focused-benchmark-results-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            BenchmarkDotNet.Artifacts/**
+            benchmark-summary/**
+          if-no-files-found: warn

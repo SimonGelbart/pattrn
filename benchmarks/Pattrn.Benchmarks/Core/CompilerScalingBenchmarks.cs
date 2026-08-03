@@ -4,7 +4,7 @@ namespace Pattrn.Benchmarks.Core;
 
 [MemoryDiagnoser]
 [BenchmarkCategory("Compilation")]
-public sealed class CompilerScalingBenchmarks
+public class CompilerScalingBenchmarks
 {
     [Params(1_000, 10_000, 50_000, 100_000)]
     public int RegistrationCount { get; set; }

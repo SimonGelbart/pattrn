@@ -31,7 +31,7 @@ From the repository root:
 
 ```bash
 dotnet restore benchmarks/Pattrn.Benchmarks/Pattrn.Benchmarks.csproj
-dotnet run --project benchmarks/Pattrn.Benchmarks/Pattrn.Benchmarks.csproj --configuration Release
+dotnet run --project benchmarks/Pattrn.Benchmarks/Pattrn.Benchmarks.csproj --configuration Release -- --filter '*PattrnIndexBenchmarks*' --job Dry
 ```
 
 Use BenchmarkDotNet filters or the workflow's group mappings for focused experiments. Do not commit generated reports, machine-specific baselines, or raw logs.

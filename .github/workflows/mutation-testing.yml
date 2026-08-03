@@ -12,7 +12,6 @@ on:
           - all
           - core
           - strings
-          - routing
           - dependency-injection
   schedule:
     - cron: '0 3 * * 0'
@@ -39,9 +38,6 @@ jobs:
           - id: strings
             name: Strings
             project_path: src/Pattrn.Strings
-          - id: routing
-            name: Routing
-            project_path: src/Pattrn.Routing
           - id: dependency-injection
             name: Dependency Injection
             project_path: src/Pattrn.DependencyInjection
