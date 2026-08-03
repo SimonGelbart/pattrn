@@ -20,9 +20,6 @@ need to update imports and fully qualified type names.
 
 - String normalization options and policies are in `Pattrn.Strings.Normalization`;
   string facades and extensions remain in `Pattrn.Strings`.
-- Route templates, constraints, and integration extensions are in
-  `Pattrn.Routing.Templates`, `Pattrn.Routing.Constraints`, and
-  `Pattrn.Routing.Integration`.
 - DI provider and service extensions remain in `Pattrn.DependencyInjection`;
   registration-source contracts and fluent registration types are in
   `Pattrn.DependencyInjection.Registration`.

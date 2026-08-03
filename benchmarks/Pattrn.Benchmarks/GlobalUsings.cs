@@ -3,7 +3,3 @@ global using Pattrn.Diagnostics;
 global using Pattrn.Matching;
 global using Pattrn.Patterns;
 global using Pattrn.Registrations;
-global using Pattrn.Routing.Integration;
-global using Pattrn.Routing.Templates;
-global using Pattrn.Strings;
-global using Pattrn.Strings.Normalization;

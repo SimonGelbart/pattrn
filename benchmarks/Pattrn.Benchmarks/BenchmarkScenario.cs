@@ -15,14 +15,6 @@ public enum BenchmarkScenario
     CatchAllTerminal
 }
 
-public enum RoutingBenchmarkScenario
-{
-    ParseSimple,
-    ParseParameters,
-    ParseCatchAll,
-    MatchDetailed
-}
-
 public enum BuilderBenchmarkScenario
 {
     BuildLargeExact,

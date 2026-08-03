@@ -6,7 +6,7 @@
     <PackageId>Pattrn.DependencyInjection</PackageId>
     <Authors>Simon Gelbart</Authors>
     <Description>Dependency-injection registration extensions for Pattrn.</Description>
-    <PackageTags>path;pattern;index;trie;wildcard;routing;matching;dependency-injection;di</PackageTags>
+    <PackageTags>path;pattern;index;trie;wildcard;matching;dependency-injection;di</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

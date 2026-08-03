@@ -24,8 +24,7 @@ public sealed class PackageMetadataTests
         {
             Path.Combine(root.FullName, "src", "Pattrn", "Pattrn.csproj"),
             Path.Combine(root.FullName, "src", "Pattrn.Strings", "Pattrn.Strings.csproj"),
-            Path.Combine(root.FullName, "src", "Pattrn.DependencyInjection", "Pattrn.DependencyInjection.csproj"),
-            Path.Combine(root.FullName, "src", "Pattrn.Routing", "Pattrn.Routing.csproj")
+            Path.Combine(root.FullName, "src", "Pattrn.DependencyInjection", "Pattrn.DependencyInjection.csproj")
         };
 
         foreach (var projectPath in packageProjects)
@@ -49,8 +48,7 @@ public sealed class PackageMetadataTests
         {
             [Path.Combine(root.FullName, "src", "Pattrn", "Pattrn.csproj")] = Path.Combine(root.FullName, "docs", "packages", "pattrn.md"),
             [Path.Combine(root.FullName, "src", "Pattrn.Strings", "Pattrn.Strings.csproj")] = Path.Combine(root.FullName, "docs", "packages", "pattrn-strings.md"),
-            [Path.Combine(root.FullName, "src", "Pattrn.DependencyInjection", "Pattrn.DependencyInjection.csproj")] = Path.Combine(root.FullName, "docs", "packages", "pattrn-dependency-injection.md"),
-            [Path.Combine(root.FullName, "src", "Pattrn.Routing", "Pattrn.Routing.csproj")] = Path.Combine(root.FullName, "docs", "packages", "pattrn-routing.md")
+            [Path.Combine(root.FullName, "src", "Pattrn.DependencyInjection", "Pattrn.DependencyInjection.csproj")] = Path.Combine(root.FullName, "docs", "packages", "pattrn-dependency-injection.md")
         };
 
         foreach (var pair in expected)
@@ -120,4 +118,3 @@ public sealed class PackageMetadataTests
         throw new InvalidOperationException("Could not locate the repository root from the test output directory.");
     }
 }
-

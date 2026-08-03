@@ -97,7 +97,6 @@ known workload. See [the limitations](docs/limitations.md) and
 | `Pattrn` | Generic segmented-pattern index | Supported |
 | `Pattrn.Strings` | String splitting and normalization convenience APIs | Maintenance-only |
 | `Pattrn.DependencyInjection` | Thin DI registration helpers | Maintenance-only |
-| `Pattrn.Routing` | Route-template experiment retained for compatibility review | Experimental |
 
 The core package has no string, DI, or framework dependency. Companion packages
 translate their input into the core model; they do not change generic matching

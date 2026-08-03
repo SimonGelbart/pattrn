@@ -4,7 +4,7 @@ The snippets use `Pattrn.Builders`, `Pattrn.Matching`, and `Pattrn.Patterns`.
 
 These examples show common uses of the current Pattrn surface.
 
-## Topic routing
+## Hierarchical event keys
 
 ```csharp
 var index = PattrnIndex<string, Action<string>>

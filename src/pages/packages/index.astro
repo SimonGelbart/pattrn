@@ -4,8 +4,8 @@ import { linkForSource, type SiteLink } from '../../site/kit/lib/docs';
 
 const packages: ({ name: string; role: string; status: string; text: string } & SiteLink)[] = [
   { name: 'Pattrn', role: 'Core package', status: 'Pre-beta stable candidate', text: 'Generic segmented-pattern matching, explicit PatternSegment registration, immutable compiled indexes, detailed matching, captures, ranking metadata, duplicate behavior, and optional diagnostics.', ...linkForSource('docs/packages/pattrn.md', 'Read package docs') },
-  { name: 'Pattrn.Strings', role: 'String ergonomics', status: 'Pre-beta stable candidate', text: 'String splitting, separators, case sensitivity, trimming, empty segment behavior, normalization, and ergonomic string-path builders and indexes.', ...linkForSource('docs/packages/pattrn-strings.md', 'Read package docs') },
-  { name: 'Pattrn.DependencyInjection', role: 'Application integration', status: 'Pre-beta stable candidate', text: 'Thin Microsoft.Extensions.DependencyInjection integration for registering compiled indexes as singletons and keeping application wiring framework-neutral.', ...linkForSource('docs/packages/pattrn-dependency-injection.md', 'Read package docs') },
+  { name: 'Pattrn.Strings', role: 'String ergonomics', status: 'Maintenance-only', text: 'String splitting, separators, case sensitivity, trimming, empty segment behavior, normalization, and ergonomic string-path builders and indexes.', ...linkForSource('docs/packages/pattrn-strings.md', 'Read package docs') },
+  { name: 'Pattrn.DependencyInjection', role: 'Application integration', status: 'Maintenance-only', text: 'Thin Microsoft.Extensions.DependencyInjection integration for registering compiled indexes as singletons and keeping application wiring framework-neutral.', ...linkForSource('docs/packages/pattrn-dependency-injection.md', 'Read package docs') },
 ];
 ---
 <PattrnLayout title="Pattrn packages" description="Package family overview for Pattrn." current="packages">

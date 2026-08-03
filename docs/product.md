@@ -28,8 +28,7 @@ the next complete replacement.
   prefix operations without adopting a routing framework.
 
 `Pattrn.Strings` and `Pattrn.DependencyInjection` are convenience packages kept
-thin around the core. `Pattrn.Routing` is experimental compatibility content,
-not part of the primary product story.
+thin around the core.
 
 ## Non-goals
 

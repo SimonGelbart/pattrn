@@ -98,5 +98,5 @@ may contain zero segments.
 
 The core permits empty patterns, which match only empty paths in exact mode and
 every path in prefix queries. Non-terminal catch-alls and duplicate capture names
-are compilation errors. String, routing, and dependency-injection packages keep
+are compilation errors. String and dependency-injection packages keep
 their domain-specific parsing and normalization outside the generic core.

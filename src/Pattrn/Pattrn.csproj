@@ -5,8 +5,8 @@
     <RootNamespace>Pattrn</RootNamespace>
     <PackageId>Pattrn</PackageId>
     <Authors>Simon Gelbart</Authors>
-    <Description>Fast immutable core index for matching segmented patterns with literals, wildcards, and generic pattern-segment registrations.</Description>
-    <PackageTags>path;pattern;index;trie;wildcard;routing;matching</PackageTags>
+    <Description>Immutable core index for matching segmented patterns with literals, wildcards, and generic pattern-segment registrations.</Description>
+    <PackageTags>path;pattern;index;trie;wildcard;matching</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

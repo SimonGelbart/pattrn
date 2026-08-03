@@ -34,14 +34,6 @@ String helpers are convenience APIs. They split strings into segments before del
 
 `Pattrn.DependencyInjection` owns service registration helpers. It lets applications build immutable indexes at startup and register them as services without putting DI concepts into the core matcher.
 
-## Routing compatibility
-
-`Pattrn.Routing` is retained only as experimental compatibility content. It is
-not part of the supported package story and does not turn the core into an HTTP
-router or implement framework route precedence.
-
-Active routing feature work is paused.
-
 ## Why this split matters
 
 Keeping these boundaries separate makes the core easier to reason about and avoids turning a generic segmented matcher into a router, globber, URL parser, or dependency-injection abstraction.

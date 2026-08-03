@@ -29,7 +29,6 @@ contracts; historical experiments remain on their research branches.
 - [Pattrn](packages/pattrn.md)
 - [Pattrn.Strings](packages/pattrn-strings.md)
 - [Pattrn.DependencyInjection](packages/pattrn-dependency-injection.md)
-- [Pattrn.Routing](packages/pattrn-routing.md) (experimental compatibility content)
 
 ## Tutorials and how-to guides
 

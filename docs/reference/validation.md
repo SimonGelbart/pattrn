@@ -82,7 +82,7 @@ tests/Pattrn.AotCompatibility/validate-aot.sh
 tests/Pattrn.AotCompatibility/validate-aot.ps1
 ```
 
-The scripts attempt trimmed and Native AOT publishes for `linux-x64` and `win-x64`, run the produced smoke executable when the host can execute it, fail on unexplained stable-package trim/AOT warnings, and report attempted, passed, failed, and skipped checks with reasons. `Pattrn.Routing` is preview and intentionally excluded.
+The scripts attempt trimmed and Native AOT publishes for `linux-x64` and `win-x64`, run the produced smoke executable when the host can execute it, fail on unexplained stable-package trim/AOT warnings, and report attempted, passed, failed, and skipped checks with reasons.
 
 The dedicated `AOT and trimming validation` workflow runs the shell script on Linux for pull requests targeting `main`, pushes to `main`, and manual dispatches. It is intended to be required pre-merge evidence once branch protection is configured. The workflow preserves the script's capability-aware skip behavior, uploads `aot-trimming-validation.log` plus `artifacts/Pattrn.AotCompatibility/**`, and writes the attempted/passed/failed/skipped summary to the job summary. Skips are only for explicit missing prerequisites or unsupported host/target execution; ambiguous Native AOT publish failures and trim/AOT warnings fail. See [trimming and Native AOT compatibility](aot-trimming.md) for support posture, caveats, and limits.
 

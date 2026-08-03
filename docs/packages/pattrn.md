@@ -60,8 +60,7 @@ boundary.
 
 `Pattrn.Strings` is a maintenance-only convenience layer for splitting and
 normalizing strings before matching. `Pattrn.DependencyInjection` is a
-maintenance-only registration helper for compiled indexes. The experimental
-`Pattrn.Routing` package is not part of the supported core product story.
+maintenance-only registration helper for compiled indexes.
 
 ## Trimming and Native AOT
 

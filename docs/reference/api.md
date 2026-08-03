@@ -13,8 +13,7 @@ and explanation contracts. Implementation-only types are under
 `Pattrn.Internal.*` and are not part of the public API.
 
 Companion contracts use `Pattrn.Strings`, `Pattrn.Strings.Normalization`,
-`Pattrn.Routing.Templates`, `Pattrn.Routing.Constraints`,
-`Pattrn.Routing.Integration`, `Pattrn.DependencyInjection`, and
+`Pattrn.DependencyInjection`, and
 `Pattrn.DependencyInjection.Registration`.
 
 ## Canonical registrations
@@ -100,8 +99,7 @@ best-prefix or all-prefix detailed matching, respectively.
 ## Companion packages
 
 `Pattrn.Strings` normalizes string paths and delegates to the core segmented
-index. `Pattrn.Routing` is preview and translates route templates into explicit
-pattern segments. `Pattrn.DependencyInjection` only owns registration and
+index. `Pattrn.DependencyInjection` only owns registration and
 publication of immutable indexes. None of these packages changes generic-core
 result ordering or diagnostics semantics.
 
