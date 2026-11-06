@@ -1,10 +1,10 @@
 # Pattrn
 
-Fast immutable segmented-pattern matching for .NET 10.
+Archived testing field for segmented-pattern matching in .NET 10.
 
-`Pattrn` indexes segmented patterns once, then resolves matching inputs quickly and predictably. The core package is generic and dependency-light; string paths, dependency-injection helpers, and route-template syntax live in companion packages.
+This repository is not under active development. It was used to explore matching semantics, immutable indexing, package boundaries, and low-allocation implementation choices.
 
-Pattrn is pre-beta. The public surface may still change while the core contracts are being exercised by real users.
+The `experiment/pattrn-lean-core` branch is a separate continuation check: it exists to test whether a smaller version of the idea is worth continuing. The main branch remains as a record of the experiment.
 
 ## Packages
 
